@@ -1,0 +1,81 @@
+# de-platform
+
+The vocabulary this project uses in a specific sense. It records language, not decisions: the reasoning behind each term lives in `docs/adr/`, and the requirements it serves live in `docs/requirements-matrix.md`. Several entries exist because the obvious word for the concept is the wrong one, so the rejected word is listed rather than left to drift back in.
+
+## Language
+
+### Correctness
+
+**Convergence**:
+The property that a destination reaches the correct final state even when changes arrive duplicated or out of order. This is the claim the project makes in place of ordering.
+_Avoid_: ordering preserved, in-order delivery, ordered stream
+
+**Idempotence**:
+The property that processing the same input a second time leaves the committed result unchanged. Idempotence is about replay; convergence is about arrival order.
+_Avoid_: deduplication, at-least-once
+
+**Exactly-once effect**:
+The guarantee that committed output reflects each source change once, even though the processing may have replayed it. It is a property of committed state, not of delivery.
+_Avoid_: exactly-once delivery, exactly-once semantics
+
+**Source-transaction atomicity**:
+The guarantee that a destination never exposes a partially applied source transaction. Explicitly not claimed by this platform.
+_Avoid_: transactional end to end, atomic pipeline
+
+**Upsert**:
+An update expressed as an insertion plus the marking of the superseded row. The storage layer has no in-place update, so this is what the word means here.
+_Avoid_: update, merge, modify
+
+### Serving
+
+**Materialised serving store**:
+The architecture in which the serving engine holds shaped copies of lakehouse tables rather than reading them in place. Physical-layout tuning exists only in the copy, which is why the copy is the architecture.
+_Avoid_: serving layer, query cache
+
+**Read-through**:
+Reading lakehouse tables in place through the catalog, with no copy made. Retained here only as a comparison arm.
+_Avoid_: direct query, federated query
+
+**Comparison arm**:
+A rejected alternative that is still built and measured, so that an architecture decision rests on a recorded delta rather than on a preference.
+_Avoid_: baseline, control
+
+### Governance
+
+**Authorisation seam**:
+The boundary between the systems that enforce access control, together with the statement of which system governs which path. Naming the seam is itself the deliverable, because no single system covers both paths.
+_Avoid_: access control layer, security boundary
+
+**Metadata plane**:
+What a catalog authorises: which catalog entities a principal may see and act on. Contrast the data plane, the path that fetches table bytes directly from object storage and does not pass through the catalog.
+_Avoid_: control plane, catalog layer
+
+### Evidence
+
+**Demonstration**:
+What a matrix row commits to producing. Evidence counts only if a sceptical interviewer can inspect it: a passing test, a dashboard, a benchmark with a recorded protocol, an incident writeup, a runbook, a diagram, or a query.
+_Avoid_: proof, deliverable, implementation
+
+**Status**:
+A verdict on whether a requirement can be honestly evidenced, not a build-state tracker. No status cell carries a measured number.
+_Avoid_: progress, done, complete
+
+**Re-specification**:
+Rewriting a requirement from the posting because the posting's wording is unfalsifiable or false, rather than copying it through. Four rows are re-specifications.
+_Avoid_: rewording, interpretation, clarification
+
+**Load-bearing**:
+A row whose claim the portfolio's credibility rests on, ranked in the interview-facing ordering. Contrast supporting rows, which are evidenced but are not where the effort concentrates.
+_Avoid_: important, priority, critical path
+
+**Eight links**:
+The evidence standard for an incident: detection, alert, diagnosis, root cause, mitigation, recovery, data-correctness verification, and permanent fix, each with a real timestamp.
+_Avoid_: incident report, postmortem
+
+**Honest gap**:
+A requirement the platform cannot evidence, recorded as such alongside a credible substitute rather than quietly omitted. The term exists so that an omission reads as a decision.
+_Avoid_: limitation, caveat, non-goal
+
+**GDPR-shaped**:
+Describing technical measures that resemble a compliance posture without constituting compliance, since a lawful basis, a DPIA and a request process cannot be evidenced locally.
+_Avoid_: GDPR compliant, privacy compliant
