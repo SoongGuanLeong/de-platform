@@ -4,6 +4,16 @@ The vocabulary this project uses in a specific sense. It records language, not d
 
 ## Language
 
+### Sources
+
+**Spine**:
+One of the platform's two independent data domains, each with its own sources, ingestion pattern and processing path: the commerce spine (TPC-C for CDC, TPC-H for batch and serving) and the network spine (RIPE Atlas for streaming, ONSPD for reference and SCD2). A spine is the unit of justification, so a source belongs to a spine and a source belonging to neither is not in the platform.
+_Avoid_: domain, workstream, pipeline, subject area
+
+**Cross-domain join**:
+A join between tables from different spines. The platform contains none, and the absence is deliberate: the two spines share only a clock.
+_Avoid_: cross-source join, enrichment join, federated join
+
 ### Correctness
 
 **Convergence**:
