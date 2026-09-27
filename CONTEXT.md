@@ -79,3 +79,33 @@ _Avoid_: limitation, caveat, non-goal
 **GDPR-shaped**:
 Describing technical measures that resemble a compliance posture without constituting compliance, since a lawful basis, a DPIA and a request process cannot be evidenced locally.
 _Avoid_: GDPR compliant, privacy compliant
+
+**Signal**:
+An observable that exists and is reachable. A signal proves the mechanism can be seen, not that the claim holds.
+_Avoid_: evidence, proof, metric
+
+**Behaviour**:
+The platform was shown to do the thing under a fault or a boundary condition, and the result was recorded. A capability may only be marked complete on at least one behaviour item.
+_Avoid_: functional test, works, demo
+
+**Observed-once**:
+A measurement whose environment cannot be reproduced. It may be recorded, but it can never be cited as evidence for a claim.
+_Avoid_: unreproducible result, anecdote, one-off
+
+### Completion
+
+**Capability instance**:
+One concrete thing that must work, such as one topic, one pipeline, one table or one dashboard. It is the unit the completion bar applies to, and a class is complete only when all of its instances are.
+_Avoid_: capability, component, feature
+
+**Capability register**:
+The machine-readable list of capability instances and their evidence, at `docs/completion-bar.yaml`. The CI validates the register without re-running evidence.
+_Avoid_: checklist, inventory, manifest
+
+**Budget**:
+A threshold declared before the measurement it judges, and committed before it. Changing a budget creates a new entry and invalidates evidence that cited the old one.
+_Avoid_: target, SLO, baseline
+
+**Profile**:
+The declared service set and resource budget an evidence item was produced under. Reproducibility is defined per profile, because the whole stack cannot be co-resident at 7 to 8 GB.
+_Avoid_: environment, mode, tier

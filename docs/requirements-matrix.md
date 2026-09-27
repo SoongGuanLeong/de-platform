@@ -170,7 +170,7 @@ Mapped against the posting, not against the mission. The mission proposed all of
 
 ## 8. What this unblocks
 
-- **[The completion bar](https://github.com/SoongGuanLeong/de-platform/issues/6)** now has a per-row checklist: each M-row above is a capability whose "definition of done" is the evidence in its `Demonstration` cell.
+- **[The completion bar](completion-bar.md)** is now the standard rather than a ticket. Each M-row above names its evidence in the `Demonstration` cell; the standard adds what a cell cannot carry, namely a register of named capability instances, an eight-item core checklist, and the signal-versus-behaviour rule that stops an observable metric standing in for demonstrated behaviour.
 - **[The technology-selection matrix](https://github.com/SoongGuanLeong/de-platform/issues/8)** is now testable row by row: every component it admits must appear in some `Platform component` cell or justify its absence.
 - **New ticket:** the incident laboratory's scenario set. The eight-link standard is now fixed, so the remaining decision is which of the mission's fourteen scenarios are demonstrable inside a 7-8 GB budget and what evidence each one produces.
 - **Still fog, now sharper:** the serving layer's concrete shape and the benchmark plan both wait on [The dataset combination and the data story](https://github.com/SoongGuanLeong/de-platform/issues/7), because the tables must exist before their layouts and query sets can be specified.
