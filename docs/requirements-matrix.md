@@ -71,6 +71,8 @@ Nothing in this matrix stands in for a claim about the person who built it. The 
 
 One standard applies to every row. A demonstration is evidence only if all of the following hold.
 
+The standard is operationalised by [`docs/completion-bar.md`](completion-bar.md), which turns these seven rules into a per-class definition of done, a fixed evidence-item schema, and a capability register the CI validates without re-running evidence.
+
 1. **Inspectable without the author.** A clone plus a command. If it needs me in the room, it is a demo, not evidence.
 2. **A benchmark has a recorded protocol.** Hardware as actually configured (12 CPU, 7-8 GB usable RAM, 231 GB disk), data volume, engine versions, the exact command, and the raw output committed. Repeatable by a script, not by memory.
 3. **Every number is measured here and labelled as such.** A number without a source artifact does not go in the document.
