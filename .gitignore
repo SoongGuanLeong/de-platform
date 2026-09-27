@@ -1,7 +1,3 @@
-# Local tracker scratch, migrated to GitHub Issues. Retained locally only until
-# the migration is confirmed; delete .scratch/ then remove this line.
-.scratch/
-
 # Python
 __pycache__/
 *.py[cod]
