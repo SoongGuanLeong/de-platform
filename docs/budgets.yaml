@@ -1,0 +1,23 @@
+# Declared thresholds for the de-platform completion bar.
+#
+# A budget is committed before the measurement it judges, and every evidence item
+# cites the budget id it is judged against. The CI resolves each citation to the
+# commit that introduced the budget, so the order is visible in git history.
+# Changing a budget creates a new entry; evidence citing a superseded budget is
+# invalid. See docs/completion-bar.md section 9.
+#
+# A budget is a threshold, never a result. No measured number appears in this file.
+
+version: 1
+
+# budgets:
+#   - id: <stable identifier>
+#     metric: <what is measured>
+#     unit: <the unit>
+#     threshold: <the declared threshold>
+#     direction: lower-is-better | higher-is-better
+#     profile: smoke | batch | streaming | observability | benchmark
+#     rationale: <why this threshold and not another>
+#     declared_on: <ISO date>
+#     declared_commit: <the commit sha that introduced this entry>
+budgets: []

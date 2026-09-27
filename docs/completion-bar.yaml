@@ -1,0 +1,49 @@
+# Capability register for the de-platform completion bar.
+#
+# The standard this register is judged against: docs/completion-bar.md
+# The thresholds it cites: docs/budgets.yaml
+# Evidence items: docs/evidence/<class>/<instance>/
+#
+# This register is forward-looking and ships empty. The map that produced it is
+# planning-only, so no platform code exists yet, and an empty register is the
+# correct state rather than an unfinished task.
+#
+# The CI validates, without re-running any evidence: that every class has at least
+# one representative instance; that every complete instance carries at least one
+# behaviour evidence item; that every evidence link resolves and every item carries
+# all required fields; that every budget_ref resolves; that every not_applicable
+# entry carries a reason; and that no complete instance has an unresolved deferral.
+
+version: 1
+
+# The eleven canonical capability classes. An instance's class must be one of these.
+classes:
+  - kafka-ingestion
+  - cdc-ingestion
+  - flink-streaming
+  - spark-batch
+  - iceberg-table-management
+  - clickhouse-serving
+  - orchestration
+  - data-quality
+  - governance-and-lineage
+  - observability
+  - infrastructure-as-code
+
+# One entry per capability instance. Field rules are in docs/completion-bar.md
+# sections 3, 4 and 12. An entry has the shape:
+#
+# instances:
+#   - id: <stable identifier>
+#     class: <one of the classes above>
+#     instance: <the topic, job, table or dashboard name>
+#     representative: <true for the one instance per class carrying benchmark-grade evidence>
+#     status: declared | in-progress | complete | deferred
+#     failure_modes:
+#       - <an enumerated failure mode>
+#     evidence:
+#       - <evidence item id>
+#     not_applicable:
+#       - field: <the core checklist item>
+#         reason: <why it does not apply>
+instances: []
