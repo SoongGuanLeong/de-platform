@@ -1,0 +1,28 @@
+# Local tracker scratch, migrated to GitHub Issues. Retained locally only until
+# the migration is confirmed; delete .scratch/ then remove this line.
+.scratch/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Env and secrets - never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Build and run output
+target/
+build/
+dist/
+*.log
+jars/
