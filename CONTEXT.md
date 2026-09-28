@@ -4,6 +4,20 @@ The vocabulary this project uses in a specific sense. It records language, not d
 
 ## Language
 
+### Selection
+
+**Substitution**:
+A component that replaces a posting-named tool across the same interface, so the posting's requirement is still demonstrated without the posting's exact tool: OpenTofu for Terraform, SeaweedFS for S3, Podman for Docker and EKS.
+_Avoid_: replacement, alternative, equivalent
+
+**Addition**:
+A component no posting line names, admitted only against a named requirement and counted as an addition rather than folded into the posting's stack: PostgreSQL as the CDC source, Apicurio, OpenLineage and Marquez.
+_Avoid_: extra, nice-to-have, bonus
+
+**Technology count**:
+The number of components the platform runs, defended against the mission's sprawl test by showing each one is posting-named, a substitution, or an addition. Nineteen, of which Iceberg and Kafka are irreplaceable.
+_Avoid_: component total, stack size
+
 ### Sources
 
 **Spine**:
