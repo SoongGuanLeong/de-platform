@@ -220,7 +220,7 @@ Data working-set ceiling                            140 GB
     TPC-H 26, TPC-C 10, RIPE Atlas 5, ONSPD 0.25
   Iceberg bronze, silver and gold with snapshots     60 to 80 GB
   ClickHouse materialised serving copy               15 to 25 GB
-  Kafka retention, bounded and compacted              5 to 10 GB
+  Kafka retention, time-bounded                       5 to 10 GB
 ```
 
 Disk is not the binding constraint; memory is. The whole stack cannot be co-resident at 7 to 8 GB of free RAM, which is why reproducibility is defined by **profiles** rather than by a clean checkout of everything.

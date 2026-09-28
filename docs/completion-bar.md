@@ -157,7 +157,7 @@ Core items 1 to 8 apply to every instance and are not repeated. Each delta is cl
 - A deliberately corrupted batch is quarantined and never reaches gold.
 - A critical failure blocks the downstream Dagster run, proven by the downstream run not starting.
 - Check results are persisted and queryable by run id.
-- A false-positive rate is measured over a stated number of consecutive clean runs.
+- A false-positive rate is measured over a stated number of consecutive clean runs, over fault-detection checks only, with source-hazard checks excluded by design and the exclusion stated.
 
 *Artifacts:* the check-result table; the quarantine table; the Dagster run that never started.
 

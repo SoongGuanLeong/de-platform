@@ -100,6 +100,38 @@ _Avoid_: access control layer, security boundary
 What a catalog authorises: which catalog entities a principal may see and act on. Contrast the data plane, the path that fetches table bytes directly from object storage and does not pass through the catalog.
 _Avoid_: control plane, catalog layer
 
+**Check**:
+One assertion over data, carrying an id, a kind, a subject and a severity. A check produces a result; on its own it stops nothing.
+_Avoid_: rule, test, validation
+
+**Severity**:
+The declared consequence of a failed check, one of warn, quarantine or fail. Declared on each check instance, with the kind supplying a default.
+_Avoid_: priority, level, criticality
+
+**Gate**:
+The orchestration consequence of a severity: a check reports, a gate stops or diverts. Keeping the two words apart is what stops a green dashboard being mistaken for enforcement.
+_Avoid_: check, validation, guard
+
+**Quarantine**:
+Diverting a batch's offending rows while its clean rows continue, as distinct from failing the batch and distinct from dropping the rows.
+_Avoid_: reject, dead-letter, drop
+
+**Minimisation**:
+Removing a sensitive column from a table because no query needs it, as distinct from masking it in place.
+_Avoid_: masking, redaction, anonymisation
+
+**Source hazard**:
+A defect the publisher documents in its own data, as distinct from a fault the platform injects deliberately. The two are never presented as the same thing.
+_Avoid_: injected fault, data bug
+
+**Data class**:
+A group of tables sharing one retention rule and one erasure bound: static oracle, live OLTP mirror, reference SCD2, live capture, or control.
+_Avoid_: category, tier, type
+
+**Erasure window**:
+The interval between a row's deletion and the expiry of the snapshots that still contain it, during which the deletion is not complete.
+_Avoid_: retention period, deletion lag
+
 ### Evidence
 
 **Demonstration**:
