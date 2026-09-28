@@ -94,7 +94,11 @@ _Avoid_: important, priority, critical path
 
 **Eight links**:
 The evidence standard for an incident: detection, alert, diagnosis, root cause, mitigation, recovery, data-correctness verification, and permanent fix, each with a real timestamp.
-_Avoid_: incident report, postmortem
+_Avoid_: incident report
+
+**Postmortem**:
+The per-incident write-up that carries the eight links, written blameless. The runbook is a separate artefact. M16 requires one per incident.
+_Avoid_: incident report, retrospective
 
 **Honest gap**:
 A requirement the platform cannot evidence, recorded as such alongside a credible substitute rather than quietly omitted. The term exists so that an omission reads as a decision.
