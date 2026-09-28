@@ -50,7 +50,33 @@ _Avoid_: transactional end to end, atomic pipeline
 An update expressed as an insertion plus the marking of the superseded row. The storage layer has no in-place update, so this is what the word means here.
 _Avoid_: update, merge, modify
 
+### Modelling
+
+**Grain**:
+What one row of a table represents. Order-grain and line-grain measures sitting side by side is the error the fan-out demonstration exists to expose.
+_Avoid_: level, granularity, detail
+
+**Fan-out**:
+The multiplication of fact rows caused by joining to a dimension that has several rows per key, which silently inflates an aggregate. The trap is invisible in the result: the query runs and returns a plausible number.
+_Avoid_: blow-up, row explosion, cartesian
+
 ### Serving
+
+**Serving copy**:
+A MergeTree table in ClickHouse that answers analyst queries, derived from an Iceberg table rather than read from it. The copy is the architecture; the Iceberg table stays the record.
+_Avoid_: cache, replica, serving layer
+
+**Straight copy**:
+A serving copy whose shape matches the gold table it is derived from.
+_Avoid_: passthrough, raw copy
+
+**Shaped copy**:
+A serving copy whose shape is changed for the workload, by denormalising a resolved value onto it or by holding it at a coarser grain.
+_Avoid_: denormalised table, wide table
+
+**Rollup**:
+A serving copy held at a coarser grain than its source and maintained as an aggregate, so the trend query never rescans raw rows.
+_Avoid_: summary table, aggregate table, cube
 
 **Materialised serving store**:
 The architecture in which the serving engine holds shaped copies of lakehouse tables rather than reading them in place. Physical-layout tuning exists only in the copy, which is why the copy is the architecture.
