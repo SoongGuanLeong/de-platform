@@ -3,7 +3,7 @@
 **Ticket:** [Data contracts and schema compatibility policy](https://github.com/SoongGuanLeong/de-platform/issues/15)
 **Map:** [Vendor-neutral lakehouse data platform: architecture proposal](https://github.com/SoongGuanLeong/de-platform/issues/9)
 **Target posting:** ONL Biz Solutions, Senior Data Engineer - Data Lakehouse ([JobStreet 94703893](https://my.jobstreet.com/job/94703893)), cached verbatim at `~/projects/career-ops/data/jd-cache/031.md`.
-**Decision records:** [ADR-0019](adr/0019-contracts-are-contract-first-and-break-by-version.md), [ADR-0020](adr/0020-avro-on-the-cdc-topics-with-backward-transitive-compatibility.md), [ADR-0021](adr/0021-the-consumer-interface-is-the-versioned-serving-views.md), [ADR-0022](adr/0022-iceberg-format-v2-is-pinned.md), [ADR-0023](adr/0023-rollback-restores-the-iceberg-table-only.md).
+**Decision records:** [ADR-0019](adr/0019-contracts-are-contract-first-and-break-by-version.md), [ADR-0020](adr/0020-avro-on-the-cdc-topics-with-backward-transitive-compatibility.md), [ADR-0021](adr/0021-the-consumer-interface-is-the-versioned-serving-views.md), [ADR-0022](adr/0022-iceberg-format-v2-is-pinned.md), [ADR-0023](adr/0023-rollback-restores-the-iceberg-table-only.md), [ADR-0025](adr/0025-iceberg-v3-copy-on-write-for-schema-evolution.md).
 
 ---
 
@@ -118,21 +118,21 @@ M17 asks for five operations, each applied with its read paths verified. The pla
 
 **Two representative tables, one per write path, plus the SCD2 case.** `commerce.gold.fact_order_line` (Flink-upsert-written) and `commerce.gold.fact_lineitem` (Spark-written, and TPC-H's published answers give the read assertion an oracle). `dim_postcode` is named as the SCD2-specific extra, because its `as_of` and validity semantics make rename and drop behave differently there.
 
-**Every operation is verified through all four read paths**, not only Spark.
+**Every operation is verified through all four read paths**, not only Spark. Only the `add-required-with-default` row needs a table on format v3, and it is the only row whose table is not v2.
 
 **The add-optional row runs as one continuous chain**, because that is the demonstration the salvage list asks for and five disconnected `ALTER TABLE` statements would evidence Iceberg but not the platform: add the field to the Avro topic (subject v1 to v2), Flink sink, the gold contract updated, the ClickHouse copy re-materialised, and the persona query still answering.
 
-**The add-required-with-default row is the v2 workaround, recorded as an honest gap.** At format v2 a required column cannot be added to a non-empty table: Iceberg's `initial-default` and `write-default` are a format-v3 feature, and adding a required field requires both to be non-null. The workaround is add-optional, backfill, then enforce the required condition through the contract invariant, and the schema-level limitation is recorded rather than smoothed over.
+**The add-required-with-default row runs on the v3 copy-on-write table.** At format v2 a required column cannot be added to a non-empty table: Iceberg's `initial-default` and `write-default` are a format-v3 feature, and adding a required field requires both to be non-null. `commerce.gold.fact_lineitem` therefore moves to format v3 with `write.delete.mode` and `write.merge.mode` set to `copy-on-write`, which produces no delete files and is what keeps the row readable by ClickHouse 26.8 (ADR-0025). The column is added through the Iceberg API rather than Spark SQL, because `ALTER TABLE ... ADD COLUMN ... DEFAULT` throws unsupported; the SQL limitation is recorded rather than hidden.
 
-### 6.1 Why the gold tables are format v2
+### 6.1 Why the gold tables are format v2, and which one is not
 
-Iceberg's column defaults are v3-only, so the gap above is a real cost. The platform stays on v2 because of the **serving reader**, not because of Iceberg.
+Iceberg's column defaults are v3-only, so staying on v2 has a real cost. The constraint is the **serving reader's handling of deletion vectors**, not the format version: ClickHouse 26.8 LTS has no format-version read gate and reads v3 tables that carry no deletion vectors, and it fails hard with `BAD_ARGUMENTS: Position deletes are supported only for parquet format` on a v3 table carrying a Puffin deletion vector.
 
-Verified 2026-09-28: **ClickHouse 26.8 LTS, the pinned version, cannot read Iceberg v3 deletion vectors.** Read support merged into `26.10.1.35` (ClickHouse issue #107502, resolved by PR #110781). ClickHouse releases monthly and designates LTS only in March and August, so 26.10 is a non-LTS release that is not yet published, and the next LTS containing it is 27.3 (March 2027). The CDC facts are merge-on-read upsert (ADR-0013), which is exactly the path that emits deletion vectors, and ClickHouse is the platform's only serving and enforcement store, so a v3 CDC fact would be read incorrectly or not at all by the read-through arm.
+Verified live 2026-09-28 on the pinned `26.8.13.2` binary: a v3 copy-on-write table was read correctly, and a v3 merge-on-read table carrying a Puffin deletion vector failed with the error above. The method and evidence are in `docs/research/20-clickhouse-26-8-v3-copy-on-write-live-test.md`. Deletion-vector read support merged into `26.10.1.35` (ClickHouse issue #107502, resolved by PR #110781); 26.10 is a non-LTS release and the feature is labelled Experimental, and the next LTS containing it is 27.3 (March 2027), because new features are not backported.
 
-The earlier reason recorded in `docs/streaming-jobs.md` ("version 3 is partially supported across the readers") was directionally right but imprecise. It is corrected to name the specific constraint.
+Every gold table is `MERGE`-maintained, and a merge-on-read row-level operation on a v3 table produces a deletion vector, so every merge-on-read gold table stays v2. `commerce.gold.fact_lineitem` is the one exception: it runs copy-on-write, produces no delete files, and is therefore on v3 (ADR-0025). The earlier reason recorded in `docs/streaming-jobs.md` ("version 3 is partially supported across the readers") was directionally right but imprecise, and the reason previously recorded here named the format version rather than the deletion vector. Both are corrected.
 
-**The full-v3 question is reviewed in its own ticket**, [Full Iceberg v3 stack review](https://github.com/SoongGuanLeong/de-platform/issues/22), which owns the serving-engine question (ClickHouse 26.10 or 27.3 LTS, Apache Doris 4.1, Trino 480+), the Flink upsert-on-v3 question and the Polaris v3 question. This document does not pre-empt it.
+**The full-v3 question is settled** by [Full Iceberg v3 stack review](https://github.com/SoongGuanLeong/de-platform/issues/22) and recorded in ADR-0025. Two validation items remain open and are documented limitations rather than decisions: the read-through arm's REST catalog path was not exercised by the live test, which read through `icebergLocal` over the filesystem, and the Flink v3 upsert writer is unverified at the pinned tag.
 
 ### 6.2 The partition-transform restriction
 
@@ -164,7 +164,6 @@ M17 asks for "a measured cost for each operation: metadata growth, commit latenc
 
 ## 9. What this document does not decide
 
-- **Whether the platform moves to Iceberg v3**, and with which serving engine. Owned by [#22](https://github.com/SoongGuanLeong/de-platform/issues/22).
 - **Where the table definitions live.** Owned by [#16](https://github.com/SoongGuanLeong/de-platform/issues/16). The contract path and the CI resolution rule are fixed here so that ticket is a move, not a redesign.
 - **The benchmark protocol and its profiles.** Owned by the completion bar's Tier B evidence.
 
@@ -175,6 +174,6 @@ M17 asks for "a measured cost for each operation: metadata growth, commit latenc
 3. The CDC topic carries Avro with `BACKWARD_TRANSITIVE`, enforced by the serializer (ADR-0020).
 4. The Git YAML contract is the sole authoring source; the registry copy is a CI-pushed mirror (ADR-0020).
 5. There is no REST or API surface; the interface is the versioned serving views (ADR-0021).
-6. The gold tables are Iceberg format v2, and the add-required-with-default row is an honest gap (ADR-0022).
+6. The gold tables are Iceberg format v2 except `commerce.gold.fact_lineitem`, which is v3 copy-on-write, and the add-required-with-default row is demonstrated on it through the Iceberg API (ADR-0025).
 7. Rollback restores the Iceberg table only; the serving copy is re-materialised (ADR-0023).
 8. No em dashes, use a hyphen.

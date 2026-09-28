@@ -1,6 +1,6 @@
 # Iceberg format v2 is pinned, and v3 is a reviewed gap
 
-**Status:** accepted
+**Status:** superseded by [ADR-0025](0025-iceberg-v3-copy-on-write-for-schema-evolution.md)
 
 The gold tables are Iceberg format v2. The reason is the serving reader, not Iceberg: ClickHouse 26.8 LTS, the pinned version, cannot read v3 deletion vectors, and read support only reaches an LTS in 27.3 (March 2027). The CDC facts are merge-on-read, so a v3 fact would break the read-through arm. The consequence is that `add-required-with-default` cannot be demonstrated at the schema level, because column defaults are v3-only, and the matrix records that as an honest gap with the add-optional, backfill, contract-invariant workaround.
 

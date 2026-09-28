@@ -13,3 +13,5 @@ The streaming path into Iceberg claims exactly-once effect on the committed tabl
 ## Consequences
 
 Exactly-once holds for the table commit but not for end-to-end delivery, so upsert mode with declared equality fields is what absorbs duplicate delivery from Debezium; append mode does not. Correctness also depends, on the Flink path, on a bounded equality delete-file count that compaction collapses, which makes a compaction record part of the evidence. Matrix row M3.
+
+**One carve-out on the Spark path.** `commerce.gold.fact_lineitem` runs copy-on-write at format v3 (ADR-0025), so it produces no delete files at all, and the Spark path's position-delete evidence does not come from it. The exactly-once-effect claim is unaffected, because it rests on committed state rather than on the delete-file type; what changes is which table supplies the Spark-side delete-file evidence. The CDC path's equality deletes and this table's copy-on-write rewrites are now the two delete behaviours the platform exhibits, and they are no longer a per-engine pairing.
