@@ -47,9 +47,9 @@ The query set is the input to the layout, so it is fixed and finite before any l
 
 Grain is what one row represents. It is the decision most star schemas get wrong, and M6 asks for one query where the correct grain is the whole point, shown beside the version that gets it wrong.
 
-**Commerce, TPC-H.** `fact_lineitem` at line grain, one row per order line, which is the atomic revenue grain. Dimensions `dim_customer`, `dim_part`, `dim_supplier`, `dim_nation`, `dim_region`, `dim_date`. There is deliberately no `fact_orders` at order grain, because order-grain and line-grain measures sitting side by side is exactly the trap C2 exists to expose.
+**Commerce, TPC-H.** `fact_lineitem` at line grain, one row per order line, which is the atomic revenue grain. Dimensions `dim_customer_tpch`, `dim_part`, `dim_supplier`, `dim_nation`, `dim_region`, `dim_date`. The customer dimension is suffixed by source because TPC-C also has a CUSTOMER table, so an unsuffixed `dim_customer` would be ambiguous in a `commerce` namespace shared by both sources. There is deliberately no `fact_orders` at order grain, because order-grain and line-grain measures sitting side by side is exactly the trap C2 exists to expose.
 
-**Commerce, TPC-C.** `fact_order_line` at order-line grain, with the order header denormalised onto it; `fact_stock` at (warehouse, item) grain; `fact_delivery` at order grain. Dimensions warehouse, district, customer, item.
+**Commerce, TPC-C.** `fact_order_line` at order-line grain, with the order header denormalised onto it; `fact_stock` at (warehouse, item) grain; `fact_delivery` at order grain. Dimensions warehouse, district, customer and item; the customer dimension is silver-only (PII, per the governance document), so no TPC-C gold dimension table is created and the name `dim_customer_tpcc` is reserved rather than used.
 
 **Network, RIPE Atlas.** `fact_measurement_result` at result grain; `dim_probe`; `dim_measurement`.
 
@@ -110,7 +110,7 @@ The baseline, with the reason for each choice. `PRIMARY KEY` stays equal to `ORD
 | Table | Engine | Partition | `ORDER BY` | Codecs | TTL | Projection |
 |---|---|---|---|---|---|---|
 | `fact_lineitem` (P1) | MergeTree | `toYYYYMM(l_shipdate)` | `(l_shipdate, l_partkey, l_suppkey)` | Delta on dates, ZSTD on decimals and strings, LowCardinality on flags | none | `proj_supplier` on `(l_suppkey, l_shipdate)` |
-| `dim_customer`, `dim_part`, `dim_supplier` (P1) | MergeTree | none | business key | LowCardinality, ZSTD | none | none |
+| `dim_customer_tpch`, `dim_part`, `dim_supplier` (P1) | MergeTree | none | business key | LowCardinality, ZSTD | none | none |
 | `dim_nation`, `dim_region`, `dim_date` (P1) | MergeTree | none | key | LowCardinality | none | none |
 | `fact_measurement_area` (P2) | MergeTree | `toStartOfHour(ts)` | `(ts, postcode_area, probe_id)` | DoubleDelta on `ts`, Gorilla on RTT, LowCardinality on area and ASN | `ts + 90 days` | none |
 | `measurement_hourly_by_area` (P2) | AggregatingMergeTree via materialised view | `toYYYYMM(hour)` | `(postcode_area, hour)` | LowCardinality, ZSTD | none | n/a |

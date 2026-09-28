@@ -146,7 +146,7 @@ The treatment is **minimisation first, masking second** (ADR-0017): a direct PII
 | TPC-C `CUSTOMER` | `c_phone` | direct | Dropped from gold; silver only; the column-level grant test |
 | TPC-C `CUSTOMER` | `c_credit`, `c_credit_lim`, `c_data` | financial, free text | Dropped from gold; silver only |
 | TPC-C `HISTORY` | `h_data` | free text | Silver only |
-| TPC-H `CUSTOMER` | `c_name`, `c_address`, `c_phone`, `c_comment` | direct, free text | Dropped from the serving copy of `dim_customer` |
+| TPC-H `CUSTOMER` | `c_name`, `c_address`, `c_phone`, `c_comment` | direct, free text | Dropped from the serving copy of `dim_customer_tpch` |
 | RIPE Atlas probe | hostname, fqdn, description | direct | Dropped from gold; `probe_id` retained |
 | RIPE Atlas probe | IPv4, IPv6 | direct | Dropped from gold |
 | RIPE Atlas probe | coordinates | quasi | Dropped from gold; the resolved postcode area is retained |

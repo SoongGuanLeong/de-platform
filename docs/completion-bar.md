@@ -241,7 +241,7 @@ A measurement whose environment cannot be reproduced may be recorded, but it is 
 Three mechanisms together, and the guarantee is limited to declared consumers.
 
 - **Registry compatibility.** The CDC topics carry an Apicurio compatibility rule, so a backward-incompatible schema is rejected before it reaches a consumer.
-- **Gold contracts.** One contract file per gold table, next to its definition, carrying the table, its grain in one sentence, its columns with types and nullability, its business keys, its invariants, the persona query ids that must run against it, the versioning rule naming what counts as breaking, and the compatibility rule enforced. The contract test runs in CI and fails on a schema or invariant break.
+- **Gold contracts.** One machine-readable YAML contract file per gold table, at `contracts/<spine>/<table>.yml`, carrying the table, its grain in one sentence, its columns with types, nullability and PII class, its business keys, its invariants, the persona query ids that must run against it, the versioning rule naming what counts as breaking, and the compatibility rule enforced. The `schema` check is generated from the contract, CI resolves the table's location from the contract's `table` field, and the contract test runs in CI and fails on a schema or invariant break. A breaking change fails unless the same commit bumps the contract major, and at most two majors may coexist.
 - **Consumer simulation.** The persona queries from the analyst work double as the simulation, so they are not written twice.
 
 The honest limit: an external consumer nobody registered is not protected, and ClickHouse's monthly backward-incompatible releases cap what can be promised about the serving engine.

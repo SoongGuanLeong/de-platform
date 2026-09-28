@@ -111,7 +111,7 @@ Both sources are ours to engineer, and the two mechanisms are different because 
 
 1. Source-transaction atomicity is not claimed (ADR-0002).
 2. No cross-domain join (ADR-0008).
-3. Format version 2, not 3. Version 3 is partially supported across the readers, and buys nothing the delete requirement needs.
+3. Format version 2, not 3. The serving reader is the constraint, not Iceberg: ClickHouse 26.8 LTS cannot read v3 deletion vectors (support merged into 26.10.1.35; the next LTS is 27.3, March 2027), and the CDC facts are merge-on-read, so a v3 fact would break the read-through arm. The full-v3 question is owned by [the v3 stack review](https://github.com/SoongGuanLeong/de-platform/issues/22). Detail in `docs/data-contracts.md` section 6.1.
 4. The per-key LSN claim is an inference from Postgres row-level locking, not a cited guarantee.
 5. The RIPE content hash is ours to keep stable; changing its inputs changes the idempotency key.
 6. Nothing here is measured.

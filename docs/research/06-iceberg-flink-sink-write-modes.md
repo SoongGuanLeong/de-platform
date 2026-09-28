@@ -156,6 +156,8 @@ For a **partitioned** table, every partition field's source column must be in th
 
 The sink needs a changelog that contains `UPDATE_BEFORE` / `UPDATE_AFTER` / `DELETE` row kinds. Flink's Debezium JSON format produces those from Debezium events [S23]. The Flink Debezium docs recommend declaring a `PRIMARY KEY` on the source table and enabling `table.exec.source.cdc-events-duplicate` so Flink normalises and deduplicates the changelog [S23]. In SQL the Iceberg sink reads the primary key off the resolved schema to get its equality columns [S4], so a Kafka `debezium-json` source table declared with `PRIMARY KEY(...) NOT ENFORCED` is the standard way to feed upsert mode.
 
+**Correction, 2026-09-28 (ticket #15).** This platform does **not** use `debezium-json` on the wire. The CDC topics carry Avro, with the producer as Debezium's Kafka Connect `AvroConverter` in `as-confluent` mode and the reader as Flink's `avro-confluent` format, against Apicurio's ccompat v7 endpoint. The reason is the compatibility gate: completion bar 6.1 requires a backward-incompatible schema to be rejected by the serializer, which only a registry-backed serializer can do. The Iceberg-side requirements in this section are unchanged; only the source-table format changes, from `debezium-json` to `avro-confluent`. Recorded in ADR-0020 and `docs/data-contracts.md` section 4.
+
 **Inference, labelled:** the Iceberg docs do not contain a Kafka/Debezium upsert example at 1.11.0 (I searched `flink.md`, `flink-writes.md`, `flink-connector.md`, `flink-ddl.md`); the Kafka-side requirement is documented by Flink, not by Iceberg. The Iceberg-side requirement (v2 format, equality fields, upsert flag) is documented by Iceberg.
 
 ### 6.3 How updates are represented on disk

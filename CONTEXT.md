@@ -132,6 +132,28 @@ _Avoid_: category, tier, type
 The interval between a row's deletion and the expiry of the snapshots that still contain it, during which the deletion is not complete.
 _Avoid_: retention period, deletion lag
 
+### Contracts
+
+**Contract**:
+One machine-readable YAML file per gold table, at `contracts/<spine>/<table>.yml`, that is the table's authoritative interface: its columns with types, nullability and PII class, its business keys, invariants, persona query ids, and its versioning and compatibility rules. Authored in Git; the registry holds a pushed mirror, never the source.
+_Avoid_: schema doc, data dictionary, specification
+
+**Contract version**:
+The `major.minor` version of a contract. A minor bump is an additive change; a major bump is required for a breaking one, and at most two majors live at once.
+_Avoid_: revision, release, iteration
+
+**Breaking change**:
+A change a declared consumer cannot absorb without changing: drop a column, rename one, narrow a type, turn an optional column required, change the grain, or change the business key. It lands as a new major version, never in place.
+_Avoid_: incompatible change, major change, schema break
+
+**Compatibility rule**:
+The declared rule governing whether a new schema may be registered against a subject, such as `BACKWARD_TRANSITIVE` for the CDC topics. It is enforced by the serializer, not by review.
+_Avoid_: compatibility mode, compatibility level, compatibility setting
+
+**Interface contract**:
+The consumer-facing surface and its versioning rule: the versioned ClickHouse serving views, with the Iceberg gold tables as the read-only second interface. Distinct from the per-table contract, which is the producer's interface.
+_Avoid_: API contract, service contract, external schema
+
 ### Evidence
 
 **Demonstration**:

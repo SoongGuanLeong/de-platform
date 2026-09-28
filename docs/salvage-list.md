@@ -26,7 +26,7 @@ This is not a verdict on the prior work. Its design thinking is well above its e
 | 9 | Gold incremental impact propagation | Design input | The hardest and best logic in the repository, and entirely Olist-shaped. The problem, that a dimension change must ripple into the facts, recurs in any star schema. The code does not transfer. |
 | 10 | Silver transform toolkit | Design input | Small, dependency-free helpers. `convert_accents` is Portuguese-specific; the rest are ten-line functions. |
 | 11 | Avro decimal normaliser | Design input | A schema-introspecting conversion from an Avro decimal struct to a fixed-precision decimal. A real problem, worth solving again. |
-| 12 | Schema-drift guard | Deferred | The policy decision belongs to the data-contracts item. The guard and its validated demonstration are recorded there as starting evidence. |
+| 12 | Schema-drift guard | Design input | The policy decision was made by the data-contracts item. The guard's shape was the starting point; it is rewritten with a major-version escape hatch, never carried. See `docs/data-contracts.md`. |
 | 13 | Incremental reader watermark | Superseded | See below. |
 | 14 | Iceberg table-property baseline | Design input | Format version, compression, target file size and hidden partitioning, stated once and applied consistently. Physical layout is the posting's stated emphasis, so these are starting values to be tuned against measurements, never settled values. |
 | 15 | OLTP DDL, staging and load (916 lines) | Design input | A working pattern: a staging schema, an FK-ordered load, `ON CONFLICT DO NOTHING`, CDC-targeted indexes, and a publication that deliberately excludes the lookup tables. The DDL itself is Olist's schema. |
@@ -64,7 +64,9 @@ Two items could not be verified and are not relied on: whether Iceberg documents
 
 ### The schema-drift policy
 
-Deferred to the data-contracts item rather than settled here, because the policy is shaped by the dataset decision. What that item receives: a 25-line additive-only guard (`ALTER TABLE ADD COLUMN`, hard failure on column removal) and a genuinely validated evolution demonstration, where a column is added, written, read, dropped, and the registry-side version change is captured with screenshots.
+Resolved by [the data-contracts ticket](https://github.com/SoongGuanLeong/de-platform/issues/15). What that item received: a 25-line additive-only guard (`ALTER TABLE ADD COLUMN`, hard failure on column removal) and a genuinely validated evolution demonstration, where a column is added, written, read, dropped, and the registry-side version change is captured.
+
+The guard was **not carried**. Ticket #15 decided that a breaking change is allowed as a new major contract version, so the additive-only hard failure was rewritten under [ADR-0006](adr/0006-reference-only-reuse-and-provenance.md) rather than copied, and extended with the version-bump escape: a drop, rename, narrow, optional-to-required, grain change or key change fails CI unless the same commit bumps the contract major, and at most two majors may coexist. The registry-side evidence is the Avro subject version change on the CDC topic (`<topic>-value`, `BACKWARD_TRANSITIVE`), captured through Apicurio's ccompat v7 endpoint, not screenshots. See `docs/data-contracts.md` and ADR-0019.
 
 ## What the Olist dataset decision does to this list
 
@@ -90,7 +92,7 @@ Recorded so those tickets do not re-derive work that already exists.
 | Unspecified item | Prior asset | What it receives |
 |---|---|---|
 | Governance and data-quality specifics | Silver DQ modules (row 17) | A per-table metric-collector convention and four check shapes. Also the negative result: metrics that gate nothing, which is the gap the item exists to close. |
-| Data contracts and schema compatibility policy | Schema-drift guard (row 12) | An additive-only guard and a validated schema-evolution demonstration with registry-side evidence. |
+| Data contracts and schema compatibility policy | Schema-drift guard (row 12) | An additive-only guard, rewritten with a major-version escape hatch, and a validated schema-evolution demonstration with registry-side evidence. See `docs/data-contracts.md`. |
 | The serving layer's concrete shape | Iceberg property baseline (row 14), gold rules doc (row 19) | The table-property baseline and the grain and join rules. No ClickHouse input: the prior repository had none. |
 | Streaming job designs | none | Negative only. The prior repository has no Flink, and its Spark `foreachBatch` writer is not a streaming design. |
 | Performance benchmark plan and baselines | none | No input. The prior repository contains no measurements, and this map's rule against fabricated numbers means nothing in it is usable as a baseline. |
