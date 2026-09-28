@@ -20,8 +20,8 @@ Every row is read from a **primary source**: the project's own `LICENSE` or `COP
 | SeaweedFS | 4.47 | Apache-2.0 | Yes | Yes | None | None | None | `seaweedfs/seaweedfs` LICENSE [S3] | 2026-09-28 |
 | Apache Kafka | 4.3.1 | Apache-2.0 | Yes | Yes | None | None | None | `apache/kafka` LICENSE [S4] | 2026-09-28 |
 | Debezium | 3.6.1 | Apache-2.0 | Yes | Yes | None | None | None (Red Hat build is optional support, not a feature gate) | `debezium/debezium` LICENSE.txt [S5] | 2026-09-28 |
-| Apache Flink | 2.3.0 | Apache-2.0 | Yes | Yes | None | None | None | `apache/flink` LICENSE [S6] | 2026-09-28 |
-| Apache Spark | 4.2.0 | Apache-2.0 | Yes | Yes | None | None | None | `apache/spark` LICENSE [S7] | 2026-09-28 |
+| Apache Flink | 2.1.3 | Apache-2.0 | Yes | Yes | None | None | None | `apache/flink` LICENSE [S6] | 2026-09-28 |
+| Apache Spark | 4.1.3 | Apache-2.0 | Yes | Yes | None | None | None | `apache/spark` LICENSE [S7] | 2026-09-28 |
 | ClickHouse | 26.8 LTS | Apache-2.0 | Yes | Yes | None on the OSS edition | None | None needed. ClickHouse Cloud (managed backups, ClickPipes, compute-compute separation, multi-zone HA) is a separate paid service; the self-hosted OSS edition carries MergeTree, Iceberg, and row policies in full | `ClickHouse/ClickHouse` LICENSE [S8]; pricing [S9] | 2026-09-28 |
 | PostgreSQL | 18.x | PostgreSQL License | Yes | Yes | None | None (permissive) | None | `postgres/postgres` COPYRIGHT [S10] | 2026-09-28 |
 | Dagster | 1.13.x | Apache-2.0 | Yes | Yes | None on the OSS edition | None | None needed. Dagster+ (managed infrastructure, catalog search, cost insights, SSO/RBAC, uptime SLA) is a separate paid product from $10/month; `@asset_check`, the capability the platform depends on, is in the OSS edition | `dagster-io/dagster` LICENSE [S11]; pricing [S12] | 2026-09-28 |

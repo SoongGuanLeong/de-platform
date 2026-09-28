@@ -23,8 +23,8 @@ Every surviving choice carries at least one rejected alternative with a reason. 
 | SeaweedFS | 4.47 (`weed mini`) | S3-compatible object storage with an embedded Iceberg REST catalog | MinIO is dead; this is the only option that fits the host and has a first-party ClickHouse guide | RustFS, Garage, Ozone, Ceph, LocalStack | M19, M1 | PASS with caution (bus factor 1) |
 | Apache Kafka | 4.3.1, KRaft | Durable, replayable log | Debezium's sink; the replayable source the streaming correctness claim needs | Redpanda, Pulsar, Kinesis | M2 | PASS, irreplaceable |
 | Debezium | 3.6.1 | CDC from the Postgres binlog | The only T1 source: real change events, including the NULL-to-value updates that break naive upserts | Flink CDC, triggers | M2 | PASS with caution (Red Hat build lags) |
-| Apache Flink | 2.3.0 | Stateful streaming, upsert into Iceberg | The real-time path, and the only Iceberg writer that emits key-only equality deletes | Kafka Connect Iceberg sink, Spark Structured Streaming | M3, M8 | PASS |
-| Apache Spark | 4.2.0 | Batch silver and gold, compaction, serving load | The posting names it; batch MERGE, `rewrite_data_files`, and the batch arm of the serving feed | (none serious) | M4, M5 | PASS with caution (Java story) |
+| Apache Flink | 2.1.3 | Stateful streaming, upsert into Iceberg | The real-time path, and the only Iceberg writer that emits key-only equality deletes | Kafka Connect Iceberg sink, Spark Structured Streaming | M3, M8 | PASS |
+| Apache Spark | 4.1.3 | Batch silver and gold, compaction, serving load | The posting names it; batch MERGE, `rewrite_data_files`, and the batch arm of the serving feed | (none serious) | M4, M5 | PASS |
 | ClickHouse | 26.8 LTS | Analytical serving store | The posting names it; the only place column-level and row-level enforcement exists | Druid, Pinot, StarRocks, Trino, DuckDB | M7, M8, M20 | PASS with caution (monthly breaking changes) |
 | PostgreSQL | 18.x | OLTP source and metadata store | The CDC source must be a real database; it also holds Polaris, Dagster, Apicurio and Marquez metadata | MySQL, CockroachDB | M2, M19 | PASS |
 | Dagster | 1.13.x | Orchestration | `@asset_check` is the only first-class data-quality gate among the candidates | Airflow, Prefect, Argo Workflows, Flyte | M13, M14 | PASS with caution (Prefect acquisition) |
@@ -37,6 +37,8 @@ Every surviving choice carries at least one rejected alternative with a reason. 
 | Helm | 4.3.0 | Packaging | The posting names it; charts authored and lint-checked, never applied | Kustomize | M19 | PASS with caution (v3 support ends Nov 2026) |
 | OpenTofu | 1.12.0 | Infrastructure as code | Terraform failed the rubric on licence; OpenTofu is the same-HCL drop-in | Terraform, Pulumi | M19 | PASS |
 | Podman | 6.1.x | Container runtime | The host has no Docker; the compose contract stays portable | Docker | M19 | PASS (5.7 is EOL) |
+
+**Engine pins follow Iceberg's connector matrix.** Iceberg 1.11.0 ships Flink connector modules up to 2.1 and Spark modules up to 4.1, so the engines are pinned to the newest patch of those minors - Flink 2.1.3 and Spark 4.1.3 - not to the newest releases. Flink 2.2/2.3 and Spark 4.2 need Iceberg 1.12.0, which is RC2 and not GA. The choice, the rejected alternatives and the re-review condition are recorded in ADR-0024.
 
 Nineteen components. The count and its defence are below.
 
