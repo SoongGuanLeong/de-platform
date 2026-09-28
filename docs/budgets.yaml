@@ -32,7 +32,7 @@ budgets:
     profile: benchmark
     rationale: A schema change or rollback is a maintenance action, so it should stay under the interactive threshold at the benchmark profile's data volume. One budget covers all three operations because the metric is the same and the operations are compared against each other.
     declared_on: 2026-09-28
-    declared_commit: pending
+    declared_commit: b076796
 
   - id: m17-metadata-object-growth
     metric: Metadata objects and rows added in the snapshots, manifests and files tables by one operation
@@ -42,7 +42,7 @@ budgets:
     profile: benchmark
     rationale: One operation adds a bounded set of metadata objects (a snapshot, its manifest list, and the data and delete manifests it references), so the budget is a small constant rather than a proportion. The count is recorded, and is never presented as byte growth.
     declared_on: 2026-09-28
-    declared_commit: pending
+    declared_commit: b076796
 
   - id: m17-metadata-byte-growth
     metric: Metadata bytes added by one operation, where measurable
@@ -52,7 +52,7 @@ budgets:
     profile: benchmark
     rationale: Metadata must not grow faster than the data it describes. One mebibyte per operation is the ceiling at the benchmark profile's data volume, and it is recorded separately from the object count because a few large manifests and many small ones are different problems.
     declared_on: 2026-09-28
-    declared_commit: pending
+    declared_commit: b076796
 
   - id: m17-expire-snapshots-removed
     metric: Snapshots, references and files removed by expire_snapshots, with in-window snapshots retained
@@ -62,7 +62,7 @@ budgets:
     profile: benchmark
     rationale: The operation must remove at least the deliberately expired snapshot. The retention half of the assertion, that an in-window snapshot survives, belongs to M12 and is recorded alongside; this budget covers only the cost counter.
     declared_on: 2026-09-28
-    declared_commit: pending
+    declared_commit: b076796
 
   - id: m17-orphan-cleanup-bytes
     metric: Orphan files removed and bytes reclaimed by remove_orphan_files, measured separately from snapshot expiry
@@ -72,4 +72,4 @@ budgets:
     profile: benchmark
     rationale: A deliberately interrupted write leaves orphan files, and zero bytes reclaimed means the cleanup did not run. The threshold is one byte because the claim is that the mechanism reclaims at all; the magnitude is a measurement, not a target.
     declared_on: 2026-09-28
-    declared_commit: pending
+    declared_commit: b076796
