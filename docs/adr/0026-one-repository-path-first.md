@@ -1,0 +1,16 @@
+# One repository, split by engineering path, with strict domain boundaries
+
+**Status:** accepted
+
+`de-platform` holds both the proposal suite and the platform code, in one repository. Every path depends on the same Iceberg catalog, the same `contracts/<spine>/<table>.yml` set and the same budget and capability ids, so a capability split would force those shared artefacts to be duplicated or versioned across repositories, and a reviewer should be able to follow an ADR to the code it justifies without changing clone. The top-level split is by engineering path (ingestion, streaming, batch, serving, governance, observability, platform, orchestration, deployment), with the two spines as a second-level dimension, because the boundary that buys independent testing and reproducible local execution is the toolchain and runtime boundary rather than the data layer. Commerce and network implementation code may not import each other in either direction, and `platform/` is a leaf that imports no path. Dagster is the composition root and the only module permitted to import both spines.
+
+## Considered options
+
+- **Several repositories by capability, per the mission's `lakehouse-*` list.** Rejected: the mission itself says not to create them automatically and not to build micro-repositories for appearance, and these are not independently deployable services. They would all depend on the same catalog, contracts and budgets, so the split would duplicate the shared artefacts rather than isolate anything.
+- **One repository for the platform code, the proposal suite elsewhere.** Rejected: it buys only a cosmetic separation of git history at the cost of ADR-to-code drift, and the proposal suite is this map's own destination.
+- **Spine-first top level (`commerce/`, `network/`, `platform/`).** Rejected: the spine is a domain boundary, not an engineering one. Both spines share one PySpark test runner, so the split buys no independent testing while putting Java and Python under the same directory.
+- **Medallion-first top level (`bronze/`, `silver/`, `gold/`).** Rejected: the layers are already Iceberg namespaces, so a directory axis would duplicate the catalog's own axis and land PySpark and Flink code in the same folder.
+
+## Consequences
+
+The boundary rules a tool can decide are enforced by the packaging graph and `import-linter`; the ones it cannot (no shared Iceberg writer, no shared conformed dimension, one writer per serving copy) are written obligations, with the serving-writer map making the last of them auditable. The completion-bar register's entries gain a `module` field that CI resolves, extending the ADR-0007 gate without claiming a bijection it cannot deliver. `sqlfluff`'s ClickHouse dialect does not parse `PROJECTION` in DDL, so the serving DDL is validated by execution rather than parsing. Full detail, including the layout tree, the packaging model and the CI scope, is in [`docs/repository-decomposition.md`](../repository-decomposition.md).
