@@ -10,7 +10,7 @@
 # docs/security-model.md section 4.1: Grafana serves HTTPS with protocol=https,
 # cert_file and cert_key, a browser completes a chain to the local CA, and an
 # untrusted chain is rejected. The test that proves it is
-# deployment/compose/tests/grafana.sh, using openssl only.
+# deployment/security-harness/tests/grafana.sh, using openssl only.
 #
 # This adds no component. Grafana 13.2.2 is one of the nineteen pinned
 # components (docs/research/24-arm64-image-availability.md).
@@ -50,7 +50,7 @@ services:
       # which can forge a certificate for any listener in the stack, and the
       # directory is mode 0700 so a non-root container user cannot traverse it
       # anyway. runtime/certs/grafana.key is remapped by
-      # deployment/compose/fix-secret-ownership.sh to uid 472, the uid Grafana
+      # deployment/security-harness/fix-secret-ownership.sh to uid 472, the uid Grafana
       # runs as, because podman-compose ignores a secret's uid and mode.
       - ../../../runtime/certs/grafana.crt:/certs/grafana.crt:ro
       - ../../../runtime/certs/grafana.key:/certs/grafana.key:ro

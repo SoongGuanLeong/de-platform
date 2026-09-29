@@ -6,7 +6,7 @@
 
 ## 1. The constraint that shapes this
 
-**Before this round there were no Compose services in this repository.** `deployment/` held only the certificate target, so the minimum set was not a subset of anything that already existed: it was authored here, from the pinned components, for evidence only. It now exists as `deployment/compose/`, and section 6 reports what it produced. It is deliberately not the platform's compose contract, which is the open ticket [The local development architecture: profile budgets, bring-up and the local-versus-cloud diff](https://github.com/SoongGuanLeong/de-platform/issues/25).
+**Before this round there were no Compose services in this repository.** `deployment/` held only the certificate target, so the minimum set was not a subset of anything that already existed: it was authored here, from the pinned components, for evidence only. It now exists as `deployment/security-harness/`, and section 6 reports what it produced. It is deliberately not the platform's compose contract, which is the open ticket [The local development architecture: profile budgets, bring-up and the local-versus-cloud diff](https://github.com/SoongGuanLeong/de-platform/issues/25).
 
 What makes a single-component profile legitimate rather than a shortcut is that the profile model is already decided: the completion bar fixes reproducibility per profile (smoke, then the path-scoped halves, then single-component), because the whole stack cannot be co-resident in 7 to 8 GB. Each test below therefore runs the smallest profile that can produce it.
 
@@ -98,4 +98,4 @@ The evidence was not only confirmatory. Each item below was produced by running 
 
 ---
 
-*Authored by ticket #18 on map #9. The harness lives in `deployment/compose/` and the tests in `deployment/compose/tests/`. See `deployment/compose/README.md` for how to run them.*
+*Authored by ticket #18 on map #9. The harness lives in `deployment/security-harness/` and the tests in `deployment/security-harness/tests/`. See `deployment/security-harness/README.md` for how to run them.*

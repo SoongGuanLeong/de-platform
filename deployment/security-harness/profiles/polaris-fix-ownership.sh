@@ -6,7 +6,7 @@
 # so under rootless podman a bind mount presents the file as owned by container
 # root. Polaris runs as the image's non-root user (polaris, uid 10000, gid
 # 10001), so without this it cannot read its own secrets. This is the same
-# mapping deployment/compose/fix-secret-ownership.sh applies to the two Polaris
+# mapping deployment/security-harness/fix-secret-ownership.sh applies to the two Polaris
 # secrets; this profile-local script adds the metastore password and is safe to
 # run repeatedly.
 #

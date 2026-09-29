@@ -78,7 +78,7 @@ fi
 echo
 echo "== every secret the harness declares resolves to a file that exists =="
 declared=0
-for cf in deployment/compose/compose.yml deployment/compose/profiles/*.yml; do
+for cf in deployment/security-harness/compose.yml deployment/security-harness/profiles/*.yml; do
   [ -f "$cf" ] || continue
   dir="$(dirname "$cf")"
   for rel in $(grep -E '^[[:space:]]+file:[[:space:]]' "$cf" | sed 's/^[[:space:]]*file:[[:space:]]*//'); do

@@ -9,20 +9,20 @@ One compose file over the pinned component images, brought up one profile at a t
 ## Prerequisites
 
 1. Generate the local certificates: `make -C deployment/certs certs`
-2. Generate the local secrets: `deployment/compose/generate-secrets.sh`
+2. Generate the local secrets: `deployment/security-harness/generate-secrets.sh`
 3. Both write only under `runtime/`, which is gitignored (ADR-0028).
 
 ## Running
 
 One profile at a time, because the whole stack does not fit in the available memory.
 
-    podman-compose -f deployment/compose/compose.yml up -d postgres
-    deployment/compose/tests/postgres.sh
-    podman-compose -f deployment/compose/compose.yml down postgres
+    podman-compose -f deployment/security-harness/compose.yml up -d postgres
+    deployment/security-harness/tests/postgres.sh
+    podman-compose -f deployment/security-harness/compose.yml down postgres
 
-    podman-compose -f deployment/compose/profiles/seaweedfs.yml up -d seaweedfs
-    deployment/compose/tests/seaweedfs.sh
-    podman-compose -f deployment/compose/profiles/seaweedfs.yml down seaweedfs
+    podman-compose -f deployment/security-harness/profiles/seaweedfs.yml up -d seaweedfs
+    deployment/security-harness/tests/seaweedfs.sh
+    podman-compose -f deployment/security-harness/profiles/seaweedfs.yml down seaweedfs
 
 `tests/static.sh` needs no running service: it checks the gitignore rules, the tracked tree and the secret declarations.
 

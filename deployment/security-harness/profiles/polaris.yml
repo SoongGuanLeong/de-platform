@@ -4,7 +4,7 @@
 # that name "Polaris, PostgreSQL, SeaweedFS" can be produced without the whole
 # stack. It is brought up with:
 #
-#   podman-compose -f deployment/compose/profiles/polaris.yml up -d
+#   podman-compose -f deployment/security-harness/profiles/polaris.yml up -d
 #
 # Two services, and the reason each is genuinely required:
 #   postgres - the Polaris metastore. Both the catalog state and the persisted
