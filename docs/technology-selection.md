@@ -34,7 +34,7 @@ Every surviving choice carries at least one rejected alternative with a reason. 
 | Prometheus | 3.14.0 | Metrics | The posting names it | VictoriaMetrics, InfluxDB | M15 | PASS |
 | Grafana | 13.x | Dashboards | The posting names it; dashboards held as code in Git | Perses | M15 | PASS with caution (AGPL, Enterprise split) |
 | Alertmanager | 0.34.x | Alerting | The posting names it | (none) | M15 | PASS |
-| Helm | 4.3.0 | Packaging | The posting names it; charts authored and lint-checked, never applied | Kustomize | M19 | PASS with caution (v3 support ends Nov 2026) |
+| Helm | 4.3.0 | Packaging | The posting names it; charts authored and lint-checked, never applied as evidence | Kustomize | M19 | PASS with caution (v3 support ends Nov 2026) |
 | OpenTofu | 1.12.0 | Infrastructure as code | Terraform failed the rubric on licence; OpenTofu is the same-HCL drop-in | Terraform, Pulumi | M19 | PASS |
 | Podman | 6.1.x | Container runtime | The host has no Docker; the compose contract stays portable | Docker | M19 | PASS (5.7 is EOL) |
 

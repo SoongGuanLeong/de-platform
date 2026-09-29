@@ -6,7 +6,7 @@
 **Evidence base:** [`docs/research/25-security-facts-secrets-auth-tls-audit.md`](research/25-security-facts-secrets-auth-tls-audit.md), verified against the pinned versions on 2026-09-29. Every capability claim and price below traces to it, or is listed in section 9 as unverified.
 **Inputs:** [`docs/governance-and-data-quality.md`](governance-and-data-quality.md), [`docs/cloud-architecture.md`](cloud-architecture.md), [ADR-0004](adr/0004-authorisation-seam-between-catalog-and-engine.md), [ADR-0006](adr/0006-reference-only-reuse-and-provenance.md), [`docs/technology-selection.md`](technology-selection.md).
 
-**Status.** This document settles decisions. It contains no measured result. Every capability claim is verified against the pinned version or listed in section 9 as unverified. Every price is a dated list price. The executable evidence these decisions call for is enumerated in section 12 and belongs to the implementation phase, because no platform code exists yet and the cloud shape is authored and never applied. Nothing here should be read as a produced test.
+**Status.** This document settles decisions. It contains no measured result. Every capability claim is verified against the pinned version or listed in section 9 as unverified. Every price is a dated list price. The executable evidence these decisions call for is enumerated in section 12 and belongs to the implementation phase, because no platform code exists yet and the cloud shape is authored and never applied as evidence. Nothing here should be read as a produced test.
 
 ---
 
@@ -322,7 +322,7 @@ That sentence replaces the earlier "audited in both engines", which was not true
 8. **Two components need entrypoint-based secret injection**: Kafka, because it has no file intake for a SASL password, and Flink, because its SSL options are Java keystore only.
 9. **No local TLS on the control plane**, for the reason in 4.2. The demonstration value is not there.
 10. **`system.query_log` denial capture is unverified.** That the table records a query's user is verified; whether a refused query appears in it is confirmed during implementation rather than asserted here.
-11. **The cloud security shape is authored and never applied.** IRSA, security groups, the ALB and Secrets Manager are validated and rendered, not exercised. Section 10 names the difference.
+11. **The cloud security shape is authored and never applied as evidence.** IRSA, security groups, the ALB and Secrets Manager are validated and rendered, not exercised. Section 10 names the difference.
 12. **No image signature verification and no admission policy.** Digests are pinned; provenance is not verified at admission.
 13. **The unverified research gaps carry forward**: Apicurio's and Marquez's own listener TLS surfaces, Polaris's signing-key rotation schedule, and whether Polaris's AssumeRole calls are fully compatible with SeaweedFS STS.
 14. **The Kafka authorizer denial log has no retention bound.** `StandardAuthorizer` writes denials to `/opt/kafka/logs/kafka-authorizer.log` rather than to stdout, at `INFO`, mode 0600 owned by the container user. Kafka's shipped `log4j2.yaml` rotates that file hourly and deletes nothing, and the file lives in the container's writable layer, so it is lost when the container is removed. The audit line exists; a durable audit destination does not.

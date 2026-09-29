@@ -46,7 +46,7 @@ The three Polaris rows originally named Polaris, PostgreSQL and SeaweedFS. Seawe
 
 ## 4. The two items that cannot be produced here
 
-1. **Cloud secrets through the CSI driver.** It needs a Kubernetes cluster. The cloud shape is authored and never applied, and the demo is time-boxed and priced, so this stays deferred and is labelled as such rather than approximated with a local secret store.
+1. **Cloud secrets through the CSI driver.** It needs a Kubernetes cluster. The cloud shape is authored and never applied as evidence, and the demo is time-boxed and priced, so this stays deferred and is labelled as such rather than approximated with a local secret store.
 2. **Quarantine deletion.** The deletion path is pipeline behaviour on an Iceberg table. Exercising it means writing the table and the deletion statement, which is the implementation this round is explicitly not doing. It stays deferred until the deletion path exists, and the security model already says its deletion path must be exercised rather than assumed.
 
 ## 5. The findings this plan expects to produce, and did
