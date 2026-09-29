@@ -185,8 +185,8 @@ Core items 1 to 8 apply to every instance and are not repeated. Each delta is cl
 ### 6.11 Infrastructure as code
 
 - OpenTofu modules cover the S3 layout, IAM roles and policies, VPC and subnets, security groups, the RDS instance class and parameter group, and secrets handling, committed and validated in CI with `tofu validate`.
-- Helm charts for the EKS deployment are authored and never applied, with `helm lint` and `helm template` in CI and the rendered manifests committed.
-- Compose files are restricted to the portable subset (section 11), linted in CI, with the compose provider the bring-up was verified against named.
+- Helm charts for the EKS deployment are authored and never applied as evidence, with `helm lint` and `helm template` in CI and the rendered manifests committed.
+- Compose files are restricted to the portable subset (section 11), linted in CI, with the compose provider the bring-up targets named.
 - A written local-versus-cloud diff names what the local run cannot exercise.
 
 *Artifacts:* `tofu validate` output; rendered Helm manifests; the compose lint result; the local-versus-cloud diff.
@@ -254,7 +254,7 @@ The honest limit: an external consumer nobody registered is not protected, and C
 
 ## 11. The portable runtime subset
 
-Bring-up must not depend on one compose provider. Compose files are restricted to the portable subset: OCI images, ports, `environment` and `env_file`, volumes, networks, `healthcheck` with `start_period`, `restart`, `profiles`, `extra_hosts` with `host-gateway`, `depends_on` without `condition`, and `deploy.resources.limits.cpus`, `deploy.resources.limits.memory` and `deploy.resources.limits.pids` with nothing else under `deploy`. The provider the bring-up was verified against is named in the runbook, and a CI lint rejects the forbidden keys.
+Bring-up must not depend on one compose provider. Compose files are restricted to the portable subset: OCI images, ports, `environment` and `env_file`, volumes, networks, `healthcheck` with `start_period`, `restart`, `profiles`, `extra_hosts` with `host-gateway`, `depends_on` without `condition`, and `deploy.resources.limits.cpus`, `deploy.resources.limits.memory` and `deploy.resources.limits.pids` with nothing else under `deploy`. The provider the bring-up targets is named in the runbook, and a CI lint rejects the forbidden keys.
 
 **Services self-retry rather than depending on health-based start ordering.** This is a resilience choice, not a portability constraint: `depends_on` with `condition` is a Compose Specification feature that both named providers implement, but a one-shot condition check only helps at first start, whereas a self-retrying service also survives a dependency that later restarts. `start_period` on a healthcheck remains permitted, and is how a slow-starting service declares its own tolerance.
 
@@ -284,7 +284,7 @@ Each entry names the gap, the reason, and what stands in its place. Naming these
 
 1. **Production scale.** Every layout and cost conclusion beyond the single measured axis is extrapolation: Iceberg planning cost, per-partition file counts, compaction and part merging at real volumes are reasoned, not observed. *In its place:* the reasoning plus one genuinely measured axis, labelled as extrapolation.
 2. **On-call as a human practice.** The system detects, alerts, and can be recovered by a stranger with a runbook. There is no pager and no human triage under pressure. *In its place:* the eight-link incident chain, as a property of the platform.
-3. **AWS.** OpenTofu is never applied, so there is no real S3, no IAM policy evaluation, no VPC routing, no RDS failover, point-in-time recovery or read replicas, no EKS scheduling or rolling upgrade, and no Helm release. *In its place:* `tofu validate`, rendered charts, and an explicit local-versus-cloud diff.
+3. **AWS.** No AWS resource is applied **as evidence**: OpenTofu and the Helm charts are authored and statically validated, and the only apply is a human running the demo runbook inside a priced, torn-down window, which is not an evidence item. So there is no evidence of real S3, no IAM policy evaluation, no VPC routing, no RDS failover, point-in-time recovery or read replicas, no EKS scheduling or rolling upgrade, and no Helm release. *In its place:* `tofu validate`, rendered charts, and an explicit local-versus-cloud diff.
 4. **Open-table-format failure modes a laptop cannot reach.** Catalog split-brain, an orphan-file storm after a killed job, a stale metadata pointer after a partial commit. *In its place:* the reachable subset, and the admission that the rest is reasoning.
 5. **GDPR.** Technical measures only: no lawful basis, no DPIA, no data-subject request process. *In its place:* the phrase "GDPR-shaped", used deliberately.
 6. **Multi-region and cross-account.** Reasoning only, no deployment.
@@ -292,7 +292,7 @@ Each entry names the gap, the reason, and what stands in its place. Naming these
 8. **Continuous ClickHouse upgrade testing.** A pin plus one upgrade drill is the ceiling, against monthly backward-incompatible releases.
 9. **Catalog-swap equivalence.** The swap drills time the swap; they do not prove the replacement is production-equivalent. *In its place:* the measured swap cost and the CI assertion that no proprietary admin API is used.
 10. **SeaweedFS STS is not AWS STS.** The local run uses a permissive trust policy and no IAM policy simulation, so it evidences the shape of the credential flow, not AWS policy semantics.
-11. **Runtime parity beyond one provider.** The bring-up is verified against one compose provider; the other provider's behaviour is untested. The Flink, ClickHouse, Dagster, Debezium Connect, Apicurio and Alertmanager images are unverified under podman until a runtime check is actually run.
+11. **Runtime parity beyond one provider.** The bring-up targets one compose provider and has not been executed; the other provider's behaviour is untested. The Flink, ClickHouse, Dagster, Debezium Connect, Apicurio and Alertmanager images are unverified under podman until a runtime check is actually run.
 12. **Unknown downstream consumers.** The regression guarantee covers declared consumers only.
 13. **True multi-broker failure.** Single-node Kafka cannot evidence broker-loss behaviour beyond a restart; replication and in-sync replica settings are configured but not exercised at real redundancy.
 14. **Concurrency and backpressure at real throughput.** Injection is synthetic and the query set is bounded; the claim is engineering behaviour, not throughput at production volume.

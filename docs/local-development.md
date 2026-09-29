@@ -100,7 +100,7 @@ The preflight also checks, and refuses on, each of these:
 
 ## 6. The bring-up runbook
 
-One entry point per profile, in `deployment/`, in four phases. **The verified provider is podman-compose**, named here as [section 11](completion-bar.md) requires; docker compose is authored for but not verified, and that is [section 13 item 11](completion-bar.md).
+One entry point per profile, in `deployment/`, in four phases. **The named provider is podman-compose**, named here as [section 11](completion-bar.md) requires. Its resource-limit translation was verified in its source ([research 26](research/26-compose-resource-limits-and-portability.md)), while the bring-up itself is unexecuted. docker compose is authored for but not verified, and that is [section 13 item 11](completion-bar.md).
 
 1. **Preflight** - every check in section 5. Refuse with the shortfall named.
 2. **Ordered start** - dependency order, each service gated by its own readiness probe in the profile script, **never by a compose condition**. The ban stands: a self-retrying service survives a dependency that later restarts, whereas a one-shot condition check only helps at first start. Services self-retry, and the script waits.
@@ -169,7 +169,7 @@ An entitlement admitted into `docs/budgets.yaml` would let a resource ceiling be
 - **The ceilings are hard limits, so an exceedance is an OOM kill, not a slowdown.** The run's assertion phase must surface an OOM-killed profile service as a profile-budget failure rather than as an application bug.
 - **The local peak is not cloud capacity.** About 44% of the minimal arm's 16 GiB, and about 29% of 24 GiB at three nodes.
 - **At 7.0 GiB free, neither path profile fits.** The reduced variant is the fallback, and it cannot produce an alert drill.
-- **Only one compose provider is verified.** The bring-up is verified against podman-compose; docker compose is authored for and untested.
+- **Only one compose provider is named.** The bring-up targets podman-compose, whose resource-limit translation was verified in its source ([research 26](research/26-compose-resource-limits-and-portability.md)); the bring-up itself is unexecuted, and docker compose is authored for and untested.
 - **The whole runbook is unexecuted.** It is a procedure written against a pinned toolchain, and its first real execution is the first implementation task.
 
 ## 12. Sources

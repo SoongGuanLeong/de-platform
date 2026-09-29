@@ -141,7 +141,7 @@ The nineteen are the application components the platform runs. Their cloud forms
 | OpenTofu 1.12.0 | CLI | CLI | n/a |
 | Podman 6.1.x | container runtime | containerd, via EKS | n/a |
 
-**Infrastructure, not components**: ECR, the internet gateway, the S3 gateway endpoint, the AWS Load Balancer Controller and the ALB (reference arm only), NAT gateways (reference arm only), Secrets Manager, the EBS and Secrets Store CSI drivers, the Flink Kubernetes Operator, Spark-on-Kubernetes, the OpenTofu state bucket, and the node groups themselves. None of these is an addition to the nineteen.
+**Infrastructure, not components**: ECR (the `reference` profile only, never created by the demo window), the internet gateway, the S3 gateway endpoint, the AWS Load Balancer Controller and the ALB (reference arm only), NAT gateways (reference arm only), Secrets Manager, the EBS and Secrets Store CSI drivers, the Flink Kubernetes Operator, Spark-on-Kubernetes, the OpenTofu state bucket, and the node groups themselves. None of these is an addition to the nineteen.
 
 ## 4. The cost model
 
@@ -277,14 +277,14 @@ The requests line is the one place the curve bends, and it is the reason the mea
 |---|---|---|
 | OpenTofu modules | `deployment/` | `tofu fmt -check`, `tofu validate`, `tflint` |
 | Two tfvars profiles, `reference` and `minimal` | `deployment/` | the policy scan below |
-| Policy scan | `deployment/` | `checkov` or `trivy config`, including the non-nesting table-prefix rule |
+| Policy scan | `deployment/` | `trivy config`, including the non-nesting table-prefix rule ([the CI/CD strategy](ci-cd-strategy.md) section 10) |
 | Helm charts | `deployment/` | `helm lint`, `helm template` against a test values file |
 | Rendered manifests | `deployment/` | `kubeconform` against a pinned schema |
 | Demo runbook | `deployment/` | not validated by CI; it is a human procedure |
-| The minimal arm itself | nowhere | **never applied** |
+| The minimal arm itself | the priced demo window | **applied only by a human inside the window, and never as evidence** |
 | The reference arm | nowhere | **never applied** |
 
-**No `tofu plan`, no `apply`, no LocalStack.** Both need a real account, and LocalStack was already rejected. The static checks are the only evidence M19 can produce, so the gate is the deliverable rather than a preliminary to one.
+**No `tofu plan` and no `apply` in CI, no LocalStack.** Both need a real account, and LocalStack was already rejected. The only apply anywhere is a human running the demo runbook inside the priced window, and that is not an evidence item. The static checks are the only evidence M19 can produce, so the gate is the deliverable rather than a preliminary to one.
 
 ## 8. Verification items and documented gaps
 
