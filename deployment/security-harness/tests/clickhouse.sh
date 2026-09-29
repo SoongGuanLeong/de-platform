@@ -102,14 +102,11 @@ assert_ok "the server records the connection as secure" \
 
 echo
 echo "== retention: a TTL bounds the query log, and it actually deletes =="
-# The shipped table carries no TTL. That was observed on a fresh container and
-# its raw output is recorded in docs/security-model.md. The assertions below are
-# idempotent instead of relying on that first-run state: they remove the TTL,
-# prove it is gone, then apply it and prove it deletes.
-assert_ok "the TTL can be removed, so the unbounded state is reachable" \
-  ch -q 'alter table system.query_log remove ttl'
-assert_absent "with the TTL removed no TTL is present" \
-  sh -c "podman exec $CTR clickhouse-client --config-file /harness/client-config.xml --secure --port 9440 --user svc_platform --password '$svc_pw' -q 'show create table system.query_log' | grep -qi 'TTL event_date'"
+# The shipped table carries no TTL, so 'alter table ... remove ttl' errors with
+# code 36 on a fresh container: removing first only passed against a container an
+# earlier run had already modified. The order below is apply, prove present,
+# prove it deletes, then remove and prove it gone, so every assertion has
+# something real to fail on and the sequence holds from either state.
 assert_ok "a TTL can be applied" \
   ch -q 'alter table system.query_log modify ttl event_date + interval 30 day'
 assert_ok "the TTL is present afterwards" \
@@ -119,6 +116,10 @@ assert_ok "a row older than the window is removed by the TTL" \
     insert into system.query_log (event_date, event_time, type, query_start_time, query_duration_ms, read_rows, read_bytes, written_rows, written_bytes, result_rows, result_bytes, memory_usage, current_database, query, exception_code, user, query_id, initial_user, initial_query_id, is_initial_query) values (today() - 60, now() - interval 60 day, 'QueryFinish', now(), 0, 0, 0, 0, 0, 0, 0, 0, 'default', 'retention-probe', 0, 'retention_probe', 'probe', 'retention_probe', 'probe', 1);
     optimize table system.query_log final;
     select count() from system.query_log where query = 'retention-probe'\" | tail -1 | grep -qx 0"
+assert_ok "the TTL can be removed, so the unbounded state is reachable" \
+  ch -q 'alter table system.query_log remove ttl'
+assert_absent "with the TTL removed no TTL is present" \
+  sh -c "podman exec $CTR clickhouse-client --config-file /harness/client-config.xml --secure --port 9440 --user svc_platform --password '$svc_pw' -q 'show create table system.query_log' | grep -qi 'TTL event_date'"
 
 echo
 if [ "$failures" -eq 0 ]; then
