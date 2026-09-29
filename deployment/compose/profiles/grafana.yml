@@ -1,0 +1,58 @@
+# Security evidence harness: the Grafana TLS profile.
+#
+# Self-contained: this file declares its own secrets and brings up exactly one
+# service, because the profiles are run one at a time and the whole stack does
+# not fit in the available memory. It is not the platform's compose contract
+# (that is ticket #25); it exists to execute the deferred Grafana item in
+# docs/security-evidence-plan.md.
+#
+# The item under test is "TLS chain verifiable: Grafana" from the TLS matrix in
+# docs/security-model.md section 4.1: Grafana serves HTTPS with protocol=https,
+# cert_file and cert_key, a browser completes a chain to the local CA, and an
+# untrusted chain is rejected. The test that proves it is
+# deployment/compose/tests/grafana.sh, using openssl only.
+#
+# This adds no component. Grafana 13.2.2 is one of the nineteen pinned
+# components (docs/research/24-arm64-image-availability.md).
+
+name: de-platform-security-grafana
+
+secrets:
+  # The admin password is a file under runtime/ (gitignored), never a tracked
+  # value and never an environment value, per ADR-0028.
+  grafana_admin_password:
+    file: ../../../runtime/secrets/grafana_admin_password
+
+services:
+  grafana:
+    image: docker.io/grafana/grafana:13.2.2
+    container_name: de-platform-security-grafana
+    restart: "no"
+    environment:
+      # Grafana's own native file-intake variable, with the double underscore it
+      # requires. The plaintext value is never placed in the environment.
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      # The TLS matrix in docs/security-model.md section 4.1: protocol=https,
+      # cert_file, cert_key. No CA is configured on the server side because the
+      # server presents a leaf and does not verify a client.
+      GF_SERVER_PROTOCOL: https
+      GF_SERVER_CERT_FILE: /certs/grafana.crt
+      GF_SERVER_CERT_KEY: /certs/grafana.key
+      GF_SERVER_HTTP_PORT: "3000"
+      GF_SERVER_DOMAIN: localhost
+      GF_SERVER_ROOT_URL: https://localhost:53000/
+    secrets:
+      - grafana_admin_password
+    volumes:
+      # Only the two files the listener needs, mounted individually. Mounting
+      # ../../runtime/certs wholesale would also hand this container ca.key,
+      # which can forge a certificate for any listener in the stack, and the
+      # directory is mode 0700 so a non-root container user cannot traverse it
+      # anyway. runtime/certs/grafana.key is remapped by
+      # deployment/compose/fix-secret-ownership.sh to uid 472, the uid Grafana
+      # runs as, because podman-compose ignores a secret's uid and mode.
+      - ../../../runtime/certs/grafana.crt:/certs/grafana.crt:ro
+      - ../../../runtime/certs/grafana.key:/certs/grafana.key:ro
+    ports:
+      - "127.0.0.1:53000:3000"

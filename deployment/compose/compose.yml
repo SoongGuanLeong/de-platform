@@ -15,6 +15,10 @@ secrets:
     file: ../../runtime/secrets/postgres_superuser_password
   postgres_svc_password:
     file: ../../runtime/secrets/postgres_svc_password
+  kafka_admin_password:
+    file: ../../runtime/secrets/kafka_admin_password
+  kafka_svc_password:
+    file: ../../runtime/secrets/kafka_svc_password
   clickhouse_default_password:
     file: ../../runtime/secrets/clickhouse_default_password
   clickhouse_svc_password:
@@ -72,3 +76,25 @@ services:
     entrypoint: ["/bin/sh", "/harness/entrypoint.sh"]
     ports:
       - "127.0.0.1:59440:9440"
+
+  kafka:
+    image: docker.io/apache/kafka:4.3.1
+    container_name: de-platform-security-kafka
+    restart: "no"
+    secrets:
+      - kafka_admin_password
+      - kafka_svc_password
+    volumes:
+      # Only the three files Kafka needs, not the whole CA directory. Mounting
+      # ../../runtime/certs wholesale would also hand this container ca.key,
+      # which can forge a certificate for any listener in the stack, and the
+      # directory is mode 0700 so a non-root container user cannot traverse it
+      # anyway.
+      - ../../runtime/certs/kafka.crt:/certs/kafka.crt:ro
+      - ../../runtime/certs/kafka.key:/certs/kafka.key:ro
+      - ../../runtime/certs/ca.crt:/certs/ca.crt:ro
+      - ./kafka/entrypoint.sh:/harness/entrypoint.sh:ro
+      - ./kafka:/harness/templates:ro
+    entrypoint: ["/bin/bash", "/harness/entrypoint.sh"]
+    ports:
+      - "127.0.0.1:59093:9093"

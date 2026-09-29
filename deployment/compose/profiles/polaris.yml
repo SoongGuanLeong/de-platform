@@ -1,0 +1,70 @@
+# Polaris security evidence profile: rotation, event audit and denial attribution.
+#
+# Self-contained, so the three deferred items in docs/security-evidence-plan.md
+# that name "Polaris, PostgreSQL, SeaweedFS" can be produced without the whole
+# stack. It is brought up with:
+#
+#   podman-compose -f deployment/compose/profiles/polaris.yml up -d
+#
+# Two services, and the reason each is genuinely required:
+#   postgres - the Polaris metastore. Both the catalog state and the persisted
+#              audit events live here, so the "successful events audited"
+#              assertion is a SQL read against POLARIS_SCHEMA.events.
+#   polaris  - the component under test.
+#
+# SeaweedFS is deliberately NOT here. The three assertions are metadata-plane
+# operations (principal create, credential rotate, token issue, namespace
+# create, grant), and none of them reaches object storage. Adding SeaweedFS
+# would add a component to the evidence path that no assertion touches.
+#
+# Every secret is a file under runtime/ (gitignored), mounted at
+# /run/secrets/<name>, per ADR-0028. Polaris runs as uid 10000, so the files
+# must be mapped to 10000:10001 first: profiles/polaris-fix-ownership.sh.
+
+name: de-platform-security-polaris
+
+secrets:
+  polaris_db_password:
+    file: ../../../runtime/secrets/polaris_db_password
+  polaris_bootstrap_secret:
+    file: ../../../runtime/secrets/polaris_bootstrap_secret
+  # Polaris generates a principal's secret server-side when the principal is
+  # created, so there is no human-authored value to supply. This file is the
+  # store for the *current* value: the evidence test writes the secret it
+  # receives from the API response here and reads it back through the container,
+  # because the file is mapped to the container uid
+  # (profiles/polaris-fix-ownership.sh) and is unreadable from the host. A
+  # human-authored value IS possible through the credential reset endpoint,
+  # which accepts an optional clientSecret, so this file is a store by choice
+  # rather than by an API constraint.
+  polaris_client_secret:
+    file: ../../../runtime/secrets/polaris_client_secret
+
+services:
+  postgres:
+    image: docker.io/library/postgres:18-alpine
+    container_name: de-platform-security-polaris-postgres
+    restart: "no"
+    environment:
+      POSTGRES_USER: deplatform
+      POSTGRES_DB: deplatform
+      POSTGRES_PASSWORD_FILE: /run/secrets/polaris_db_password
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=trust"
+    secrets:
+      - polaris_db_password
+
+  polaris:
+    image: docker.io/apache/polaris:1.7.0
+    container_name: de-platform-security-polaris
+    restart: "no"
+    depends_on:
+      - postgres
+    secrets:
+      - polaris_db_password
+      - polaris_bootstrap_secret
+      - polaris_client_secret
+    volumes:
+      - ../polaris/entrypoint.sh:/harness/entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/harness/entrypoint.sh"]
+    ports:
+      - "127.0.0.1:58181:8181"

@@ -1,0 +1,49 @@
+# The security evidence harness: the SeaweedFS S3 profile.
+#
+# One self-contained profile per deferred test, brought up on its own because
+# the whole stack does not fit in the available memory. This file declares its
+# own secrets rather than relying on compose.yml, and it adds no component: it
+# runs the pinned SeaweedFS 4.47 image.
+#
+# It carries the deferred item "TLS refused when plaintext: SeaweedFS S3" from
+# docs/security-evidence-plan.md. The S3 gateway is started with a certificate
+# and key and WITHOUT -s3.port.https, which is the mode in which SeaweedFS 4.47
+# serves TLS on the single S3 port and starts no plaintext S3 listener at all.
+# The evidence is in weed/command/s3.go at tag 4.47: the plaintext server is
+# started only when tlsPrivateKey == "" or portHttps > 0, and TLS is served on
+# portHttps when it is set, otherwise on the plain s3 port.
+#
+# weed mini also starts a plaintext Iceberg REST catalog on 8181, a plaintext
+# Lance namespace server on 9101 and a WebDAV server on 7333 by default. An
+# unauthenticated Iceberg REST catalog inside the object store would let a client
+# resolve table metadata without going through Polaris, routing around the
+# authorisation seam the platform depends on (ADR-0004, ADR-0010), so all three
+# are disabled in ../seaweedfs/entrypoint.sh and the only surface this profile
+# serves is the TLS S3 endpoint.
+
+name: de-platform-security-seaweedfs
+
+secrets:
+  seaweedfs_s3_secret_key:
+    file: ../../../runtime/secrets/seaweedfs_s3_secret_key
+
+services:
+  seaweedfs:
+    image: docker.io/chrislusf/seaweedfs:4.47
+    container_name: de-platform-security-seaweedfs
+    restart: "no"
+    secrets:
+      - seaweedfs_s3_secret_key
+    volumes:
+      # Only the three files the S3 gateway needs, never the whole directory:
+      # mounting ../../../runtime/certs wholesale would also hand this container
+      # ca.key, which can forge a certificate for any listener in the stack, and
+      # the directory is mode 0700 so a non-root user could not traverse it.
+      - ../../../runtime/certs/seaweedfs.crt:/certs/seaweedfs.crt:ro
+      - ../../../runtime/certs/seaweedfs.key:/certs/seaweedfs.key:ro
+      - ../../../runtime/certs/ca.crt:/certs/ca.crt:ro
+      - ../seaweedfs/entrypoint.sh:/harness/entrypoint.sh:ro
+      - ../seaweedfs/s3-config.json.tmpl:/harness/s3-config.json.tmpl:ro
+    entrypoint: ["/bin/sh", "/harness/entrypoint.sh"]
+    ports:
+      - "127.0.0.1:58333:8333"

@@ -28,3 +28,12 @@ The auditability boundary is now the same boundary as the authorisation seam, an
 Two further limits follow from the components rather than from this decision. The OpenLineage specification has no user or author field, so Marquez lineage records what ran and never who ran it. Grafana's audit log is an Enterprise and Cloud feature, so Grafana configuration changes are not audited in the OSS edition.
 
 The audit matrix, the retention table, the cannot-list and the evidence plan are in [`docs/security-model.md`](../security-model.md).
+
+## Correction, 2026-09-29
+
+Two factual premises in this record were checked against the running components while the runtime evidence was produced, and both are wrong. The decision is unaffected; the prerequisites change.
+
+- **"The access log's default pattern does not include the authenticated principal."** Wrong for Quarkus 3.37.4. `AccessLogConfig` defaults `pattern` to `common`, and `AccessLogHandler` maps `common` to `%h %l %u %t "%r" %s %b`, which contains `%u`, the authenticated principal. What is required is to **enable** the access log, since `quarkus.http.access-log.enabled` defaults to `false`; the pattern does not need changing, and the explicit pattern this harness sets is a no-op. The attribution mechanism is unchanged, but the prerequisite becomes "enable the log" rather than "change the pattern".
+- **"The framework brackets successful operations only."** Wrong. The framework emits `BEFORE_*` unconditionally for every operation it brackets and `AFTER_*` only on success, so a denied operation leaves an **unmatched `BEFORE_*` row** carrying the authenticated principal and the request, with no closing event. What remains true is that there is no denial event *type*, and that an unmatched `BEFORE_*` row means "attempted and did not complete" rather than specifically "denied", because a 404 leaves one too. A 403 line is therefore still what makes a row a denial.
+
+A third record was found and is now named in the audit matrix: `PolarisAuthorizerImpl` logs `Authorization denied for principal '<principal>' on operation '<OPERATION>': missing <PRIVILEGE> on <RESOURCE>`, naming the principal, the operation and the missing privilege in one line. That is the most precise denial record Polaris emits.
