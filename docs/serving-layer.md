@@ -178,8 +178,8 @@ The per-query numbers are **not** declared here. They are committed in `docs/bud
 
 - **`fact_lineitem` ordering and projection.** The `ORDER BY` and `proj_supplier` are workload-driven hypotheses. M5's three layout variants of one hot table test the Iceberg-side partition transform and sort order, measured partly through ClickHouse p50/p95, and a changed Iceberg layout means re-materialising the ClickHouse copy.
 - **The P3 read pattern.** `FINAL` and the `argMax`/`GROUP BY` latest-version idiom are both benchmarked for correctness and measured latency, and the winner becomes the declared pattern for O1 to O3. `ReplacingMergeTree` supports either, so the layout does not constrain the outcome.
-- **The per-query budgets.** Committed in `docs/budgets.yaml` before the benchmark, per section 9.
-- **The two-arm delta.** Measured per section 8, and the magnitude is unknown until then.
+- **The per-query budgets.** The p95 commitments are the persona classes `m9-interactive-p95`, `m9-dashboard-p95` and `m9-near-realtime-query-p95`, and the p50 budgets are the nine derived `m7-<query>-p50` entries, all in `docs/budgets.yaml` per section 9. The protocol that produces them is [the benchmark plan](benchmark-plan.md), which pre-registers the three layout variants and the two arms.
+- **The two-arm delta.** Measured per section 8, and the magnitude is unknown until then; the budget id is `m7-arm-delta`.
 
 ---
 

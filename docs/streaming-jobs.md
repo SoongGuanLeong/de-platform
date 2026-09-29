@@ -97,7 +97,7 @@ All four are budgets, committed in `docs/budgets.yaml` before the late-event inj
 | Parallelism | 2 / 4 | `parallelism.default` |
 | Sink flush size | 64 / 128 / 256 MB | the Iceberg sink's `write.target-file-size-bytes` |
 
-The state backend is declared as the baseline rather than varied, because changing it changes the state representation and would confound the other two axes. If budget allows, a fourth arm compares HashMap with RocksDB for the ingestion job. The protocol is the evidence standard: fixed data volume, pinned versions, the exact command, raw output committed, and budgets declared before the measurement. Incident 2, the checkpoint timeout, has its permanent fix in Iceberg table properties rather than these knobs, so it does not duplicate this record.
+The state backend is declared as the baseline rather than varied, because changing it changes the state representation and would confound the other two axes. If budget allows, a fourth arm compares HashMap with RocksDB for the ingestion job. The protocol is the evidence standard: fixed data volume, pinned versions, the exact command, raw output committed, and budgets declared before the measurement. Its shape, the run count and statistic, and the controls block are fixed in [the benchmark plan](benchmark-plan.md) section 2; the arms above are pre-registered there in section 4. Incident 2, the checkpoint timeout, has its permanent fix in Iceberg table properties rather than these knobs, so it does not duplicate this record.
 
 ## 8. Deduplication and idempotency
 

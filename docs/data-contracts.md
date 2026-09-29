@@ -160,7 +160,7 @@ M17 asks for "a measured cost for each operation: metadata growth, commit latenc
 | Snapshot expiry | Old snapshots, references and files removed by `expire_snapshots` |
 | Orphan cleanup | Orphan files removed and bytes reclaimed by `remove_orphan_files`, measured separately from expiry |
 
-**Thresholds for every counter above go into `docs/budgets.yaml` before implementation, and the register entries are named here and produced during implementation.** This document names the register entries; it does not claim numbers. The completion bar's honesty rule forbids a measured number while the map is open.
+**The five `m17-*` entries are in `docs/budgets.yaml`**, declared before the schema-evolution matrix is run and cited by the matrix's evidence items. This document names the counters; it does not claim numbers. The completion bar's honesty rule forbids a measured number while the map is open, and the protocol that produces them is [the benchmark plan](benchmark-plan.md) section 2.
 
 ## 9. What this document does not decide
 

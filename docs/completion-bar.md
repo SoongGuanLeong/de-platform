@@ -195,6 +195,8 @@ Core items 1 to 8 apply to every instance and are not repeated. Each delta is cl
 
 One file per item at `docs/evidence/<class>/<instance>/<item>.md`, with raw artifacts committed under `raw/` beside it. A per-instance `INDEX.md` lists the matrix rows the instance satisfies.
 
+A **benchmark** record is the same item with a benchmark block added: the mode, the arms, the hypothesis written before the run, the change, the controls, the run count and statistic, the result, the trade-off, the budget verdicts, the reset proof and the TPC label. The block is fixed in [the benchmark plan](benchmark-plan.md) section 2.3, and there is deliberately no second schema.
+
 | Field | Meaning |
 |---|---|
 | `id` | Stable identifier, unique across the repository. |
@@ -236,7 +238,7 @@ Time and resource figures in this document are budgets and definitions of done, 
 
 Thresholds live in [`docs/budgets.yaml`](budgets.yaml), one entry per threshold, and each evidence item cites the budget id it is judged against. A budget is committed before the measurement it judges; the CI resolves the citation to the commit that introduced the budget, so the order is visible in history. Changing a budget creates a new entry, and evidence citing a superseded budget is invalid.
 
-A benchmark record states its hardware as configured, its data volume, its engine versions, its exact command, its run count, and its raw output, with the commit and the date.
+A benchmark record states its hardware as configured, its data volume, its engine versions, its exact command, its run count, and its raw output, with the commit and the date. The full protocol, the three modes, and the list of conditions that invalidate a record are in [the benchmark plan](benchmark-plan.md) section 2.
 
 A measurement whose environment cannot be reproduced may be recorded, but it is labelled `observed_once: true` and may never be cited as evidence for a claim. The claim must rest on a reproducible measurement or be downgraded to an observation.
 

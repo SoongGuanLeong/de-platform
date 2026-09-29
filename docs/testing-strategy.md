@@ -4,7 +4,7 @@
 **Map:** [Vendor-neutral lakehouse data platform: architecture proposal](https://github.com/SoongGuanLeong/de-platform/issues/9)
 **Base:** the evidence standard in [`docs/requirements-matrix.md`](requirements-matrix.md) section 3, operationalised by [`docs/completion-bar.md`](completion-bar.md).
 **Decision record:** [`docs/adr/0032-the-level-determines-the-strongest-claim-a-test-may-support.md`](adr/0032-the-level-determines-the-strongest-claim-a-test-may-support.md)
-**Boundary:** this document fixes the test levels, the fixtures, and which tests run inside CI. The benchmark protocol is [the performance benchmark plan](https://github.com/SoongGuanLeong/de-platform/issues/21); the pipeline job graph, branch protection and the delivery path are [the CI/CD strategy](https://github.com/SoongGuanLeong/de-platform/issues/24).
+**Boundary:** this document fixes the test levels, the fixtures, and which tests run inside CI. The benchmark protocol is [the benchmark plan](benchmark-plan.md); the pipeline job graph, branch protection and the delivery path are [the CI/CD strategy](https://github.com/SoongGuanLeong/de-platform/issues/24).
 
 ---
 
@@ -126,7 +126,7 @@ Three design inputs, none of them copied, all recorded in the salvage list.
 
 ## 12. What this strategy does not settle, and the honest gaps
 
-- **The benchmark protocol.** The baseline, hypothesis, change and result protocol is [the performance benchmark plan](https://github.com/SoongGuanLeong/de-platform/issues/21). This document says which tests are benchmarks; it does not say how one is recorded.
+- **The benchmark protocol.** The baseline, hypothesis, change and result protocol is [the benchmark plan](benchmark-plan.md). This document says which tests are benchmarks; it does not say how one is recorded.
 - **The pipeline job graph, branch protection and the delivery path.** [The CI/CD strategy](https://github.com/SoongGuanLeong/de-platform/issues/24) owns those. This document names which tests run inside CI, not how CI is wired.
 - **No test has been written or run.** The register ships empty and nothing here is a result.
 - **The fixture volumes are budgets, not measurements.** They come from [`docs/dataset-selection.md`](dataset-selection.md) section 7, which labels every figure an initial budget, and the two slice sizes are derived by scaling rather than measured.

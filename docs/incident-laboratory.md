@@ -171,6 +171,6 @@ Incidents 2 and 3 were admitted only because their permanent fixes add something
 
 ## 10. Open items
 
-- The MTTD and MTTR budgets are not declared yet; `docs/budgets.yaml` ships empty and each must be committed before its incident runs.
+- The MTTD and MTTR budgets are declared per incident in `docs/budgets.yaml` as `m16-mttd-incident-<n>` and `m16-mttr-incident-<n>`, with the reasoning in [the benchmark plan](benchmark-plan.md) section 6. An earlier revision of this document said the file ships empty; it held five M17 entries by the time the full set was written.
 - The runbooks, postmortems and dashboards are out of scope for this ticket and are produced later.
 - The RIPE Atlas collector is the ingestion path (`docs/dataset-selection.md:36`) but is not one of the nineteen counted components; the proposal's technology count should be checked for consistency.
