@@ -38,7 +38,11 @@ services:
       - postgres_superuser_password
       - postgres_svc_password
     volumes:
-      - ../../runtime/certs:/certs:ro
+      # Only the two files this listener needs, not the whole CA directory.
+      # Mounting ../../runtime/certs wholesale would also hand this container
+      # ca.key, which can forge a certificate for any listener in the stack.
+      - ../../runtime/certs/postgres.crt:/certs/postgres.crt:ro
+      - ../../runtime/certs/postgres.key:/certs/postgres.key:ro
       - ./postgres/pg_hba.conf:/pgconf/pg_hba.conf:ro
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
     # The certificate key is chowned into place here rather than on the host,
@@ -69,7 +73,12 @@ services:
       - clickhouse_default_password
       - clickhouse_svc_password
     volumes:
-      - ../../runtime/certs:/certs:ro
+      # Only the three files this listener needs, not the whole CA directory.
+      # Mounting ../../runtime/certs wholesale would also hand this container
+      # ca.key, which can forge a certificate for any listener in the stack.
+      - ../../runtime/certs/clickhouse.crt:/certs/clickhouse.crt:ro
+      - ../../runtime/certs/clickhouse.key:/certs/clickhouse.key:ro
+      - ../../runtime/certs/ca.crt:/certs/ca.crt:ro
       - ./clickhouse/entrypoint.sh:/harness/entrypoint.sh:ro
       - ./clickhouse/client-config.xml:/harness/client-config.xml:ro
       - ./clickhouse/config.d:/etc/clickhouse-server/config.d:ro
