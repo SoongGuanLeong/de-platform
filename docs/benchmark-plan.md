@@ -127,6 +127,8 @@ These carry tests, and a budget only where a threshold exists. They are listed s
 
 **M13's false-positive rate is not a performance benchmark.** It is a repeated-run statistic over a declared number of consecutive clean runs, so it sits under the batch profile with its own budget and does not appear in this plan's benchmark set. Recording it as a benchmark would let a correctness property be judged by a latency protocol.
 
+**The benchmark identifiers therefore run B1 to B7 and B9.** The identifier B8 was assigned to the false-positive rate while this plan was being written, and it is deliberately retired rather than reused, so a reader who notices the gap knows it was a decision rather than a lost section.
+
 ## 4. The pre-registered arms
 
 Choosing arms after seeing results is the same failure as writing a budget after seeing the number. The arms are fixed here.
