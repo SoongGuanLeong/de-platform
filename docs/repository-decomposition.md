@@ -114,7 +114,7 @@ CI runs the cheap structural checks on every pull request, and never re-runs evi
 
 Linters are one pinned version per toolchain, with the configs at the root: `ruff` for Python (pinned, unlike the prior repository's unpinned linter whose green badge was an artifact rather than a gate), `import-linter` for the boundaries, Spotless with google-java-format for the Flink jobs, `sqlfluff` for SQL, `yamllint` for compose and contracts, and `actionlint` for the workflows. The compose-subset lint is a repository script in `deployment/`, since no off-the-shelf tool enforces a custom subset.
 
-Path filters are **fail-safe**: the cheap validators always run, and the heavier per-path test jobs are path-filtered, but a change to `platform/` or `contracts/` triggers everything, because those invalidate every path.
+Path filters are **fail-safe**: the cheap validators always run, and the heavier per-path test jobs are path-filtered. The per-job input sets and their overrides are stated in [the CI/CD strategy](ci-cd-strategy.md) section 5, and the principle is that a job's filter includes every shared artefact that job really consumes, so a change to a shared artefact can never skip a check it invalidates.
 
 ## How a capability instance points at its module
 

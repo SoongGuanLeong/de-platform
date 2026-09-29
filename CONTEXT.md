@@ -275,3 +275,17 @@ _Avoid_: degraded mode, lite profile, fallback
 **Local-versus-cloud diff**:
 The written statement of what a local run cannot exercise, one row per mechanism, each naming what stands in its place. A required artefact rather than a caveat list.
 _Avoid_: limitations, caveats, known issues
+
+### Continuous integration
+
+**Deployable artefact**:
+The commit on `main` whose required check is green and whose `deployment/` tree renders and pins its inputs. A `demo-<YYYY-MM-DD>` tag names the one a priced window is run from. Delivery is defined by this artefact rather than by a deployment, because no cloud arm is ever applied.
+_Avoid_: release, build, deployment
+
+**Structural check**:
+A check that needs no stack, no credential and no evidence re-run, and that reads committed artefacts and re-derives from them. It is what the structural jobs run; the one job in the graph that is not a structural check is the arm64 image build. It is why a green pipeline is never a behaviour item.
+_Avoid_: check, lint, static test, fast test
+
+**Required-check aggregator**:
+The single job a branch ruleset requires, which fails on any failure or cancellation and passes on success or skipped, so a legitimately path-filtered job cannot block a merge. Named `required` and never `gate`, because gate already means the orchestration consequence of a severity.
+_Avoid_: gate, umbrella job, checks job

@@ -72,7 +72,7 @@ A double may stand in for a component **off** the path of the claim, never for o
 
 ## 6. What runs in CI, and what runs under a profile
 
-CI runs the static set and nothing else. This is [`docs/repository-decomposition.md`](repository-decomposition.md)'s CI consequence, and [`docs/local-development.md`](local-development.md) section 9 already states that `tests/<profile>/` is never in CI and that `smoke` stays a one-command local re-run.
+CI runs the static set plus the one artefact the platform authors, and nothing else. This is [`docs/repository-decomposition.md`](repository-decomposition.md)'s CI consequence, amended by [the CI/CD strategy](ci-cd-strategy.md) section 4, which adds the arm64 image build as the single non-static job; [`docs/local-development.md`](local-development.md) section 9 already states that `tests/<profile>/` is never in CI and that `smoke` stays a one-command local re-run.
 
 | Runs in CI | Needs a profile |
 |---|---|
@@ -80,7 +80,7 @@ CI runs the static set and nothing else. This is [`docs/repository-decomposition
 | contract-file validation (section 7a) | `tests/batch/` |
 | the register and budget validators | `tests/streaming/` |
 | the cross-path comparison (section 8) | the incident laboratory, under a path profile plus `observability` |
-| the structural lints of `#16`, including the compose-subset lint | every benchmark, under `benchmark` |
+| the structural lints of `#16`, including the compose-subset lint, and the arm64 image build | every benchmark, under `benchmark` |
 
 **One runner, one directory per profile.** `pytest tests/smoke`, `pytest tests/batch` and `pytest tests/streaming` are the commands, so a profile names a command rather than a convention, and the preflight in `deployment/` runs before the suite rather than beside it.
 
