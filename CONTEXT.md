@@ -18,6 +18,18 @@ _Avoid_: extra, nice-to-have, bonus
 The number of components the platform runs, defended against the mission's sprawl test by showing each one is posting-named, a substitution, or an addition. Nineteen, of which Iceberg and Kafka are irreplaceable.
 _Avoid_: component total, stack size
 
+**Application component**:
+One of the nineteen things the platform runs, and the only kind of thing the technology count counts. A component may take a different form in the cloud without becoming a different component, or a twentieth.
+_Avoid_: service, workload, deployment unit
+
+**Cloud form**:
+The managed service a component takes in the cloud deployment. It is a change of runtime, not of component: S3 is SeaweedFS's cloud form and RDS is PostgreSQL's, and neither is an addition.
+_Avoid_: cloud equivalent, managed version, hosted variant
+
+**Infrastructure**:
+What exists only because the cloud needs it, and is therefore neither a component nor an addition: the container registry, the ingress controller and its load balancer, NAT gateways, VPC endpoints, the secrets store, the CSI drivers, the Flink Kubernetes Operator, Spark-on-Kubernetes, the node groups, and the OpenTofu state store.
+_Avoid_: platform component, supporting service, dependency
+
 ### Sources
 
 **Spine**:
