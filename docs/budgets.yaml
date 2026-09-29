@@ -21,8 +21,8 @@
 #             pending entry fails CI.
 #
 # `declared_commit` names the commit that introduced the entry. A commit cannot
-# name itself, so a new entry is committed with `declared_commit: pending-fill`
-# and the follow-up commit writes the sha.
+# name itself, so a new entry is committed with a placeholder value and the
+# follow-up commit writes the sha in its place.
 
 version: 2
 
@@ -37,7 +37,7 @@ budgets:
     commitment: fixed
     rationale: The portability claim is that a component swap is a same-day action rather than a migration project, so one working day is the ceiling. The swap is cheap only because no code path calls a Polaris-proprietary admin API, which is asserted separately.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m1-storage-swap-hours
     metric: Wall-clock hours to swap object storage from SeaweedFS to RustFS, including the diff required
@@ -48,7 +48,7 @@ budgets:
     commitment: fixed
     rationale: As above. The storage swap is the one that touches the data plane, so it is the more expensive of the two and the figure the eight hours is really testing.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M2: CDC correctness, from docs/requirements-matrix.md ---
   - id: m2-cdc-retention-window
@@ -60,7 +60,7 @@ budgets:
     commitment: fixed
     rationale: ADR-0018 makes the CDC topics time-bounded, and M2's idempotence test replays a partition from offset 0, which needs the whole capture still present. Twenty-four hours covers a capture window plus the replay, and is the longest window the 5 to 10 GB topic size budget allows at the declared rate.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m2-replication-lag
     metric: Debezium MilliSecondsBehindSource, the lag between a committed source transaction and the event reaching Kafka
@@ -71,7 +71,7 @@ budgets:
     commitment: fixed
     rationale: Bounded lag is the difference between a replication slot that advances and one that stalls and holds WAL. Sixty seconds sits well inside the 24-hour retention window, so a stall is caught long before the window could drop unreplayed data.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M3: exactly-once effect and Flink tuning, from docs/requirements-matrix.md ---
   - id: m3-checkpoint-duration
@@ -83,7 +83,7 @@ budgets:
     commitment: fixed
     rationale: The baseline checkpoint interval is 60 s (docs/streaming-jobs.md section 7). A checkpoint taking longer than half the interval leaves no headroom for a slow one, so 30 s is the pass condition the tuning record's interval arms are judged against.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m3-checkpoint-failed-count
     metric: Failed checkpoints over a benchmark run
@@ -94,7 +94,7 @@ budgets:
     commitment: fixed
     rationale: A failed checkpoint is a correctness event, not a performance one, so any failure invalidates the run rather than lowering a score. Counted over the whole run, never as a rate.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m3-equality-delete-files
     metric: Equality delete files present on a CDC table after the compaction step
@@ -105,7 +105,7 @@ budgets:
     commitment: fixed
     rationale: The claim is that compaction collapses the delete files rather than that it removes every one. One file is the floor for a table that took writes after the last compaction, and the count before and after is the measured quantity.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M4: Spark batch correctness, from docs/requirements-matrix.md ---
   - id: m4-cross-path-tolerance
@@ -117,7 +117,7 @@ budgets:
     commitment: fixed
     rationale: The two engines sum in different orders, so a float sum cannot agree bit for bit while a count can and does. One part in a thousand is tighter than the rounding the shared metric can carry, and the comparison is a CI validator reading two committed artifacts (docs/testing-strategy.md section 8).
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m4-batch-wallclock
     metric: Wall-clock seconds for the full bronze to silver to gold batch at the declared volume
@@ -129,7 +129,7 @@ budgets:
     derivation: The value is the wall-clock of the declared baseline run at the declared volume, committed in a commit that precedes the run it judges. The rule is fixed here so the number is not free once the run happens.
     rationale: A batch wall-clock is a property of this hardware and this volume, so a number chosen before either was exercised would be a guess wearing a threshold's clothes (docs/serving-layer.md section 9).
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M5: physical table layout, from docs/requirements-matrix.md ---
   - id: m5-median-file-size
@@ -141,7 +141,7 @@ budgets:
     commitment: fixed
     rationale: The Iceberg sink targets 128 MiB files (docs/streaming-jobs.md section 7), so a healthy distribution's median sits at or above half the target. A median below 64 MiB is the small-file problem arriving through the batch path instead of the streaming one.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m5-small-file-share
     metric: Share of data files below 16 MiB, per layout variant
@@ -152,7 +152,7 @@ budgets:
     commitment: fixed
     rationale: One eighth of the 128 MiB target. A higher share means compaction is not keeping pace with the write path, which is the mechanism incident 3 injects. The share is recorded at rest and again after compaction.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m5-write-throughput
     metric: Rows written per second into one layout variant's table during the bulk load
@@ -164,7 +164,7 @@ budgets:
     derivation: The value is the median write throughput of the declared baseline arm (variant A), committed in a commit that precedes the run it judges. The three variants are then judged against each other and against that baseline.
     rationale: Write throughput is a property of this hardware, this volume and this engine pin set, none of which has been exercised, so the baseline run is what makes the number meaningful.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m5-compaction-duration
     metric: Wall-clock seconds for one rewrite_data_files over a layout variant
@@ -176,7 +176,7 @@ budgets:
     derivation: The value is the median compaction duration of the declared baseline arm (variant A) at the declared volume, committed in a commit that precedes the run it judges.
     rationale: Compaction cost is a function of file count and volume on this hardware, so it is baseline-relative by nature. The file counts before and after are the measured quantity; this threshold judges the cost of achieving them.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M6: dimensional modelling and expert SQL, from docs/requirements-matrix.md ---
   - id: m6-query-improvement-ratio
@@ -188,7 +188,7 @@ budgets:
     commitment: fixed
     rationale: A rewrite that does not at least halve the latency is not worth the SQL complexity it adds, and the before-measurement is the baseline arm of a comparison rather than a separate run. Three queries are rewritten, each carrying its own before and after.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M7: the serving layer, from docs/requirements-matrix.md ---
   - id: m7-serving-recovery
@@ -200,7 +200,7 @@ budgets:
     commitment: fixed
     rationale: The documented recovery is a restart plus the readiness assertion, not a rebuild. Five minutes is the ceiling for a recovery an operator performs by hand while a session is open; a longer recovery means the documented procedure is missing a step.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-concurrent-degradation-p1
     metric: The p95 at concurrency 4 divided by the p95 at concurrency 1, for the commercial analyst's query set
@@ -211,7 +211,7 @@ budgets:
     commitment: fixed
     rationale: Four times the load must not cost four times the latency, which would be linear scaling and would mean the layout is queueing rather than parallelising. Two is the ceiling for sub-linear degradation with ClickHouse at 8 vCPU in the benchmark profile.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-concurrent-degradation-p2
     metric: The p95 at concurrency 4 divided by the p95 at concurrency 1, for the network analyst's query set
@@ -222,7 +222,7 @@ budgets:
     commitment: fixed
     rationale: As m7-concurrent-degradation-p1, for the network spine's shaped copy and rollup.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-concurrent-degradation-p3
     metric: The p95 at concurrency 4 divided by the p95 at concurrency 1, for the operations analyst's query set
@@ -233,7 +233,7 @@ budgets:
     commitment: fixed
     rationale: As m7-concurrent-degradation-p1, measured on the ReplacingMergeTree serving copy under the streaming profile. The degradation ratio is used here rather than a latency budget because the freshness effect is measured separately and must not confound it.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-arm-delta
     metric: The materialised arm's p95 divided by the read-through arm's p95, over the six batch queries
@@ -245,7 +245,7 @@ budgets:
     derivation: The value is the materialised arm's p95 ratio against the read-through arm measured on the same pinned snapshot, committed in a commit that precedes the judged run. A value below 1 is what converts ADR-0003 from a preference into a measurement.
     rationale: The magnitude of the two-arm delta is unknown until it is measured, and it is the one figure the architecture decision rests on. Committing it in advance would be asserting the result the experiment exists to establish.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-c1-p50
     metric: Median latency of query C1, revenue by nation and part category, at concurrency 1
@@ -257,7 +257,7 @@ budgets:
     derivation: The value is the median of the declared baseline arm for this query at the declared volume, committed in a commit that precedes the judged run. The p95 commitment for this query is its persona's class ceiling, m9-interactive-p95.
     rationale: A per-query threshold invented before the workload is measured on this hardware would be a guess wearing a threshold's clothes (docs/serving-layer.md section 9). The p50 is baseline-relative; the p95 is a design class.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-c2-p50
     metric: Median latency of query C2, top suppliers by revenue contribution, at concurrency 1
@@ -269,7 +269,7 @@ budgets:
     derivation: As m7-c1-p50. The p95 commitment is m9-interactive-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-c3-p50
     metric: Median latency of query C3, parts with more than one supplier and their price spread, at concurrency 1
@@ -281,7 +281,7 @@ budgets:
     derivation: As m7-c1-p50. The p95 commitment is m9-interactive-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-n1-p50
     metric: Median latency of query N1, median round-trip time by postcode area, at concurrency 1
@@ -293,7 +293,7 @@ budgets:
     derivation: As m7-c1-p50. The p95 commitment is m9-dashboard-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-n2-p50
     metric: Median latency of query N2, probes whose nearest postcode has been terminated, at concurrency 1
@@ -305,7 +305,7 @@ budgets:
     derivation: As m7-c1-p50. The p95 commitment is m9-dashboard-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-n3-p50
     metric: Median latency of query N3, connectivity trend by postcode area, at concurrency 1
@@ -317,7 +317,7 @@ budgets:
     derivation: As m7-c1-p50. The p95 commitment is m9-dashboard-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-o1-p50
     metric: Median latency of query O1, orders in flight by warehouse, at concurrency 1
@@ -329,7 +329,7 @@ budgets:
     derivation: As m7-c1-p50, measured on the ReplacingMergeTree serving copy. The p95 commitment is m9-near-realtime-query-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-o2-p50
     metric: Median latency of query O2, stock-out risk by warehouse, at concurrency 1
@@ -341,7 +341,7 @@ budgets:
     derivation: As m7-o1-p50. The p95 commitment is m9-near-realtime-query-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m7-o3-p50
     metric: Median latency of query O3, orders past their delivery window, at concurrency 1
@@ -353,7 +353,7 @@ budgets:
     derivation: As m7-o1-p50. The p95 commitment is m9-near-realtime-query-p95.
     rationale: As m7-c1-p50.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M8: near-real-time serving, from docs/requirements-matrix.md ---
   - id: m8-freshness-p99
@@ -365,7 +365,7 @@ budgets:
     commitment: fixed
     rationale: The operations analyst's declared class is near-real-time, and two minutes is the band that class means. It is also the same figure as the consumer-lag budget, because a lag beyond the freshness band is already a user-visible failure rather than a metric to trend.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m8-freshness-p50
     metric: Source commit timestamp to the row being visible in the materialised ClickHouse copy, p50
@@ -377,7 +377,7 @@ budgets:
     derivation: The value is the median freshness of the declared baseline arm at the declared volume, committed in a commit that precedes the judged run. The read-through arm's freshness is recorded alongside as the baseline the materialised copy is traded against.
     rationale: Median freshness is a function of the checkpoint interval, the sink commit and this hardware, so it is baseline-relative. The p99 is the class commitment; the p50 is the magnitude.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M9: the analyst-facing latency classes, from docs/requirements-matrix.md ---
   - id: m9-interactive-p95
@@ -389,7 +389,7 @@ budgets:
     commitment: fixed
     rationale: A latency class is a user-facing commitment rather than a measurement on this hardware, so it is fixed in advance. One second is what interactive means, because an analyst waiting longer than that stops asking the question. The per-query p50 budgets sit under it.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m9-dashboard-p95
     metric: p95 query latency for the network analyst's class, over N1 to N3
@@ -400,7 +400,7 @@ budgets:
     commitment: fixed
     rationale: A dashboard refresh is read at a glance and is allowed to be slower than an interactive query, but not slow enough to be stale on arrival. Five seconds is the ceiling for that class.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m9-near-realtime-query-p95
     metric: p95 query latency for the operations analyst's class, over O1 to O3
@@ -411,7 +411,7 @@ budgets:
     commitment: fixed
     rationale: The operations analyst reads live state and is the only persona whose queries touch a continuously written table, so the class is the loosest of the three. Ten seconds is the ceiling, and the freshness p99 is measured separately so the two effects never confound each other.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M10: access control, from docs/requirements-matrix.md ---
   - id: m10-session-policy-size
@@ -423,7 +423,7 @@ budgets:
     commitment: fixed
     rationale: The limit is AWS's, not ours. A session policy above 2048 bytes is rejected or silently truncated, and a truncated policy widens the vended prefix. The assertion is that the generated policy stays inside it, which is what keeps the prefix-scoped credential a real boundary.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M12: retention, from docs/requirements-matrix.md ---
   - id: m12-storage-reclaimed
@@ -435,7 +435,7 @@ budgets:
     commitment: fixed
     rationale: Zero bytes reclaimed means the expiry did not run. The threshold is one byte because the claim is that the mechanism reclaims at all; the magnitude is a measurement, not a target. Shared with M5's retention policy, which is the same number judged by the same run.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M13: data quality, from docs/requirements-matrix.md ---
   - id: m13-false-positive-rate
@@ -447,7 +447,7 @@ budgets:
     commitment: fixed
     rationale: A check that fires on clean data is broken, and the rate counts fault-detection checks only, with source-hazard checks excluded by design (docs/governance-and-data-quality.md). Zero over twenty runs is the only defensible value; a non-zero rate means the check needs fixing, not budgeting.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m13-quarantine-share
     metric: Quarantined rows as a share of rows evaluated in one run
@@ -458,7 +458,7 @@ budgets:
     commitment: fixed
     rationale: Quarantine diverts and continues, so a small share is normal because ONSPD and RIPE Atlas carry genuine publisher defects. Above one percent the source has changed shape, and the declared escalation from quarantine to fail is what stops a silent drift reaching gold.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M15: monitoring and alerting, from docs/requirements-matrix.md ---
   - id: m15-lag-budget
@@ -470,7 +470,7 @@ budgets:
     commitment: fixed
     rationale: The alert rule is on records-lag-max, and a lag expressed in records is meaningless without the rate, so the budget is stated in time. Two minutes is the freshness band the operations analyst is promised, and it is far inside the 24-hour CDC retention window, so the alert fires long before retention could drop unreplayed data. This is also incident 1's detection link.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M16: incident root-cause analysis, from docs/requirements-matrix.md ---
   # MTTD ends at the alert delivery timestamp at the real destination, not at
@@ -484,7 +484,7 @@ budgets:
     commitment: fixed
     rationale: The alerting pipeline is the same for every injected incident (15 s scrape, 1 m evaluation, Alertmanager group_wait), so the ceiling is one figure for all six. Five minutes is generous for that pipeline and still far inside an operator's attention span.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttd-incident-2
     metric: Minutes from the injection timestamp to the alert delivery timestamp, Flink checkpoint timeout
@@ -495,7 +495,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttd-incident-1.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttd-incident-3
     metric: Minutes from the injection timestamp to the alert delivery timestamp, Iceberg small-file explosion
@@ -506,7 +506,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttd-incident-1. This one is detected on the compaction backlog rather than on a path-level error, so the same ceiling is the harder claim of the three.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttd-incident-4
     metric: Minutes from the injection timestamp to the alert delivery timestamp, ClickHouse query regression
@@ -517,7 +517,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttd-incident-1.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttd-incident-5
     metric: Minutes from the injection timestamp to the alert delivery timestamp, object-storage outage
@@ -528,7 +528,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttd-incident-1. Detection is fast even though recovery is slow, and keeping the two figures separate is the point of measuring both.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttd-incident-6
     metric: Minutes from the trigger timestamp to the alert delivery timestamp, RIPE Atlas source hazard
@@ -539,7 +539,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttd-incident-1. Incident 6 is a source hazard rather than an injected fault, so it carries a trigger timestamp instead of an injection timestamp, and the same delivery ceiling applies.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttr-incident-1
     metric: Minutes from the alert delivery timestamp to the recovery assertion passing, Kafka consumer lag spike
@@ -550,7 +550,7 @@ budgets:
     commitment: fixed
     rationale: Recovery is a committed durable change with a SHA plus the backlog draining, never a restart. Thirty minutes is the ceiling for a change an operator writes and applies while the platform is degraded.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttr-incident-2
     metric: Minutes from the alert delivery timestamp to the recovery assertion passing, Flink checkpoint timeout
@@ -561,7 +561,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttr-incident-1. The permanent fix is an Iceberg table-property change bounding commit size, not a Flink parameter change.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttr-incident-3
     metric: Minutes from the alert delivery timestamp to the recovery assertion passing, Iceberg small-file explosion
@@ -572,7 +572,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttr-incident-1. Recovery includes the compaction run that collapses the file count, which is why the figure is a run to completion rather than a restart.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttr-incident-4
     metric: Minutes from the alert delivery timestamp to the recovery assertion passing, ClickHouse query regression
@@ -583,7 +583,7 @@ budgets:
     commitment: fixed
     rationale: As m16-mttr-incident-1. The fix is a layout change rather than a query rewrite, so recovery includes re-materialising the affected partition.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttr-incident-5
     metric: Minutes from the alert delivery timestamp to the recovery assertion passing, object-storage outage
@@ -594,7 +594,7 @@ budgets:
     commitment: fixed
     rationale: The one incident whose recovery is bounded by the backlog that accumulated while the data plane was down, not by the fix itself. One hour is the ceiling, and the materialised ClickHouse copies surviving the outage is the behaviour worth demonstrating rather than the speed of the restart.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m16-mttr-incident-6
     metric: Minutes from the alert delivery timestamp to the recovery assertion passing, RIPE Atlas source hazard
@@ -605,7 +605,7 @@ budgets:
     commitment: fixed
     rationale: A publisher-side hazard cannot be fixed by the platform, so recovery means the declared mitigation and the correctness assertion, which takes longer than an injected fault the platform controls.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   # --- M17: operating an open table format, from docs/data-contracts.md section 8 ---
   # Declared before the schema-evolution matrix is run. The numbers these budgets
@@ -680,7 +680,7 @@ budgets:
     derivation: The value is the median of the declared baseline run at the declared volume, committed in a commit that precedes the judged run.
     rationale: Objects per GB is the counter that feeds S3 request cost, which is the line that bends superlinearly with ingest rate. It is a property of the sink's file sizing on this hardware, so it is baseline-relative.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m18-bytes-per-gb
     metric: Bytes written to Iceberg per GB of CDC ingested
@@ -692,7 +692,7 @@ budgets:
     derivation: The value is the median of the declared baseline run at the declared volume, committed in a commit that precedes the judged run.
     rationale: The write amplification between the source's bytes and the stored bytes, including delete files and metadata. Measured rather than assumed, because it is the multiplier every storage-cost extrapolation is built on.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
 
   - id: m18-compaction-work-per-gb
     metric: Compute spent on compaction per GB of CDC ingested
@@ -704,4 +704,4 @@ budgets:
     derivation: The value is the median of the declared baseline run's compaction step at the declared volume, committed in a commit that precedes the judged run.
     rationale: Compaction compute is the second line that dominates a lakehouse bill at 10x, and it grows with file count rather than with bytes. It is the one cost the platform produces itself rather than inheriting from a price list.
     declared_on: 2026-09-29
-    declared_commit: pending-fill
+    declared_commit: c47cfff
