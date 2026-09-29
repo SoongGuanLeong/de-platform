@@ -90,7 +90,7 @@ The compatibility rule only bites where a machine reads the schema. There are fo
 | Surface | Rule | Enforced by |
 |---|---|---|
 | The CDC Kafka topic | Avro, subject `<topic>-value`, `BACKWARD_TRANSITIVE` | The serializer, against Apicurio's ccompat v7 endpoint |
-| The gold Iceberg tables | The contract and its CI contract test | CI |
+| The gold Iceberg tables | The contract: validated as a file in CI, asserted against the live table under a path profile ([testing strategy](testing-strategy.md) section 7) | CI plus the batch or streaming profile |
 | The ClickHouse serving copy | None of its own; it is derived | The contract's rule, inherited |
 | The consumer-facing interface | The view version rule, section 5 | The interface policy and CI |
 

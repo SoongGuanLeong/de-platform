@@ -216,11 +216,13 @@ Full co-residency of the stack is impossible at roughly 7 to 8 GB of free RAM, s
 
 | Profile | Contains | Entitlement |
 |---|---|---|
-| `smoke` | The CI-checkable set plus per-service lightweight container checks. No full stack. | Re-run in CI or on a laptop from a clean checkout, deterministic, minutes. |
+| `smoke` | The CI-checkable set plus per-service lightweight container checks. No full stack. | Re-run on a laptop from a clean checkout, deterministic, minutes. The container half is never a CI job. |
 | `batch` | PostgreSQL, SeaweedFS, Polaris, Spark, ClickHouse, Dagster. | Re-run the batch path end to end. |
 | `streaming` | PostgreSQL, Debezium, Kafka, Flink, SeaweedFS, Polaris, ClickHouse. | Re-run the streaming path end to end. |
 | `observability` | Prometheus, Grafana, Alertmanager. An overlay on either path. | Open the dashboards and see an alert fire. |
 | `benchmark` | One component at a time under a declared resource budget. Never the whole stack. | Re-run a benchmark if the reviewer matches the declared profile. |
+
+The level each test runs at, the fixtures it consumes, and the CI-versus-profile split are in [`docs/testing-strategy.md`](testing-strategy.md).
 
 Two tiers of evidence follow. **Tier A** is correctness and contract evidence, re-runnable from a clean checkout by one command under `smoke`. **Tier B** is benchmarks, incidents and load tests, recorded with a protocol and regenerable only under their declared profile.
 
@@ -243,7 +245,7 @@ A measurement whose environment cannot be reproduced may be recorded, but it is 
 Three mechanisms together, and the guarantee is limited to declared consumers.
 
 - **Registry compatibility.** The CDC topics carry an Apicurio compatibility rule, so a backward-incompatible schema is rejected before it reaches a consumer.
-- **Gold contracts.** One machine-readable YAML contract file per gold table, at `contracts/<spine>/<table>.yml`, carrying the table, its grain in one sentence, its columns with types, nullability and PII class, its business keys, its invariants, the persona query ids that must run against it, the versioning rule naming what counts as breaking, and the compatibility rule enforced. The `schema` check is generated from the contract, CI resolves the table's location from the contract's `table` field, and the contract test runs in CI and fails on a schema or invariant break. A breaking change fails unless the same commit bumps the contract major, and at most two majors may coexist.
+- **Gold contracts.** One machine-readable YAML contract file per gold table, at `contracts/<spine>/<table>.yml`, carrying the table, its grain in one sentence, its columns with types, nullability and PII class, its business keys, its invariants, the persona query ids that must run against it, the versioning rule naming what counts as breaking, and the compatibility rule enforced. The `schema` check is generated from the contract, CI resolves the table's location from the contract's `table` field, and the contract is tested at two levels: the file is validated in CI and fails on a schema, versioning or invariant break, while its conformance to the live gold table is asserted under the batch or streaming profile ([`docs/testing-strategy.md`](testing-strategy.md) section 7). A breaking change fails unless the same commit bumps the contract major, and at most two majors may coexist.
 - **Consumer simulation.** The persona queries from the analyst work double as the simulation, so they are not written twice.
 
 The honest limit: an external consumer nobody registered is not protected, and ClickHouse's monthly backward-incompatible releases cap what can be promised about the serving engine.
