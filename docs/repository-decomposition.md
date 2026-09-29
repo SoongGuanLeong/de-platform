@@ -90,7 +90,7 @@ Rule 5 is the prior repository's failure made into a check. Its real pipeline li
 
 ## Ownership of the shared artefacts
 
-`contracts/` holds data only: the per-table YAML. `governance/` holds the framework and the validators: the check kinds and severities, the gate wiring, the quarantine writer and the result-store schema, the retention and erasure logic, the data-class definitions, the contract validator and breaking-change check, and the completion-bar register and budget validator. `platform/` holds the shared Python core.
+`contracts/` holds data only: the per-table YAML. `governance/` holds the framework and the validators: the check kinds and severities, the gate wiring, the quarantine writer and the result-store schema, the retention and erasure logic, the data-class definitions, the contract validator and breaking-change check, the completion-bar register and budget validator, and the layout-agreement validator that keeps the consolidated architecture tables in step with the per-domain specs they restate. `platform/` holds the shared Python core.
 
 **Check instances live with the asset they gate**, in the path package, not in `governance/`. This follows from [ADR-0016](adr/0016-gate-on-input-and-promote-through-a-branch.md): an input-evaluable check has to sit upstream of the asset it stops, so the instance is bound to the asset and only the framework is shared.
 
@@ -108,7 +108,7 @@ Unit tests are **co-located inside each distribution**, which is what makes "run
 
 CI runs the cheap structural checks on every pull request, and never re-runs evidence, because the load-bearing evidence needs the streaming or benchmark profile and cannot run at 7 to 8 GB.
 
-**Runs:** the boundary rules 1 to 5; the contract validator and breaking-change check; the completion-bar register and budget validation; the compose-subset lint; `tofu validate`; `helm lint` and `helm template`; `promtool check rules`; `sqlfluff`; `yamllint`; `actionlint`; and the per-distribution unit tests.
+**Runs:** the boundary rules 1 to 5; the contract validator and breaking-change check; the completion-bar register and budget validation; the layout-agreement check; the compose-subset lint; `tofu validate`; `helm lint` and `helm template`; `promtool check rules`; `sqlfluff`; `yamllint`; `actionlint`; and the per-distribution unit tests.
 
 **Does not run:** any part of the stack, any benchmark, any streaming job, any evidence re-run. Those stay human-judged from the committed raw artifacts, per ADR-0007.
 

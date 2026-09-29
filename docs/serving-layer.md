@@ -105,7 +105,7 @@ The constraint that decides it is already recorded in [the salvage list](salvage
 
 ## 7. The physical layout
 
-The baseline, with the reason for each choice. `PRIMARY KEY` stays equal to `ORDER BY`, the ClickHouse default, so the declaration matches `system.tables.sorting_key` and `system.tables.primary_key`, which [the completion bar](completion-bar.md) checks.
+The baseline, with the reason for each choice. This table is restated, beside the Iceberg side of the layout, in [the data architecture](data-architecture.md) section 5.2, and a structural check asserts the two agree. `PRIMARY KEY` stays equal to `ORDER BY`, the ClickHouse default, so the declaration matches `system.tables.sorting_key` and `system.tables.primary_key`, which [the completion bar](completion-bar.md) checks.
 
 | Table | Engine | Partition | `ORDER BY` | Codecs | TTL | Projection |
 |---|---|---|---|---|---|---|

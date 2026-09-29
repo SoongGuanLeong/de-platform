@@ -46,7 +46,7 @@ Format version **2**, in merge-on-read upsert mode, with `write.upsert.enabled=t
 | `fact_delivery` | `(w_id, d_id, o_id)` | `days(o_entry_d)` | `(w_id, d_id, o_id, o_entry_d)` |
 | `fact_stock` | `(s_w_id, s_i_id)` | none | `(s_w_id, s_i_id)` |
 
-The partition transform is a baseline: M5 tests partition transforms on a hot table, and **a changed partition transform changes the equality fields**, so the two are decided together and the ADR records the link. The ClickHouse serving copy carries the same business key in its `ORDER BY` and is versioned by `source.lsn`.
+This table is restated, beside the ClickHouse side of the layout, in [the data architecture](data-architecture.md) section 5.1, and a structural check asserts the two agree. The partition transform is a baseline: M5 tests partition transforms on a hot table, and **a changed partition transform changes the equality fields**, so the two are decided together and the ADR records the link. The ClickHouse serving copy carries the same business key in its `ORDER BY` and is versioned by `source.lsn`.
 
 ### 4.3 The ordering operator
 

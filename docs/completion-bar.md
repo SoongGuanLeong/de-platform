@@ -220,7 +220,7 @@ Full co-residency of the stack is impossible at roughly 7 to 8 GB of free RAM, s
 |---|---|---|
 | `smoke` | The CI-checkable set plus per-service lightweight container checks. No full stack. | Re-run on a laptop from a clean checkout, deterministic, minutes. The container half is never a CI job. |
 | `batch` | PostgreSQL, SeaweedFS, Polaris, Spark, ClickHouse, Dagster. | Re-run the batch path end to end. |
-| `streaming` | PostgreSQL, Debezium, Kafka, Flink, SeaweedFS, Polaris, ClickHouse. | Re-run the streaming path end to end. |
+| `streaming` | PostgreSQL, Debezium, Kafka, Flink, SeaweedFS, Polaris, ClickHouse, the RIPE Atlas collector. | Re-run the streaming path end to end. |
 | `observability` | Prometheus, Grafana, Alertmanager. An overlay on either path. | Open the dashboards and see an alert fire. |
 | `benchmark` | One component at a time under a declared resource budget. Never the whole stack. | Re-run a benchmark if the reviewer matches the declared profile. |
 

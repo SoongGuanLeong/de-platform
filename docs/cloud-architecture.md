@@ -105,7 +105,7 @@ Kubernetes namespaces mirror the repository's engineering paths, because the rep
 
 | Namespace | Workloads |
 |---|---|
-| `streaming` | Kafka (StatefulSet, PVCs), Debezium (Deployment, Kafka Connect distributed), Flink operator and its three FlinkDeployment CRs |
+| `streaming` | Kafka (StatefulSet, PVCs), Debezium (Deployment, Kafka Connect distributed), the RIPE Atlas collector (Deployment), Flink operator and its three FlinkDeployment CRs |
 | `batch` | Spark, submitted by Dagster with `spark-submit` on Kubernetes |
 | `serving` | ClickHouse (StatefulSet, PVCs) |
 | `governance` | Apicurio, Marquez |
@@ -117,7 +117,7 @@ No Strimzi, no ClickHouse Operator, no Spark Operator, no Prometheus Operator: e
 
 ## 3. The local-to-cloud mapping
 
-The nineteen are the application components the platform runs. Their cloud forms are not additions.
+The twenty are the application components the platform runs. Their cloud forms are not additions.
 
 | Component | Local form | Cloud form | Workload kind |
 |---|---|---|---|
@@ -126,6 +126,7 @@ The nineteen are the application components the platform runs. Their cloud forms
 | SeaweedFS 4.47 | `weed mini` | **S3** | managed |
 | Apache Kafka 4.3.1 | container, KRaft | StatefulSet, 1 broker minimal / 3 reference | StatefulSet |
 | Debezium 3.6.1 | container | Kafka Connect Deployment | Deployment |
+| RIPE Atlas collector | container | Deployment, lifecycle owned by Dagster | Deployment |
 | Apache Flink 2.1.3 | container | Flink Kubernetes Operator + 3 FlinkDeployment CRs | Operator + CRs |
 | Apache Spark 4.1.3 | container | `spark-submit` on Kubernetes, driven by Dagster | Job |
 | ClickHouse 26.8 LTS | container | StatefulSet, 1 replica minimal / 2 reference | StatefulSet |
@@ -141,7 +142,7 @@ The nineteen are the application components the platform runs. Their cloud forms
 | OpenTofu 1.12.0 | CLI | CLI | n/a |
 | Podman 6.1.x | container runtime | containerd, via EKS | n/a |
 
-**Infrastructure, not components**: ECR (the `reference` profile only, never created by the demo window), the internet gateway, the S3 gateway endpoint, the AWS Load Balancer Controller and the ALB (reference arm only), NAT gateways (reference arm only), Secrets Manager, the EBS and Secrets Store CSI drivers, the Flink Kubernetes Operator, Spark-on-Kubernetes, the OpenTofu state bucket, and the node groups themselves. None of these is an addition to the nineteen.
+**Infrastructure, not components**: ECR (the `reference` profile only, never created by the demo window), the internet gateway, the S3 gateway endpoint, the AWS Load Balancer Controller and the ALB (reference arm only), NAT gateways (reference arm only), Secrets Manager, the EBS and Secrets Store CSI drivers, the Flink Kubernetes Operator, Spark-on-Kubernetes, the OpenTofu state bucket, and the node groups themselves. None of these is an addition to the twenty.
 
 ## 4. The cost model
 

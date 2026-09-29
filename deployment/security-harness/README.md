@@ -4,7 +4,7 @@ Executes the deferred tests in [`docs/security-evidence-plan.md`](../../docs/sec
 
 ## What it is
 
-One compose file over the pinned component images, brought up one profile at a time because the whole stack does not fit in the available memory. It adds no component: every service is one of the nineteen, at its pinned version.
+One compose file over the pinned component images, brought up one profile at a time because the whole stack does not fit in the available memory. It adds no component: every service is one of the twenty, at its pinned version.
 
 ## Prerequisites
 

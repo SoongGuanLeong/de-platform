@@ -11,29 +11,37 @@ A component that replaces a posting-named tool across the same interface, so the
 _Avoid_: replacement, alternative, equivalent
 
 **Addition**:
-A component no posting line names, admitted only against a named requirement and counted as an addition rather than folded into the posting's stack: PostgreSQL as the CDC source, Apicurio, OpenLineage and Marquez.
+A component no posting line names, admitted only against a named requirement and counted as an addition rather than folded into the posting's stack: PostgreSQL as the CDC source, the RIPE Atlas collector, Apicurio, OpenLineage and Marquez.
 _Avoid_: extra, nice-to-have, bonus
 
 **Technology count**:
-The number of components the platform runs, defended against the mission's sprawl test by showing each one is posting-named, a substitution, or an addition. Nineteen, of which Iceberg and Kafka are irreplaceable.
+The number of components the platform runs, defended against the mission's sprawl test by showing each one is posting-named, a substitution, or an addition. Twenty, of which Iceberg and Kafka are irreplaceable.
 _Avoid_: component total, stack size
 
 **Application component**:
-One of the nineteen things the platform runs, and the only kind of thing the technology count counts. A component may take a different form in the cloud without becoming a different component, or a twentieth.
+One of the twenty things the platform runs, and the only kind of thing the technology count counts. A component is a service the platform runs, resident or transient, whether it is a selected third-party technology or platform-authored code; a library, a CLI, a framework or a bespoke job is not a component. A component may take a different form in the cloud without becoming a different component, or a twenty-first.
 _Avoid_: service, workload, deployment unit
 
 **Cloud form**:
 The managed service a component takes in the cloud deployment. It is a change of runtime, not of component: S3 is SeaweedFS's cloud form and RDS is PostgreSQL's, and neither is an addition.
 _Avoid_: cloud equivalent, managed version, hosted variant
 
+**Data plane**:
+The components and paths that move or store data: the RIPE Atlas collector, Debezium, Kafka, Flink, Spark, SeaweedFS and the Iceberg bytes it holds, ClickHouse, and PostgreSQL as the CDC source. Contrast the control plane, which describes, schedules, authorises and observes.
+_Avoid_: data layer, hot path, runtime plane
+
+**Control plane**:
+The components that describe, schedule, authorise or observe data: Polaris, Dagster, Apicurio, Marquez, Prometheus, Grafana and Alertmanager. A component has a primary plane, and a crossing into the other plane is drawn rather than resolved away: Polaris vends a prefix-scoped credential into the data plane, and Dagster starts work in it.
+_Avoid_: metadata plane, catalog layer, orchestration layer, EKS control plane
+
 **Infrastructure**:
-What exists only because the cloud needs it, and is therefore neither a component nor an addition: the container registry, the ingress controller and its load balancer, NAT gateways, VPC endpoints, the secrets store, the CSI drivers, the Flink Kubernetes Operator, Spark-on-Kubernetes, the node groups, and the OpenTofu state store.
+What exists only because the cloud needs it, and is therefore neither a component nor an addition: the container registry, the ingress controller and its load balancer, NAT gateways, VPC endpoints, the secrets store, the CSI drivers, the Flink Kubernetes Operator, Spark-on-Kubernetes, the node groups, and the OpenTofu state store. The RIPE Atlas collector is deliberately not infrastructure: it runs locally, and it is a service the platform runs rather than something the cloud needs.
 _Avoid_: platform component, supporting service, dependency
 
 ### Sources
 
 **Spine**:
-One of the platform's two independent data domains, each with its own sources, ingestion pattern and processing path: the commerce spine (TPC-C for CDC, TPC-H for batch and serving) and the network spine (RIPE Atlas for streaming, ONSPD for reference and SCD2). A spine is the unit of justification, so a source belongs to a spine and a source belonging to neither is not in the platform.
+One of the platform's two independent data domains, each with its own sources, ingestion pattern and processing path: the commerce spine (TPC-C for CDC, TPC-H for batch and serving) and the network spine (RIPE Atlas for streaming, ONSPD for reference and SCD2). A spine is the unit of justification, so a source belongs to a spine and a source belonging to neither is not in the platform. A streaming source is reached through its spine's ingestion service: Debezium for TPC-C's change events, the RIPE Atlas collector for the live measurement stream.
 _Avoid_: domain, workstream, pipeline, subject area
 
 **Cross-domain join**:
@@ -72,6 +80,14 @@ _Avoid_: level, granularity, detail
 The multiplication of fact rows caused by joining to a dimension that has several rows per key, which silently inflates an aggregate. The trap is invisible in the result: the query runs and returns a plausible number.
 _Avoid_: blow-up, row explosion, cartesian
 
+**Layer**:
+One of the three fidelities a spine's data passes through, each with its own namespace: bronze holds the source's own records as they arrived, silver holds them cleansed and conformed at the source's own grain, and gold holds the modelled tables with declared grains and contracts. A layer is not a spine and not a component, and the `platform` namespace holds control-plane tables and is neither.
+_Avoid_: zone, tier, stage, medallion
+
+**Physical layout**:
+The choices that decide how a table is stored and read: the partition transform, the sort order, the format version, the compaction policy and the retention. It is the posting's stated emphasis, and every value is a baseline until a benchmark measures it.
+_Avoid_: schema, table design, DDL
+
 ### Serving
 
 **Serving copy**:
@@ -109,8 +125,8 @@ The boundary between the systems that enforce access control, together with the 
 _Avoid_: access control layer, security boundary
 
 **Metadata plane**:
-What a catalog authorises: which catalog entities a principal may see and act on. Contrast the data plane, the path that fetches table bytes directly from object storage and does not pass through the catalog.
-_Avoid_: control plane, catalog layer
+What a catalog authorises: which catalog entities a principal may see and act on. Contrast the data plane, the path that fetches table bytes directly from object storage and does not pass through the catalog. This is an axis of a read rather than a grouping of components, and it is not the same cut as the control plane.
+_Avoid_: catalog layer
 
 **Check**:
 One assertion over data, carrying an id, a kind, a subject and a severity. A check produces a result; on its own it stops nothing.

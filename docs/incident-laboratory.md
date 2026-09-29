@@ -152,7 +152,7 @@ The profiles are the reproducibility unit (`docs/completion-bar.md:215-223`); in
 
 | Profile | Contains | Incidents |
 |---|---|---|
-| `streaming` + observability | Postgres, Debezium, Kafka, Flink, SeaweedFS, Polaris, ClickHouse, Prometheus, Grafana, Alertmanager | 1, 2, 6 |
+| `streaming` + observability | Postgres, Debezium, Kafka, Flink, SeaweedFS, Polaris, ClickHouse, the RIPE Atlas collector, Prometheus, Grafana, Alertmanager | 1, 2, 6 |
 | `batch` + observability | Postgres, SeaweedFS, Polaris, Spark, ClickHouse, Dagster, Prometheus, Grafana, Alertmanager | 3 (batch arm), 4 |
 | either, heaviest | the data plane goes down | 5 |
 
@@ -173,4 +173,4 @@ Incidents 2 and 3 were admitted only because their permanent fixes add something
 
 - The MTTD and MTTR budgets are declared per incident in `docs/budgets.yaml` as `m16-mttd-incident-<n>` and `m16-mttr-incident-<n>`, with the reasoning in [the benchmark plan](benchmark-plan.md) section 6. An earlier revision of this document said the file ships empty; it held five M17 entries by the time the full set was written.
 - The runbooks, postmortems and dashboards are out of scope for this ticket and are produced later.
-- The RIPE Atlas collector is the ingestion path (`docs/dataset-selection.md:36`) but is not one of the nineteen counted components; the proposal's technology count should be checked for consistency.
+- **Incident 6 cites no budget.** Its detection link is "ingestion stall, freshness lag, or collector error rate", and incident 1's detection is covered by `m15-lag-budget` in `docs/budgets.yaml`, but no budget id exists for a collector error rate. Section 4 requires every evidence item to cite a budget declared before the run, so incident 6 cannot run as written. **Registered as a gap rather than invented**: the threshold is declared with the alert rule it judges, when the collector's own metrics exist to be measured, and not before. Resolving the collector's component status (the architecture-synthesis ticket) closed the earlier half of this item: it is component twenty, and the count is corrected.

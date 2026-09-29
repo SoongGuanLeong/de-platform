@@ -23,6 +23,7 @@ Every surviving choice carries at least one rejected alternative with a reason. 
 | SeaweedFS | 4.47 (`weed mini`) | S3-compatible object storage with an embedded Iceberg REST catalog | MinIO is dead; this is the only option that fits the host and has a first-party ClickHouse guide | RustFS, Garage, Ozone, Ceph, LocalStack | M19, M1 | PASS with caution (bus factor 1) |
 | Apache Kafka | 4.3.1, KRaft | Durable, replayable log | Debezium's sink; the replayable source the streaming correctness claim needs | Redpanda, Pulsar, Kinesis | M2 | PASS, irreplaceable |
 | Debezium | 3.6.1 | CDC from the Postgres binlog | The only T1 source: real change events, including the NULL-to-value updates that break naive upserts | Flink CDC, triggers | M2 | PASS with caution (Red Hat build lags) |
+| RIPE Atlas collector | Python 3.12 service | The network spine's ingestion path | The live WebSocket is at-most-once, so the platform must own the cursor, the content hash and the REST backfill rather than delegate them | RIPE's own client library alone, a scheduled REST pull only, a bespoke Flink source | M8, M13, M16 | n/a, platform-authored |
 | Apache Flink | 2.1.3 | Stateful streaming, upsert into Iceberg | The real-time path, and the only Iceberg writer that emits key-only equality deletes | Kafka Connect Iceberg sink, Spark Structured Streaming | M3, M8 | PASS |
 | Apache Spark | 4.1.3 | Batch silver and gold, compaction, serving load | The posting names it; batch MERGE, `rewrite_data_files`, and the batch arm of the serving feed | (none serious) | M4, M5 | PASS |
 | ClickHouse | 26.8 LTS | Analytical serving store | The posting names it; the only place column-level and row-level enforcement exists | Druid, Pinot, StarRocks, Trino, DuckDB | M7, M8, M20 | PASS with caution (monthly breaking changes) |
@@ -40,7 +41,9 @@ Every surviving choice carries at least one rejected alternative with a reason. 
 
 **Engine pins follow Iceberg's connector matrix.** Iceberg 1.11.0 ships Flink connector modules up to 2.1 and Spark modules up to 4.1, so the engines are pinned to the newest patch of those minors - Flink 2.1.3 and Spark 4.1.3 - not to the newest releases. Flink 2.2/2.3 and Spark 4.2 need Iceberg 1.12.0, which is RC2 and not GA. The choice, the rejected alternatives and the re-review condition are recorded in ADR-0024.
 
-Nineteen components. The count and its defence are below.
+**One row is not a selected technology.** The collector is platform-authored code: its pin is the image's Python version, its alternatives are build-versus-adopt shapes rather than vendor candidates, and the longevity rubric does not apply to it. It is in the count because the count counts services the platform runs, and it is in this table because a reviewer should find it where the other ingestion services are. The rule is stated in [`CONTEXT.md`](../CONTEXT.md) under **Application component**.
+
+Twenty components. The count and its defence are below.
 
 ## Rejected candidates and their disposition
 
@@ -92,11 +95,15 @@ Grouped by the problem they would have solved. Every candidate the effort consid
 
 ## The count
 
-**Nineteen components.** Twelve are named by the posting: Debezium, Kafka, Iceberg, Polaris, Flink, Spark, ClickHouse, Dagster, Helm, Prometheus, Grafana and Alertmanager. Three are same-interface **substitutions** for a named tool: OpenTofu for Terraform, SeaweedFS for S3, Podman for Docker and EKS. Four are **additions** that a named requirement demands: PostgreSQL as the CDC source, Apicurio for the contract requirement, and OpenLineage with Marquez for the lineage requirement.
+**Twenty components.** Twelve are named by the posting: Debezium, Kafka, Iceberg, Polaris, Flink, Spark, ClickHouse, Dagster, Helm, Prometheus, Grafana and Alertmanager. Three are same-interface **substitutions** for a named tool: OpenTofu for Terraform, SeaweedFS for S3, Podman for Docker and EKS. Five are **additions** that a named requirement demands: PostgreSQL as the CDC source, the RIPE Atlas collector for the network spine's streaming ingestion, Apicurio for the contract requirement, and OpenLineage with Marquez for the lineage requirement.
 
-**One-line defence:** every component is a posting-named tool, a same-interface substitution for one, or an addition that a named requirement demands; two of them, Iceberg and Kafka, are irreplaceable, and the other seventeen each carry a recorded swap cost of between half a day and thirty days.
+The structure that the matrix does not carry - which plane each component sits in, and which of the twenty are services at all - is in [the system architecture](system-architecture.md) section 2.
 
-Against the mission's sprawl test, the pairs that look like duplication and their reasons: Flink and Spark are a genuinely different workload, real-time versus batch; ClickHouse's read-through and its MergeTree copy are an architecture and its comparison arm; Kafka Connect appears only as Debezium's runtime, not as a second Iceberg writer; Polaris and SeaweedFS both expose an Iceberg REST catalog, but SeaweedFS's is the dev convenience and Polaris is the governance plane, which is why the catalog is a swappable URI.
+**The twentieth was a correction, not an addition to the platform.** The collector was always in the design: it is the network spine's ingestion path, it lives in `ingestion/network/`, and [the incident laboratory](incident-laboratory.md) names it as an actor in two of its six scenarios. It was missing from the count, and the count was therefore wrong. The correction is recorded rather than the component being quietly relabelled as infrastructure, which the glossary's definition of infrastructure would not survive.
+
+**One-line defence:** every component is a posting-named tool, a same-interface substitution for one, or an addition that a named requirement demands; two of them, Iceberg and Kafka, are irreplaceable, and every other component carries a recorded swap cost of between half a day and thirty days, with one honest exception. The collector is platform-authored code, so replacing it means rewriting it rather than swapping a dependency, and it is the only row in the table where that is true.
+
+Against the mission's sprawl test, the pairs that look like duplication and their reasons: Flink and Spark are a genuinely different workload, real-time versus batch; ClickHouse's read-through and its MergeTree copy are an architecture and its comparison arm; Kafka Connect appears only as Debezium's runtime, not as a second Iceberg writer; Polaris and SeaweedFS both expose an Iceberg REST catalog, but SeaweedFS's is the dev convenience and Polaris is the governance plane, which is why the catalog is a swappable URI; and the collector and Debezium are not duplicates, because each is its own spine's ingestion service and neither can reach the other's source.
 
 ## Honest gaps
 
@@ -106,6 +113,7 @@ Against the mission's sprawl test, the pairs that look like duplication and thei
 - **SeaweedFS has a bus factor of one** and its write amplification under Iceberg load is unmeasured. Its Iceberg catalog is the dev path only, not the governance path.
 - **Dagster retention must be built.** The orchestrator has no built-in retention policy.
 - **The Kafka Connect Iceberg sink comparison is closed** (research 10), but it was a gap when this ticket opened; the record is kept because the prior repository made a false claim here.
+- **The collector's resource ceiling has no documented default**, because the service is platform-authored. Its 192 MiB ceiling is an initial declared budget, and the trigger for revisiting it is the first measured capture under the `streaming` profile.
 
 ## Research this rests on
 

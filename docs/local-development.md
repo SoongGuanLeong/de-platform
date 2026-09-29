@@ -43,7 +43,7 @@ One ceiling per service, in `deployment/budgets/profiles.yaml`. A ceiling is a h
 | postgres | 384 | 1 | Image tunes nothing; `shared_buffers` defaults to 128 MB, which fits |
 | seaweedfs | 256 | 1 | No default published; `weed mini` is auto-tuned for one node |
 | polaris | 768 | 1 | No default (Helm `resources: {}`); the production recommendation is 8 GiB / 4 CPU, which is a production figure |
-| clickhouse | 1024 streaming / 1792 batch | 2 / 3 | Documented default is a **ceiling of 90% of available memory** (6.3 to 7.2 GiB here), which would consume the whole budget; `max_server_memory_usage` is set explicitly |
+| clickhouse | 832 streaming / 1792 batch | 1.75 / 3 | Documented default is a **ceiling of 90% of available memory** (6.3 to 7.2 GiB here), which would consume the whole budget; `max_server_memory_usage` is set explicitly. The streaming figure is 832 rather than 1024 to admit the RIPE Atlas collector as a resident of that profile |
 | kafka | 768 | 1 | Heap defaults to `-Xmx1G`; overridden to `-Xmx512M` |
 | debezium-connect | 640 | 1 | Worker heap defaults to `-Xmx2G`; overridden to `-Xmx384M` |
 | flink-jobmanager | 640 | 1 | `jobmanager.memory.process.size` has **no default**; Flink's own component defaults (128 MB framework heap, 256 MB metaspace, 192 MB minimum JVM overhead) put the floor near 576 MB, which is why the ceiling is 640 and not 384 |
@@ -56,10 +56,13 @@ One ceiling per service, in `deployment/budgets/profiles.yaml`. A ceiling is a h
 | dagster-user-code | 256 | 0.5 | As above |
 | spark | 2048 | 3 | Defaults are a 1g driver plus a 1g executor plus 10% overhead, 2252.8 MiB; `--master local[3]` with `spark.driver.memory=1536m` puts both in one JVM at 1690 MiB |
 | flink-client | 512 | 0.5 | The `flink run` client, transient |
+| ripe-collector | 192 | 0.25 | **No documented default**: the service is this platform's own code, so the ceiling is declared rather than derived |
 
 **The Grafana deviation, recorded rather than hidden.** Grafana publishes 512 MB as a recommended minimum. Grafana's own guidance attributes the headroom to image rendering at about 1 GB per renderer worker, and this platform provisions dashboards as code and does not use image rendering, so the 384 MiB ceiling is defensible. The trigger for reconsideration is enabling image rendering, or any render exceeding the ceiling.
 
 **Six of these require an explicit override of a documented default, and the register records each one with its reason.** They are collected under `documented_default_overrides` in `deployment/budgets/profiles.yaml` so a reviewer sees the deviation rather than discovering it.
+
+**One ceiling has no documented default to override, because the service is platform-authored.** The RIPE Atlas collector is the platform's own code, so 192 MiB is a declared budget rather than a derived one. Its stated basis is a Python 3.12 interpreter holding at most 16 concurrent WebSocket subscriptions, which is RIPE Atlas's documented per-IP cap, with a bounded in-flight buffer. It is collected under `declared_ceilings` in the same register, with the trigger that would revisit it: the first measured capture, where the collector's peak RSS is recorded.
 
 ## 4. The five profiles
 
@@ -69,13 +72,13 @@ A profile's peak is **the sum of its resident ceilings plus the largest single t
 |---|---|---|---|---|---|
 | `smoke` | none | none | 2048 MiB / 3 vCPU | 5632 MiB | none |
 | `batch` | postgres, seaweedfs, polaris, clickhouse, dagster-webserver, dagster-daemon, dagster-user-code, prometheus, grafana, alertmanager | spark | 6976 MiB / 11.75 vCPU | 704 MiB | 6080 MiB, overlay dropped |
-| `streaming` | postgres, seaweedfs, polaris, clickhouse, kafka, debezium-connect, flink-jobmanager, flink-taskmanager, prometheus, grafana, alertmanager | flink-client | 7168 MiB / 11.75 vCPU | 512 MiB | 6272 MiB, overlay dropped |
+| `streaming` | postgres, seaweedfs, polaris, clickhouse, kafka, debezium-connect, flink-jobmanager, flink-taskmanager, ripe-collector, prometheus, grafana, alertmanager | flink-client | 7168 MiB / 11.75 vCPU | 512 MiB | 6272 MiB, overlay dropped |
 | `observability` | prometheus, grafana, alertmanager | none | 896 MiB / 1.25 vCPU | 6784 MiB | none |
 | `benchmark` | declared per run | declared per run | rule: <= 7168 MiB / 12 vCPU | n/a | none |
 
 - **`smoke`** runs one service at a time and never the stack, so its peak is the largest single ceiling in the register, Spark's 2048 MiB.
 - **`batch`** carries the larger ClickHouse ceiling because it owns the serving materialisation. Spark runs as `spark-submit --master local[3]` with `spark.driver.memory=1536m`.
-- **`streaming`** carries the smaller ClickHouse ceiling because it serves one CDC table. **Dagster is deliberately absent**: the completion bar fixes this profile's service list and this ticket does not re-litigate it, so the profile script starts the Flink job, and the Dagster-owned lifecycle (deploy, restart, savepoint) is exercised in `batch` against a Flink cluster brought up for the purpose. The seam is a row in the diff (section 8).
+- **`streaming`** carries the smaller ClickHouse ceiling because it serves one CDC table, and that ceiling is 832 MiB rather than 1024 because the profile's peak already equals the enforceable peak: the RIPE Atlas collector is a resident of this profile, so the space for it had to come from an existing resident, and ClickHouse is the resident whose reduction cannot confound the evidence. **The collector is here because incidents 1 and 6 run under this profile with the collector among their components**, and incident 1 is the live-stack injection M16 requires; before it was admitted, the profile could not evidence them. **Dagster is deliberately absent**: the completion bar fixes this profile's service list and this ticket does not re-litigate it, so the profile script starts the Flink job, and the Dagster-owned lifecycle (deploy, restart, savepoint) is exercised in `batch` against a Flink cluster brought up for the purpose. The seam is a row in the diff (section 8).
 - **`observability`** is the overlay alone, for dashboard authoring and for reading a dashboard without a path.
 - **`benchmark`** is one component at a time under a budget declared in that benchmark's protocol. Worked example, the ClickHouse layout benchmark that M5 and [section 6.5](completion-bar.md) need: ClickHouse 6144 MiB / 8 vCPU plus PostgreSQL 384 / 1 and SeaweedFS 256 / 1, peak **6784 MiB / 10 vCPU**.
 

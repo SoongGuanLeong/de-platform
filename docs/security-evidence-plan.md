@@ -39,7 +39,7 @@ The three Polaris rows originally named Polaris, PostgreSQL and SeaweedFS. Seawe
 
 ## 3. What this plan refuses to do
 
-- **No new component.** Every service below is one of the nineteen pinned components. No identity provider, no proxy, no log store, no certificate authority daemon.
+- **No new component.** Every service below is one of the twenty components, at its pinned version. No identity provider, no proxy, no log store, no certificate authority daemon.
 - **No architecture change to make a test pass.** If a component cannot do something the model claims, the finding is recorded and the model is corrected, rather than the component being swapped or the test weakened.
 - **No platform code**, with one named exception: the quarantine deletion test needs an Iceberg table and a deletion statement, which is a slice of the pipeline. That item is marked above and is not silently absorbed into a harness.
 - **No test reported that did not run.** Each result below carries the exact command and its raw output.

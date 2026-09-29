@@ -49,7 +49,7 @@ ceilings:
   postgres:          { memory_mib: 384,  cpus: 1.0  }
   seaweedfs:         { memory_mib: 256,  cpus: 1.0  }
   polaris:           { memory_mib: 768,  cpus: 1.0  }
-  clickhouse:        { memory_mib: 1024, cpus: 2.0  }
+  clickhouse:        { memory_mib: 832,  cpus: 1.75 }
   kafka:             { memory_mib: 768,  cpus: 1.0  }
   debezium-connect:  { memory_mib: 640,  cpus: 1.0  }
   flink-jobmanager:  { memory_mib: 640,  cpus: 1.0  }
@@ -62,6 +62,7 @@ ceilings:
   dagster-user-code: { memory_mib: 256,  cpus: 0.5  }
   spark:             { memory_mib: 2048, cpus: 3.0  }
   flink-client:      { memory_mib: 512,  cpus: 0.5  }
+  ripe-collector:    { memory_mib: 192,  cpus: 0.25 }
 
 # A profile's peak is the sum of its resident ceilings plus the largest single
 # transient ceiling. Resident services are up for the whole run; a transient is a
@@ -125,6 +126,7 @@ profiles:
       - debezium-connect
       - flink-jobmanager
       - flink-taskmanager
+      - ripe-collector
       - prometheus
       - grafana
       - alertmanager
@@ -141,7 +143,13 @@ profiles:
         as reduced in its evidence item.
     note: >-
       ClickHouse carries less here than in batch because this profile serves one
-      CDC table. Dagster is deliberately absent: the completion bar fixes this
+      CDC table, and it is 832 MiB rather than 1024 because the RIPE Atlas
+      collector is a resident of this profile and the peak already equals the
+      enforceable peak, so the space had to come from an existing resident. The
+      collector is here because incidents 1 and 6 run under this profile with the
+      collector among their components, and incident 1 is the live-stack
+      injection M16 requires; before it was admitted this profile could not
+      evidence them. Dagster is deliberately absent: the completion bar fixes this
       profile's service list and this ticket does not re-litigate it, so the
       profile script starts the Flink job and the Dagster-owned lifecycle
       (deploy, restart, savepoint) is exercised in the batch profile against a
@@ -195,8 +203,17 @@ documented_default_overrides:
     reason: The 2 GiB worker default is a production default; one connector at local volume does not need it.
   - service: clickhouse
     documented: "max_server_memory_usage=0 with max_server_memory_usage_to_ram_ratio=0.9, i.e. a ceiling of 90% of available memory (6.3 to 7.2 GiB here)"
-    override: "max_server_memory_usage=1024 MiB in streaming, 1792 MiB in batch"
-    reason: The documented default would consume the entire profile budget on its own. This is the clearest case for declaring a ceiling rather than inheriting one.
+    override: "max_server_memory_usage=832 MiB in streaming, 1792 MiB in batch"
+    reason: The documented default would consume the entire profile budget on its own. This is the clearest case for declaring a ceiling rather than inheriting one. The streaming figure is 832 rather than 1024 because the RIPE Atlas collector is a resident of that profile.
+    trigger: >-
+      The streaming reduction is contingent on the ClickHouse workload
+      measurement. If the streaming profile's serving queries approach 832 MiB,
+      what moves is the collector's residency rather than this ceiling back up,
+      because the streaming peak already equals the enforceable peak. The
+      incidents that require the collector do not exercise ClickHouse at all
+      (incident 1's components are the collector, Kafka, Flink and Iceberg;
+      incident 6's are the collector and Kafka), so the reduction cannot
+      confound the evidence the collector was admitted to produce.
   - service: flink-jobmanager
     documented: "jobmanager.memory.process.size has no default value"
     override: "jobmanager.memory.process.size=640m"
@@ -223,6 +240,23 @@ documented_default_overrides:
     trigger: >-
       Reconsider if image rendering is ever enabled, or if a dashboard render
       exceeds the ceiling.
+
+# Ceilings with no documented default to derive from, because the service is
+# platform-authored. Declared rather than derived, and each carries the trigger
+# that would revisit it.
+declared_ceilings:
+  - service: ripe-collector
+    basis: >-
+      A Python 3.12 service holding at most 16 concurrent WebSocket
+      subscriptions, which is RIPE Atlas's documented per-IP cap, with a bounded
+      in-flight buffer and a bounded cursor record. The interpreter dominates
+      the figure, and there is no published default to derive from because the
+      service is this platform's own code.
+    ceiling: 192 MiB / 0.25 vCPU
+    resident_in: streaming
+    trigger: >-
+      The first measured capture under the streaming profile, where the
+      collector's peak RSS is recorded. Revisit the ceiling against it.
 
 # Recorded limitations that follow from the table above rather than from any
 # single ceiling.

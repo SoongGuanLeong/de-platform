@@ -104,6 +104,7 @@ Rotation class is one of three, and it is a property of the component rather tha
 | Grafana admin password | Grafana 13 | `GF_SECURITY_ADMIN_PASSWORD__FILE` | Restart | Restart with a new projected file |
 | Alertmanager SMTP and webhook | Alertmanager 0.34 | `*_file` config fields | **Reload** | Config reload via `/-/reload`; `*_file` contents are re-read |
 | Debezium source password | Debezium 3.6.1 | Connector config via the Connect REST API | **Reload** | `PUT /connectors/<name>/config`, no worker restart |
+| `RIPE_ATLAS_API_KEY` | RIPE Atlas collector | Read-only file at `/run/secrets`, read at process start | Restart | Replace the projected file and restart the collector. It is the platform's only third-party credential, and the only one a scanner would reliably match, so it must never be baked into an image or a compose file |
 | AWS credentials | all, cloud | IRSA | n/a | Not a long-lived secret: IRSA issues short-lived STS credentials per pod |
 
 The count of genuinely long-lived secrets in the cloud shape is therefore small, and no static AWS key is among them.
@@ -138,6 +139,7 @@ container
 | Debezium to PostgreSQL | SCRAM-SHA-256 | `password_encryption = scram-sha-256`; the source user is not a superuser | Wrong password refused at connect |
 | Debezium to Kafka | SASL_SSL, SCRAM-SHA-256 | Connect worker and connector producer and consumer configs | Wrong SCRAM credential refused |
 | Flink to Kafka | SASL_SSL, SCRAM-SHA-256 | Kafka connector properties | Wrong SCRAM credential refused |
+| The RIPE Atlas collector to Kafka | SASL_SSL, SCRAM-SHA-256 | The collector's own SCRAM principal, distinct from Debezium's and Flink's | Wrong SCRAM credential refused |
 | Flink to Polaris | OAuth2 client credentials | Iceberg REST catalog, `rest.auth.type=oauth2` | Wrong client secret refused with 401 |
 | Spark to Polaris | OAuth2 client credentials | `spark.sql.catalog.<c>.rest.auth.type=oauth2` | Wrong client secret refused with 401 |
 | ClickHouse to Polaris | OAuth2 client credentials | `DataLakeCatalog`, `catalog_type='rest'`, `catalog_credential` | Wrong credential refused |
@@ -160,6 +162,7 @@ container
 - **Polaris 1.7.0**: OAuth2 client credentials through the Iceberg REST catalog's token endpoint, one client per engine, with a token lifetime of `PT1H` by default.
 - **ClickHouse 26.8 LTS**: SQL-driven access control with sha256 passwords, the users and roles fixed in [`docs/governance-and-data-quality.md`](governance-and-data-quality.md), and `tcp_port_secure` for the encrypted path.
 - **SeaweedFS 4.47**: S3 access keys from its JSON config, with the platform's engines using the Polaris-vended prefix-scoped credential rather than the static key.
+- **RIPE Atlas collector**: produces to Kafka over `SASL_SSL` with `SCRAM-SHA-256` under its own principal, and reads the publisher's API over TLS using `RIPE_ATLAS_API_KEY` from a read-only file. It is the platform's only third-party credential and its only component whose upstream is outside this host. Its negative test is the refused Kafka connection; the publisher-side key is not negatively tested, because driving RIPE Atlas with an invalid key risks the publisher's documented IP-ban policy, and that is stated rather than implied.
 
 ---
 
@@ -191,7 +194,7 @@ One tooling trap is worth naming because it silently inverts a negative test: **
 
 ### 4.4 The Kafka and Flink asymmetry
 
-Kafka can run PEM mode, so it has no keystore password. It still needs an entrypoint, for a different reason: Kafka has no file intake for a SASL password, so the SCRAM credential must be rendered into the server properties. **Flink needs one too**: its SSL options are Java keystore only, and its own documentation converts a keystore to PEM solely for use as a `curl` client rather than as a server keystore. Flink's keystore password therefore has to be materialised into `flink-conf.yaml` by an entrypoint that reads a projected file. Two components in nineteen needing an entrypoint step, for two different reasons, is an explainable exception; a password sitting in a tracked file would not be.
+Kafka can run PEM mode, so it has no keystore password. It still needs an entrypoint, for a different reason: Kafka has no file intake for a SASL password, so the SCRAM credential must be rendered into the server properties. **Flink needs one too**: its SSL options are Java keystore only, and its own documentation converts a keystore to PEM solely for use as a `curl` client rather than as a server keystore. Flink's keystore password therefore has to be materialised into `flink-conf.yaml` by an entrypoint that reads a projected file. Two components in twenty needing an entrypoint step, for two different reasons, is an explainable exception; a password sitting in a tracked file would not be.
 
 ### 4.5 The cloud distinction, stated so it cannot be misread
 
@@ -213,6 +216,7 @@ Most components in this stack ship with authentication disabled or absent by def
 | Prometheus | UI and query API | Everything unless `--web.config.file` is supplied | Metrics only, and the query API is read-only | Loopback and the compose network | ClusterIP only, scraped by Grafana inside the cluster | A reachable query API discloses metric labels |
 | Alertmanager | UI and API | Everything unless `--web.config.file` is supplied | Silences and alert state only | Loopback and the compose network | ClusterIP only | No multi-tenancy and no RBAC: one global config and one silence namespace |
 | SeaweedFS | Filer, master and admin endpoints; the bundled **Iceberg REST catalog** (8181) and **Lance namespace server** (9101); WebDAV (7333) | Everything on those ports. The S3 endpoint is the only authenticated surface | The platform uses only the S3 endpoint, and the other ports are not published to the host | Loopback and the compose network; only the S3 port is published | Security groups and a cluster-internal service only, and the catalog surfaces are disabled outright with `-s3.port.iceberg=0 -s3.port.lance=0 -webdav=false` | **An exposed Iceberg REST catalog would bypass Polaris, not merely the S3 key check**: a client could resolve table metadata without passing the authorisation seam. Verified 2026-09-29 — `weed mini` starts all of these by default |
+| RIPE Atlas collector | Prometheus metrics endpoint | Everything. A metrics listener with no authentication | Metrics only: counters and gauges, not measurement data | Loopback and the compose network | ClusterIP only, scraped by Prometheus inside the cluster | The endpoint is the only place the collector's error rate is observable, and no alert threshold is declared for it yet; the incident laboratory records that as a gap |
 | Podman | API socket | The socket itself; access control is Unix socket permissions | It is the local container runtime, rootless | A Unix socket owned by the developer account | Not applicable: the cloud runtime is EKS rather than podman | Any process running as the developer can control the local runtime |
 | OpenLineage client | Outbound transport | No authorization by default | It is a client, not a listener | n/a | Marquez is cluster-internal | See Marquez |
 
@@ -320,7 +324,7 @@ That sentence replaces the earlier "audited in both engines", which was not true
 6. **Apicurio's authentication path is unexercised.** OIDC is the documented cloud path and no identity provider is authored.
 7. **Marquez has no authentication at all**, and the OpenLineage bearer token it receives is not verified.
 8. **Two components need entrypoint-based secret injection**: Kafka, because it has no file intake for a SASL password, and Flink, because its SSL options are Java keystore only.
-9. **No local TLS on the control plane**, for the reason in 4.2. The demonstration value is not there.
+9. **No local TLS on the unauthenticated surfaces register**, for the reason in 4.2. The demonstration value is not there.
 10. **`system.query_log` denial capture is unverified.** That the table records a query's user is verified; whether a refused query appears in it is confirmed during implementation rather than asserted here.
 11. **The cloud security shape is authored and never applied as evidence.** IRSA, security groups, the ALB and Secrets Manager are validated and rendered, not exercised. Section 10 names the difference.
 12. **No image signature verification and no admission policy.** Digests are pinned; provenance is not verified at admission.
@@ -372,7 +376,7 @@ The decisions above are settled. This table is what will prove them, and it is d
 | Kafka denials are logged | A denied produce appears in `kafka-authorizer.log` | `StandardAuthorizer` configured |
 | ClickHouse query-log retention is bounded | The TTL exists and rows older than the window are gone | A running ClickHouse carrying the TTL |
 | Quarantine deletion is exercised | The deletion test run against `platform.quarantine` as well as against gold | The deletion path implemented |
-| No unnecessary component was introduced | The technology count is still nineteen, plus infrastructure | The implementation |
+| No unnecessary component was introduced | The technology count is still twenty, plus infrastructure | The implementation |
 
 ---
 

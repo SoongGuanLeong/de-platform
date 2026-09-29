@@ -12,7 +12,7 @@
 # untrusted chain is rejected. The test that proves it is
 # deployment/security-harness/tests/grafana.sh, using openssl only.
 #
-# This adds no component. Grafana 13.2.2 is one of the nineteen pinned
+# This adds no component. Grafana 13.2.2 is one of the twenty pinned
 # components (docs/research/24-arm64-image-availability.md).
 
 name: de-platform-security-grafana
