@@ -1,0 +1,245 @@
+# Local execution budgets for de-platform.
+#
+# The single source of truth for what a profile's services are entitled to on the
+# local host. This is NOT the threshold register. docs/budgets.yaml holds
+# thresholds that judge measurements: every entry there carries a direction, a
+# unit and a declared commit, and an evidence item cites it through budget_ref.
+# An entitlement has no direction and is never cited as a threshold, so the two
+# live apart on purpose. See docs/completion-bar.md sections 8, 9 and 11, and
+# docs/local-development.md.
+#
+# The anchor's declaration point is the commit that adds this file, resolvable
+# with:
+#   git log --diff-filter=A --format=%H -- deployment/budgets/profiles.yaml
+#
+# A ceiling is a hard limit, not a target. A service that reaches it is
+# OOM-killed rather than slowed down, and an OOM kill of a profile service is a
+# profile-budget failure, surfaced as one by the run's assertion phase.
+#
+# The compose-subset lint recomputes every profile peak from the ceilings and
+# overrides below and fails on a mismatch, and checks that each compose file's
+# deploy.resources.limits resolves to the value declared here.
+
+version: 1
+
+anchor:
+  id: local-host-free-memory
+  free_memory_mib: 7680
+  reserve_mib: 512
+  enforceable_peak_mib: 7168
+  host_cpus: 12
+  enforceable_cpus: 12
+  rationale: >-
+    The host is a 12-CPU machine with 14 GiB of RAM and roughly 7.5 to 8 GiB free.
+    The anchor is the free-memory figure rather than the total, because that is
+    what a profile actually runs against and it is the binding constraint.
+    ADR-0027's minimal cloud arm is 2 to 3 m7g.large, which is 4 to 6 vCPU and 16
+    to 24 GiB, so the local peak is about 44% of the two-node arm and about 29%
+    of the three-node arm. The cloud node shapes are an input from ADR-0027 and
+    are checked against this table, never derived from it. The 512 MiB reserve
+    covers podman, conmon and host drift; the free figure already excludes the
+    operating system. At the bottom of the ticket's stated range (7.0 GiB free)
+    neither path profile fits, and the reduced variant is the documented
+    fallback rather than a silent degradation.
+  declared_on: 2026-09-29
+
+# One entry per service: the entitlement it receives in every profile it appears
+# in, unless the profile overrides it.
+ceilings:
+  postgres:          { memory_mib: 384,  cpus: 1.0  }
+  seaweedfs:         { memory_mib: 256,  cpus: 1.0  }
+  polaris:           { memory_mib: 768,  cpus: 1.0  }
+  clickhouse:        { memory_mib: 1024, cpus: 2.0  }
+  kafka:             { memory_mib: 768,  cpus: 1.0  }
+  debezium-connect:  { memory_mib: 640,  cpus: 1.0  }
+  flink-jobmanager:  { memory_mib: 640,  cpus: 1.0  }
+  flink-taskmanager: { memory_mib: 1280, cpus: 2.0  }
+  prometheus:        { memory_mib: 384,  cpus: 0.5  }
+  grafana:           { memory_mib: 384,  cpus: 0.5  }
+  alertmanager:      { memory_mib: 128,  cpus: 0.25 }
+  dagster-webserver: { memory_mib: 320,  cpus: 0.5  }
+  dagster-daemon:    { memory_mib: 256,  cpus: 0.5  }
+  dagster-user-code: { memory_mib: 256,  cpus: 0.5  }
+  spark:             { memory_mib: 2048, cpus: 3.0  }
+  flink-client:      { memory_mib: 512,  cpus: 0.5  }
+
+# A profile's peak is the sum of its resident ceilings plus the largest single
+# transient ceiling. Resident services are up for the whole run; a transient is a
+# run-to-completion member whose container the profile starts and which overlaps
+# the resident set while it runs. The observability overlay is folded into the
+# two path profiles rather than declared alongside them, because an alert firing
+# on a path that is not running is not an alert.
+profiles:
+  smoke:
+    description: >-
+      The CI-checkable set plus per-service lightweight container checks, one
+      service at a time. No full stack.
+    resident: []
+    transient: []
+    single_service_ceiling: spark
+    peak: { memory_mib: 2048, cpus: 3.0 }
+    reduced_variant: none
+    note: >-
+      The peak is the largest single ceiling in the register (Spark at 2048 MiB),
+      because smoke never runs two services at once.
+
+  batch:
+    description: Re-run the batch path end to end.
+    resident:
+      - postgres
+      - seaweedfs
+      - polaris
+      - clickhouse
+      - dagster-webserver
+      - dagster-daemon
+      - dagster-user-code
+      - prometheus
+      - grafana
+      - alertmanager
+    transient:
+      - spark
+    overrides:
+      clickhouse: { memory_mib: 1792, cpus: 3.0 }
+    peak: { memory_mib: 6976, cpus: 11.75 }
+    reduced_variant:
+      drops: [prometheus, grafana, alertmanager]
+      peak: { memory_mib: 6080, cpus: 10.5 }
+      consequence: >-
+        No alert drill can be produced from a reduced run, so the
+        incident-laboratory items are not evidenced there and the run is labelled
+        as reduced in its evidence item.
+    note: >-
+      ClickHouse carries more here than in streaming because this profile owns
+      the serving materialisation. Spark runs as spark-submit --master local[3]
+      with spark.driver.memory=1536m, which puts driver and executor in one JVM
+      at 1690 MiB and fits the 2048 ceiling with room.
+
+  streaming:
+    description: Re-run the streaming path end to end.
+    resident:
+      - postgres
+      - seaweedfs
+      - polaris
+      - clickhouse
+      - kafka
+      - debezium-connect
+      - flink-jobmanager
+      - flink-taskmanager
+      - prometheus
+      - grafana
+      - alertmanager
+    transient:
+      - flink-client
+    overrides: {}
+    peak: { memory_mib: 7168, cpus: 11.75 }
+    reduced_variant:
+      drops: [prometheus, grafana, alertmanager]
+      peak: { memory_mib: 6272, cpus: 10.5 }
+      consequence: >-
+        No alert drill can be produced from a reduced run, so the
+        incident-laboratory items are not evidenced there and the run is labelled
+        as reduced in its evidence item.
+    note: >-
+      ClickHouse carries less here than in batch because this profile serves one
+      CDC table. Dagster is deliberately absent: the completion bar fixes this
+      profile's service list and this ticket does not re-litigate it, so the
+      profile script starts the Flink job and the Dagster-owned lifecycle
+      (deploy, restart, savepoint) is exercised in the batch profile against a
+      Flink cluster brought up for the purpose. The seam is recorded in the
+      local-versus-cloud diff.
+
+  observability:
+    description: >-
+      Dashboards and alerting without a path, for authoring and for reading a
+      dashboard. The same three services appear as an overlay inside batch and
+      streaming.
+    resident: [prometheus, grafana, alertmanager]
+    transient: []
+    overrides: {}
+    peak: { memory_mib: 896, cpus: 1.25 }
+    reduced_variant: none
+
+  benchmark:
+    description: >-
+      One component at a time under a declared resource budget. Never the whole
+      stack.
+    resident: []
+    transient: []
+    declared_per_run: true
+    rule:
+      max_peak_memory_mib: 7168
+      max_peak_cpus: 12
+    worked_example:
+      name: clickhouse layout benchmark (M5, completion bar section 6.5)
+      services:
+        clickhouse: { memory_mib: 6144, cpus: 8.0 }
+        postgres:   { memory_mib: 384,  cpus: 1.0 }
+        seaweedfs:  { memory_mib: 256,  cpus: 1.0 }
+      peak: { memory_mib: 6784, cpus: 10.0 }
+    note: >-
+      Every other benchmark declares its own ceiling in its protocol and records
+      it with the run, per completion bar section 8.
+
+# Ceilings that sit below a component's documented default or recommendation, and
+# therefore require an explicit override in the compose file or in the service's
+# own configuration. Recorded here so the deviation is visible rather than
+# discovered as a surprise.
+documented_default_overrides:
+  - service: kafka
+    documented: "KAFKA_HEAP_OPTS defaults to -Xmx1G -Xms1G via bin/kafka-server-start.sh"
+    override: "KAFKA_HEAP_OPTS=-Xmx512M -Xms512M"
+    reason: A single-broker local broker with a bounded topic set does not need the 1 GiB default heap.
+  - service: debezium-connect
+    documented: "KAFKA_HEAP_OPTS defaults to -Xms256M -Xmx2G via bin/connect-distributed.sh"
+    override: "KAFKA_HEAP_OPTS=-Xmx384M -Xms384M"
+    reason: The 2 GiB worker default is a production default; one connector at local volume does not need it.
+  - service: clickhouse
+    documented: "max_server_memory_usage=0 with max_server_memory_usage_to_ram_ratio=0.9, i.e. a ceiling of 90% of available memory (6.3 to 7.2 GiB here)"
+    override: "max_server_memory_usage=1024 MiB in streaming, 1792 MiB in batch"
+    reason: The documented default would consume the entire profile budget on its own. This is the clearest case for declaring a ceiling rather than inheriting one.
+  - service: flink-jobmanager
+    documented: "jobmanager.memory.process.size has no default value"
+    override: "jobmanager.memory.process.size=640m"
+    reason: >-
+      Flink's own component defaults set the floor: a 128 MB framework heap, a
+      256 MB JVM metaspace and a 192 MB minimum JVM overhead put the process-size
+      minimum at about 576 MB, which is why the ceiling is 640 MiB and not 384.
+  - service: flink-taskmanager
+    documented: "taskmanager.memory.process.size has no default value"
+    override: "taskmanager.memory.process.size=1280m"
+    reason: The operator must supply it; 1280m leaves about 832 MiB of task heap after metaspace and JVM overhead.
+  - service: spark
+    documented: "spark.driver.memory=1g and spark.executor.memory=1g with a 0.10 overhead factor, 2252.8 MiB for a driver plus one executor"
+    override: "spark-submit --master local[3] with spark.driver.memory=1536m"
+    reason: Local mode puts driver and executor in one JVM, which fits the 2048 MiB ceiling where a separate executor would not.
+  - service: grafana
+    documented: "published recommended minimum of 512 MB"
+    override: "384 MiB"
+    reason: >-
+      A deliberate deviation below a published recommendation. Grafana's own
+      guidance attributes the headroom to image rendering at about 1 GB per
+      renderer worker, and this platform provisions dashboards as code and does
+      not use image rendering.
+    trigger: >-
+      Reconsider if image rendering is ever enabled, or if a dashboard render
+      exceeds the ceiling.
+
+# Recorded limitations that follow from the table above rather than from any
+# single ceiling.
+limitations:
+  - id: no-portable-cpu-floor
+    statement: >-
+      deploy.resources.reservations.cpus is enforced by neither docker compose
+      nor podman-compose outside swarm, so there is no CPU floor anywhere in the
+      platform. Every cpus figure above is a ceiling only, and a service on a
+      busy host can be starved with no guarantee.
+  - id: ceilings-are-hard-limits
+    statement: >-
+      An exceedance is an OOM kill rather than a slowdown. The run's assertion
+      phase must surface an OOM-killed profile service as a profile-budget
+      failure rather than as an application bug.
+  - id: local-capacity-is-not-cloud-capacity
+    statement: >-
+      At 7168 MiB the local path peak is about 44% of the minimal arm's 16 GiB
+      and about 29% of 24 GiB at three nodes. The local run evidences the shape
+      of the entitlement and never the cloud capacity.

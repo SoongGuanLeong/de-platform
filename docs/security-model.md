@@ -68,7 +68,7 @@ A secret is one of: a password, an OAuth2 client secret, an access key, a privat
 
 | Rejected | Reason |
 |---|---|
-| Compose `secrets:` with an `environment:` source | podman-compose 1.5.0 fails with `ValueError: ERROR: unparsable secret`; the source is Docker-Compose-only, so it breaks the portability rule |
+| Compose `secrets:` with an `environment:` source | podman-compose fails with `ValueError: ERROR: unparsable secret` (observed at 1.5.0; not re-verified at the pinned 1.6.0); the source is Docker-Compose-only, so it breaks the portability rule |
 | Native `podman secret` | Works on podman only, with no Docker equivalent outside swarm. Its file driver is also unencrypted on disk |
 | Environment variables for secret values | Readable by every process in the container and visible in `podman inspect` |
 | SOPS plus age, encrypted in Git | A real option and the documented alternative if Git-encrypted secrets are ever required. Not adopted, because the runtime directory solves the same problem with no extra tool and no key-distribution question |

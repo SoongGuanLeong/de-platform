@@ -235,9 +235,33 @@ The machine-readable list of capability instances and their evidence, at `docs/c
 _Avoid_: checklist, inventory, manifest
 
 **Budget**:
-A threshold declared before the measurement it judges, and committed before it. Changing a budget creates a new entry and invalidates evidence that cited the old one.
+A threshold declared before the measurement it judges, and committed before it. Changing a budget creates a new entry and invalidates evidence that cited the old one. Contrast a **ceiling**, which is a resource entitlement rather than a threshold and lives in its own register.
 _Avoid_: target, SLO, baseline
 
 **Profile**:
-The declared service set and resource budget an evidence item was produced under. Reproducibility is defined per profile, because the whole stack cannot be co-resident at 7 to 8 GB.
+The declared service set and resource budget an evidence item was produced under. Reproducibility is defined per profile, because the whole stack cannot be co-resident at 7 to 8 GB. Its concrete entitlement is the **profile peak**, declared in `deployment/budgets/profiles.yaml`.
 _Avoid_: environment, mode, tier
+
+**Ceiling**:
+The hard limit one service's container is entitled to inside a profile, declared in `deployment/budgets/profiles.yaml`. An exceedance is an OOM kill rather than a slowdown, which is what makes a ceiling a real constraint. A ceiling is not a budget.
+_Avoid_: quota, allocation, limit, cap
+
+**Profile peak**:
+A profile's declared entitlement: the sum of its resident ceilings plus the largest single transient ceiling. The preflight compares it against the host's free memory and refuses the run when it does not fit.
+_Avoid_: total, footprint, resource sum
+
+**Resident set**:
+The services a profile keeps up for the whole run, as distinct from its transient members.
+_Avoid_: long-running services, core services
+
+**Transient member**:
+A run-to-completion member of a profile, counted at its ceiling in the peak and not resident, such as `spark-submit` or the `flink run` client.
+_Avoid_: job, batch step, one-shot
+
+**Reduced variant**:
+A profile's declared fallback when the host cannot hold the full peak: the same ceilings with the observability overlay dropped. A reduced run is labelled as reduced, and it cannot evidence an alert drill.
+_Avoid_: degraded mode, lite profile, fallback
+
+**Local-versus-cloud diff**:
+The written statement of what a local run cannot exercise, one row per mechanism, each naming what stands in its place. A required artefact rather than a caveat list.
+_Avoid_: limitations, caveats, known issues

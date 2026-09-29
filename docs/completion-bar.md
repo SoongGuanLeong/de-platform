@@ -226,6 +226,8 @@ Two tiers of evidence follow. **Tier A** is correctness and contract evidence, r
 
 Every evidence item names the profile that produced it. A claim that fits no profile is a design claim, not evidence.
 
+The concrete ceilings, the resident and transient sets, each profile's peak, and the reduced variant offered when the host cannot hold a full run are declared in [`deployment/budgets/profiles.yaml`](../deployment/budgets/profiles.yaml), with the reasoning in [`docs/local-development.md`](local-development.md). This table defines what each profile is *for*; the register defines what it is *entitled to*.
+
 Time and resource figures in this document are budgets and definitions of done, never measurements.
 
 ## 9. The honesty rule
@@ -248,7 +250,13 @@ The honest limit: an external consumer nobody registered is not protected, and C
 
 ## 11. The portable runtime subset
 
-Bring-up must not depend on one compose provider. Compose files are restricted to the portable subset: OCI images, ports, `environment` and `env_file`, volumes, networks, `healthcheck` with `start_period`, `restart`, `profiles`, `extra_hosts` with `host-gateway`, and `depends_on` without `condition`. Services self-retry rather than depending on health-based start ordering. The provider the bring-up was verified against is named in the runbook, and a CI lint rejects the forbidden keys.
+Bring-up must not depend on one compose provider. Compose files are restricted to the portable subset: OCI images, ports, `environment` and `env_file`, volumes, networks, `healthcheck` with `start_period`, `restart`, `profiles`, `extra_hosts` with `host-gateway`, `depends_on` without `condition`, and `deploy.resources.limits.cpus`, `deploy.resources.limits.memory` and `deploy.resources.limits.pids` with nothing else under `deploy`. The provider the bring-up was verified against is named in the runbook, and a CI lint rejects the forbidden keys.
+
+**Services self-retry rather than depending on health-based start ordering.** This is a resilience choice, not a portability constraint: `depends_on` with `condition` is a Compose Specification feature that both named providers implement, but a one-shot condition check only helps at first start, whereas a self-retrying service also survives a dependency that later restarts. `start_period` on a healthcheck remains permitted, and is how a slow-starting service declares its own tolerance.
+
+**The resource-limit keys were verified in provider source rather than in documentation**, because the Deploy Specification is optional and a conforming provider is allowed to ignore the whole `deploy` block. Both named providers translate the same three keys: docker compose applies them to the container's host configuration, and podman-compose maps them to `--cpus`, `--memory` and `--pids-limit`. Three things do not port and stay rejected: `memswap_limit` (docker compose honours it, podman-compose does not implement it at all), `deploy.resources.reservations.cpus` (neither provider enforces a CPU reservation outside swarm, so there is no portable CPU floor anywhere in the platform), and the swarm-only `deploy` subtrees. `deploy.resources.reservations.memory` does port, but the platform does not use it: a memory floor is not a ceiling, and it would be a second and weaker statement of the same entitlement.
+
+**The numbers behind a profile's entitlement live in `deployment/budgets/profiles.yaml`**, not in this standard. A ceiling is a hard limit, so an exceedance is an OOM kill rather than a slowdown, and a profile's peak is the sum of its resident ceilings plus its largest transient ceiling. See [`docs/local-development.md`](local-development.md) and ADR-0031.
 
 The explicit `host.docker.internal:host-gateway` entry is kept: podman adds that hostname automatically, Docker on Linux does not.
 
@@ -264,7 +272,7 @@ The CI never re-runs expensive evidence. It checks that the paperwork is honest:
 - every `budget_ref` resolves to an entry in `docs/budgets.yaml`;
 - every `not_applicable` entry carries a reason;
 - no `complete` instance has an unresolved deferral;
-- compose files contain none of the keys outside the portable subset.
+- compose files contain none of the keys outside the portable subset, with `deploy` permitted only at `resources.limits.{cpus,memory,pids}`; every declared limit resolves against the ceiling register in `deployment/budgets/profiles.yaml`; and every profile peak in that register is recomputed from its ceilings, so a peak that does not match its parts fails.
 
 ## 13. What we explicitly do not test, and why
 
