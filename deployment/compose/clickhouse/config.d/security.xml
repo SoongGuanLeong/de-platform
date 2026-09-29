@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+  Security evidence harness: the secure listener.
+
+  ADR-0029 puts TLS on ClickHouse's native port. The plaintext native port is
+  switched off so that TLS is enforced rather than merely available: with
+  tcp_port at 0 there is no unencrypted path to the server at all.
+-->
+<clickhouse>
+  <tcp_port>0</tcp_port>
+  <tcp_port_secure>9440</tcp_port_secure>
+  <openSSL>
+    <server>
+      <certificateFile>/etc/clickhouse-server/certs/clickhouse.crt</certificateFile>
+      <privateKeyFile>/etc/clickhouse-server/certs/clickhouse.key</privateKeyFile>
+      <caConfig>/etc/clickhouse-server/certs/ca.crt</caConfig>
+      <verificationMode>relaxed</verificationMode>
+      <loadDefaultCAFile>false</loadDefaultCAFile>
+      <cacheSessions>true</cacheSessions>
+      <disableProtocols>sslv2,sslv3</disableProtocols>
+      <preferServerCiphers>true</preferServerCiphers>
+    </server>
+  </openSSL>
+</clickhouse>

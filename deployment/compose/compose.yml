@@ -1,0 +1,74 @@
+# The security evidence harness.
+#
+# This is NOT the platform's compose contract. It exists to execute the deferred
+# tests listed in docs/security-evidence-plan.md, one profile at a time, on the
+# pinned component images. It adds no component and changes no architecture.
+# The platform's own bring-up is ticket #25.
+#
+# Every secret is a file under runtime/ (gitignored), mounted read-only at
+# /run/secrets/<name> by the compose secrets mechanism, per ADR-0028.
+
+name: de-platform-security-evidence
+
+secrets:
+  postgres_superuser_password:
+    file: ../../runtime/secrets/postgres_superuser_password
+  postgres_svc_password:
+    file: ../../runtime/secrets/postgres_svc_password
+  clickhouse_default_password:
+    file: ../../runtime/secrets/clickhouse_default_password
+  clickhouse_svc_password:
+    file: ../../runtime/secrets/clickhouse_svc_password
+
+services:
+  postgres:
+    image: docker.io/library/postgres:18-alpine
+    container_name: de-platform-security-postgres
+    restart: "no"
+    environment:
+      POSTGRES_USER: deplatform
+      POSTGRES_DB: deplatform
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_superuser_password
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=trust"
+    secrets:
+      - postgres_superuser_password
+      - postgres_svc_password
+    volumes:
+      - ../../runtime/certs:/certs:ro
+      - ./postgres/pg_hba.conf:/pgconf/pg_hba.conf:ro
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    # The certificate key is chowned into place here rather than on the host,
+    # because a rootless podman bind mount presents the host owner as container
+    # root and PostgreSQL refuses a key it does not own.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        install -m 600 -o postgres -g postgres /certs/postgres.key /tmp/pg.key
+        install -m 644 -o postgres -g postgres /certs/postgres.crt /tmp/pg.crt
+        install -m 600 -o postgres -g postgres /run/secrets/postgres_svc_password /tmp/postgres_svc_password
+        exec docker-entrypoint.sh postgres \
+          -c ssl=on \
+          -c ssl_cert_file=/tmp/pg.crt \
+          -c ssl_key_file=/tmp/pg.key \
+          -c password_encryption=scram-sha-256 \
+          -c hba_file=/pgconf/pg_hba.conf
+    ports:
+      - "127.0.0.1:55432:5432"
+
+  clickhouse:
+    image: docker.io/clickhouse/clickhouse-server:26.8.13.2
+    container_name: de-platform-security-clickhouse
+    restart: "no"
+    secrets:
+      - clickhouse_default_password
+      - clickhouse_svc_password
+    volumes:
+      - ../../runtime/certs:/certs:ro
+      - ./clickhouse/entrypoint.sh:/harness/entrypoint.sh:ro
+      - ./clickhouse/client-config.xml:/harness/client-config.xml:ro
+      - ./clickhouse/config.d:/etc/clickhouse-server/config.d:ro
+    entrypoint: ["/bin/sh", "/harness/entrypoint.sh"]
+    ports:
+      - "127.0.0.1:59440:9440"
