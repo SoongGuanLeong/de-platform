@@ -164,7 +164,7 @@ Core items 1 to 8 apply to every instance and are not repeated. Each delta is cl
 ### 6.9 Governance and lineage
 
 - A namespace and role layout, plus a written authorisation map naming which system governs which path and stating that Polaris enforces no column-level access.
-- A denied principal is refused and the refusal is audited in both engines, each traceable to the system that made it.
+- A denied principal is refused and the refusal is attributable, with the mechanism named per system: ClickHouse attributes the attempt to the querying user in `system.query_log`, and Polaris returns an HTTP 403 recorded in its access log with the authenticated principal once the access-log pattern is set to include it. Polaris emits no denial event of its own, so its denial record is an HTTP and access-log record, not a structured audit event. Successful catalog operations are audited separately, through the Polaris event listener that persists to PostgreSQL.
 - A column-level test on a PII column in ClickHouse, the only engine that can enforce it.
 - A vended-credential scope test: vend for table A, assert that a read of table B's prefix is refused with `AccessDenied`, and record the unscoped baseline that proves the policy caused it.
 - The generated session policy size is asserted against the 2048-byte limit.

@@ -1,0 +1,49 @@
+# gitleaks configuration for de-platform.
+#
+# The default ruleset is kept whole ([extend] useDefault = true). Every entry
+# below allowlists one specific, dated false positive by BOTH its file and a
+# regex on the finding's line, so no rule is disabled and no whole file is
+# exempted: a new secret on any other line of the same file still fails.
+#
+# condition = "AND" is load-bearing. gitleaks defaults to "OR", under which a
+# matching paths entry alone allows every finding in that file. AND requires the
+# path and the line regex to match together.
+#
+# Historical findings that cannot be fixed by an edit to the current tree are
+# suppressed by fingerprint in .gitleaksignore, not here.
+#
+# See docs/security-model.md section 2.4 and ADR-0028: the control on secrets is
+# the write path, and this scan is a backstop for the common case of a real
+# third-party token, not the self-minted case.
+
+[extend]
+useDefault = true
+
+# GHSA identifiers are published security advisories, not credentials. The
+# generic-api-key entropy rule reads their shape as a key. Scoped to the line,
+# so any other content in this file is still scanned.
+[[allowlists]]
+description = "Public GitHub advisory identifiers in the longevity audit."
+condition = "AND"
+paths = ['''docs/research/03-longevity-audit\.md''']
+regexTarget = "line"
+regexes = ['''GHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}''']
+
+# A self-describing test signing key. The value is the base64 of the literal
+# string test-signing-key-for-sts-integration-tests, chosen by the local test
+# rather than issued by anything. Scoped to the exact base64 value.
+[[allowlists]]
+description = "Test-only SeaweedFS STS signing key in the interop record."
+condition = "AND"
+paths = ['''docs/research/08-seaweedfs-sts-interop\.md''']
+regexTarget = "line"
+regexes = ['''dGVzdC1zaWduaW5nLWtleS1mb3Itc3RzLWludGVncmF0aW9uLXRlc3Rz''']
+
+# An STS access key ID (not a secret on its own) plus the session token's
+# character count, not the token. Scoped to the recorded output line.
+[[allowlists]]
+description = "Recorded STS access key ID and session token length, not the token."
+condition = "AND"
+paths = ['''docs/research/08-seaweedfs-sts-interop\.md''']
+regexTarget = "line"
+regexes = ['''ASSUME_ROLE_OK access_key=ASIA[0-9a-f]+ session_token_len=[0-9]+''']

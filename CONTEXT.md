@@ -144,6 +144,18 @@ _Avoid_: category, tier, type
 The interval between a row's deletion and the expiry of the snapshots that still contain it, during which the deletion is not complete.
 _Avoid_: retention period, deletion lag
 
+**Unauthenticated surface**:
+A listener or interface that deliberately carries no authentication locally, entered in a register with the reason it is acceptable, the network boundary that bounds it, and the control that protects it in the cloud. It is a decision with a written reason, not an omission.
+_Avoid_: insecure, exposed, unprotected
+
+**Rotation class**:
+How a component re-reads a credential: reload (it re-reads without a restart), restart (the value is read at process start), or init (the value is consumed once at first initialisation and cannot be rotated by re-reading). It is a property of the component, so it is declared rather than assumed.
+_Avoid_: rotation policy, secret lifecycle
+
+**Audit gap**:
+A question an auditor would ask that the platform cannot answer, named with its reason rather than left implicit. The largest is structural: a read using the vended, prefix-scoped credential does not pass through the catalog, so no system attributes it to a user.
+_Avoid_: blind spot, limitation, caveat
+
 ### Contracts
 
 **Contract**:

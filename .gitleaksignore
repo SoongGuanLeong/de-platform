@@ -1,0 +1,15 @@
+# gitleaks fingerprint suppressions for de-platform.
+#
+# Each line suppresses exactly one finding in one historical commit. A rule is
+# never disabled and no path is exempted, so a new secret in any future commit
+# still fails the scan.
+#
+# Both entries are the same two values: temporary SeaweedFS STS credentials
+# minted by the local interop test recorded in docs/research/08, redacted
+# forward on 2026-09-29 under ADR-0028. They are already public in git history,
+# and ADR-0006 rejects history rewriting because it does not unpublish a value
+# that forks, clones and crawlers have seen. The test stack was never deployed,
+# so no running service accepts them.
+
+1d184c1ecca5dabb448d892cc87f359d37cb433b:docs/research/08-seaweedfs-sts-interop.md:generic-api-key:290
+1d184c1ecca5dabb448d892cc87f359d37cb433b:docs/research/08-seaweedfs-sts-interop.md:generic-api-key:291

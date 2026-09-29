@@ -287,13 +287,15 @@ A namespace `db` and tables `table_a`/`table_b` were created (Polaris placed the
     "prefix": "s3://warehouse/db/table_a",
     "config": {
       "s3.access-key-id": "ASIA6f30e3a41a3c0b58",
-      "s3.secret-access-key": "pq+IQEeuy70DOxN6j1+OGR3upJesT4MxclzhTEbY5tA=",
-      "s3.session-token": "eyJhbGciOiJIUzI1NiIs...",
+      "s3.secret-access-key": "<redacted>",
+      "s3.session-token": "<redacted>",
       "s3.session-token-expires-at-ms": "1790502320000"
     }
   }
 ]
 ```
+
+**Redaction, 2026-09-29.** The `s3.secret-access-key` and `s3.session-token` values in the response above were redacted under [ADR-0028](../adr/0028-secrets-live-only-in-the-runtime-directory.md). They were temporary STS credentials minted by this local interop test. The test stack was never deployed, so no running service accepts them, and the record is otherwise unchanged.
 
 Decoding the session token (a SeaweedFS-signed JWT) shows Polaris's role and its inline policy landed in the token:
 

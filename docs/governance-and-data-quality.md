@@ -159,10 +159,12 @@ The treatment is **minimisation first, masking second** (ADR-0017): a direct PII
 
 | Path | Principal | Object | Expected |
 |---|---|---|---|
-| Polaris, Iceberg and Spark | `analyst_commercial` | `commerce.silver.customer` | Denied at table level; audited in Polaris |
-| ClickHouse | `analyst_ops` | `SELECT(c_phone)` on the one exposed column | Denied at column level; audited in ClickHouse |
+| Polaris, Iceberg and Spark | `analyst_commercial` | `commerce.silver.customer` | Denied at table level; Polaris returns 403 and the request is recorded in its access log with the authenticated principal |
+| ClickHouse | `analyst_ops` | `SELECT(c_phone)` on the one exposed column | Denied at column level; ClickHouse attributes the attempt to the querying user in `system.query_log` |
 | ClickHouse | `analyst_ops_wh1` | Rows with `w_id != 1` on the CDC facts | Absent by row policy |
 | ClickHouse | `engineer` | The same column | Allowed |
+
+**The audit claim, corrected.** An earlier draft of this document said a denied access is "audited in Polaris". Polaris 1.7.0 emits no denial event: its event framework brackets successful operations only, and its listeners ship disabled. The accurate claim is that Polaris returns an HTTP 403 and the request appears in its access log, with the authenticated principal present once the access-log pattern is set to include it. Successful catalog operations are audited separately, by enabling the event listener that persists to PostgreSQL. Denial attribution per system, and what cannot be attributed at all, are settled in [`docs/security-model.md`](security-model.md) and ADR-0030.
 
 **The deletion path and the erasure definition of done.** The path runs on the TPC-C `CUSTOMER` table: a source deletion becomes a Debezium `op=d`, lands in Iceberg through the Flink upsert sink, and is applied as a `MERGE ... WHEN MATCHED THEN DELETE`. The serving CDC facts do **not** carry `c_id`, so the path terminates in Iceberg and the ClickHouse side is a documented absence rather than a second deletion to prove. Erasure is complete when three things hold: the current snapshot no longer returns the key, no serving copy holds a reference to it, and the historical snapshots containing it have expired at T plus the retention window, asserted by the retention dry run.
 

@@ -14,7 +14,13 @@ venv/
 !.env.example
 *.pem
 *.key
+*.jks
+*.p12
 secrets/
+runtime/
+
+# Backup files can carry secrets minted at bootstrap (see ADR-0006)
+*.bak
 
 # Build and run output
 target/
