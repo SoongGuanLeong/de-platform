@@ -37,7 +37,8 @@ classes:
 #   - id: <stable identifier>
 #     class: <one of the classes above>
 #     instance: <the topic, job, table or dashboard name>
-#     representative: <true for the one instance per class carrying benchmark-grade evidence>
+#     representative: <true for the one instance per class whose evidence carries
+#       the class's mutation note>
 #     status: declared | in-progress | complete | deferred
 #     failure_modes:
 #       - <an enumerated failure mode>

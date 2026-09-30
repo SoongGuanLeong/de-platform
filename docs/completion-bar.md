@@ -38,7 +38,7 @@ The failure mode this document exists to resist is a portfolio project that look
 
 A class is complete only when every instance in its register entry is complete. The register is what makes the claim falsifiable: it turns "Kafka ingestion is done" into a named list of topics, each with its evidence.
 
-Each class carries one **representative** instance holding the deeper, benchmark-grade evidence. The remaining instances carry the core evidence. This bounds the cost of the bar without letting one working instance speak for a class.
+Each class designates exactly one **representative instance**, the one whose evidence carries the class's mutation note (section 7). Which instance carries the class's deeper evidence is fixed by the benchmark inventory in [the benchmark plan](benchmark-plan.md) section 3, not by the flag. This bounds the cost of the bar without letting one working instance speak for a class.
 
 ## 4. The core checklist
 
@@ -209,6 +209,7 @@ A **benchmark** record is the same item with a benchmark block added: the mode, 
 | `commit` | The commit the evidence was produced at. |
 | `date` | The date of the run. |
 | `budget_ref` | Optional. The budget id this evidence is judged against. |
+| `mutation_note` | Optional, and required on at least one evidence item of each class's representative instance. One line naming what was removed and recording that the test failed. See [the testing strategy](testing-strategy.md) section 3. The CI checks that the note exists; whether the mutation actually fails the test is a reviewer's judgement from the raw artifact. |
 | `artifact` | Path to the raw output under `raw/`. |
 | `observed_once` | Default `false`. See section 9. |
 
@@ -270,13 +271,15 @@ The Docker-versus-podman technology decision itself belongs to the technology-se
 
 The CI never re-runs expensive evidence. It checks that the paperwork is honest:
 
-- every class in the register has at least one representative instance;
+- every class that has at least one instance in the register has exactly one instance flagged `representative`, and that instance's evidence carries the class's mutation note;
 - every `complete` instance has at least one `behaviour` evidence item;
 - every evidence link resolves, and every evidence item carries all required fields;
 - every `budget_ref` resolves to an entry in `docs/budgets.yaml`;
 - every `not_applicable` entry carries a reason;
 - no `complete` instance has an unresolved deferral;
 - compose files contain none of the keys outside the portable subset, with `deploy` permitted only at `resources.limits.{cpus,memory,pids}`; every declared limit resolves against the ceiling register in `deployment/budgets/profiles.yaml`; and every profile peak in that register is recomputed from its ceilings, so a peak that does not match its parts fails.
+
+**The class rule is scoped to classes that have instances.** The register is filled in incrementally as phases land, so a rule scoped to the whole eleven-value vocabulary would be red from the first commit and would make the required check unusable. The vocabulary in `docs/completion-bar.yaml` is closed; the obligation is not.
 
 ## 13. What we explicitly do not test, and why
 
@@ -299,4 +302,4 @@ Each entry names the gap, the reason, and what stands in its place. Naming these
 
 ## 14. Where this is applied
 
-The standard is applied during implementation, not while the map is open. The phased roadmap and its gates are the fog item that consumes it, and the interview-facing ordering in `docs/requirements-matrix.md` section 4 decides which capabilities are evidenced first.
+The standard is applied during implementation, not while the map is open. [The phased implementation roadmap](implementation-roadmap.md) is the plan that consumes it: it fixes which register instances land in which phase and what closes each phase. The interview-facing ordering in `docs/requirements-matrix.md` section 4 is a secondary mapping that decides emphasis and demo effort, not phase order.

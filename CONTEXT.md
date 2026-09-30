@@ -260,6 +260,10 @@ _Avoid_: capability, component, feature
 The machine-readable list of capability instances and their evidence, at `docs/completion-bar.yaml`. The CI validates the register without re-running evidence.
 _Avoid_: checklist, inventory, manifest
 
+**Representative instance**:
+The one instance in a capability class whose evidence carries the class's **mutation note**, a one line record of what was removed and that the test failed. Exactly one per populated class, and the register's `representative` flag is what makes the obligation findable. The CI checks that the note exists; whether the mutation actually fails the test is a reviewer's judgement.
+_Avoid_: exemplar instance, sample instance, lead instance
+
 **Budget**:
 A threshold declared before the measurement it judges, and committed before it. Changing a budget creates a new entry and invalidates evidence that cited the old one. Contrast a **ceiling**, which is a resource entitlement rather than a threshold and lives in its own register.
 _Avoid_: target, SLO, baseline
