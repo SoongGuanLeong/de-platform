@@ -18,11 +18,13 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # The permitted dependency edges. platform/ is the shared core and depends on
-# nothing; orchestration/ is the composition root and may import both spines.
+# nothing. governance/ is the framework a path may import, so ingestion and batch
+# may depend on it (rule 4, second clause). orchestration/ is the composition root
+# and may import both spines.
 PERMITTED: dict[str, frozenset[str]] = {
     "platform": frozenset(),
-    "ingestion": frozenset({"platform"}),
-    "batch": frozenset({"platform"}),
+    "ingestion": frozenset({"platform", "governance"}),
+    "batch": frozenset({"platform", "governance"}),
     "governance": frozenset({"platform"}),
     "orchestration": frozenset({"platform", "ingestion", "batch", "governance"}),
 }

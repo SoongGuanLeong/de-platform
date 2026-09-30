@@ -23,11 +23,15 @@ name = "batch"
 version = "0.0.0"
 source = { editable = "batch" }
 dependencies = [
+    { name = "governance" },
     { name = "platform" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "platform", editable = "platform" }]
+requires-dist = [
+    { name = "governance", editable = "governance" },
+    { name = "platform", editable = "platform" },
+]
 
 [[package]]
 name = "click"
@@ -183,11 +187,15 @@ name = "ingestion"
 version = "0.0.0"
 source = { editable = "ingestion" }
 dependencies = [
+    { name = "governance" },
     { name = "platform" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "platform", editable = "platform" }]
+requires-dist = [
+    { name = "governance", editable = "governance" },
+    { name = "platform", editable = "platform" },
+]
 
 [[package]]
 name = "iniconfig"

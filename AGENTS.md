@@ -4,7 +4,7 @@ A vendor-neutral data lakehouse / data platform, built as a portfolio project th
 
 The design is driven by a specific target job posting, cached verbatim at `~/projects/career-ops/data/jd-cache/031.md` (Senior Data Engineer - Data Lakehouse). The platform is scoped to that posting's actual requirements rather than to a generic tutorial or a collection of technologies.
 
-**Current phase: planning.** No platform code exists yet. The canonical planning artifact is a wayfinder map on this repo's issue tracker, labelled `wayfinder:map`.
+**Current phase: implementation, at Phase 0 of `docs/implementation-roadmap.md`.** The planning map on this repo's issue tracker (labelled `wayfinder:map`) is closed, and the repository layout of `docs/adr/0026-one-repository-path-first.md` exists.
 
 ## Agent skills
 

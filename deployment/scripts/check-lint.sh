@@ -9,7 +9,7 @@
 # compose files and are read by their own validators instead.
 #
 # sqlfluff has no SQL to read until the serving DDL lands (issue #37), so it is
-# gated here rather than added as a dependency before it has a subject.
+# deferred here rather than added as a dependency before it has a subject.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
@@ -32,4 +32,4 @@ if find serving contracts -name '*.sql' -print -quit 2>/dev/null | grep -q .; th
   echo "::error::SQL exists but the sqlfluff check is not implemented yet (issue #37)" >&2
   exit 1
 fi
-echo "::notice::no .sql files yet; sqlfluff check gated on issue #37"
+echo "::notice::no .sql files yet; sqlfluff check deferred to issue #37"

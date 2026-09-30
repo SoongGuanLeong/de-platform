@@ -11,9 +11,10 @@ readme = "README.md"
 package = false
 
 # One distribution per Python-bearing path (ADR-0026, docs/repository-decomposition.md).
-# The packaging graph is the first line of the boundary rules: a distribution
-# that is not declared as a dependency cannot be imported. deployment/scripts/check-packaging-graph.sh
-# asserts the declared edges, and .importlinter carries the rules the graph cannot express.
+# The packaging graph is the declared edge set: deployment/scripts/check_packaging_graph.py
+# asserts the declared edges are the permitted ones, and .importlinter fails a
+# cross-path import, which the graph alone does not (a uv workspace shares one
+# virtual environment, so an undeclared import still resolves at runtime).
 [tool.uv.workspace]
 members = ["platform", "ingestion", "batch", "governance", "orchestration"]
 

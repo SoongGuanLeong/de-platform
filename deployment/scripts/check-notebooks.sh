@@ -7,7 +7,7 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-code_paths=(platform ingestion streaming batch serving governance orchestration observability deployment)
+code_paths=(platform ingestion streaming batch serving governance orchestration observability deployment tests)
 
 found=""
 for path in "${code_paths[@]}"; do

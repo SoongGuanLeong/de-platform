@@ -11,8 +11,8 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-GITLEAKS_VERSION="8.30.1"
-GITLEAKS_LINUX_X64_SHA256="551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+# shellcheck source=../tools.lock
+. deployment/tools.lock
 
 workdir="$(mktemp -d)"
 archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"

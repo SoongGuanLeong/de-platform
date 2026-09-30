@@ -17,6 +17,8 @@ The lint tool list is **proposed, not measured**, which is the gap [the reposito
 
 **None of the structure this document describes exists yet.** `.github/workflows/ci.yml`, `deployment/scripts/`, `deployment/tools.lock`, `deployment/rendered/`, `contracts/`, `tests/` and the Python and Java distributions are all part of the plan, named here so the plan is reviewable. The only path named in this document that exists today is `deployment/budgets/profiles.yaml`, `docs/budgets.yaml` and the one existing workflow file.
 
+**Correction, 2026-09-30 (ticket #30).** The structure now partly exists. `.github/workflows/ci.yml`, `deployment/scripts/`, `deployment/tools.lock`, `contracts/`, `tests/` and the five Python distributions are in the repository, and `.github/workflows/security.yml` has been absorbed into the `secrets` job and deleted, so the sentence above about the one existing workflow file no longer holds. The graph's eleven jobs are present; the checks owned by other tickets (`compose`, `governance`, `java`, `deployment`, `observability`, `images`) are deferred and assert their subject is absent until the owning ticket lands. `deployment/rendered/` and the Java distribution do not exist yet.
+
 ## 1. What this document settles
 
 1. **The CI platform**, and why it is infrastructure rather than a component or an addition (section 2).

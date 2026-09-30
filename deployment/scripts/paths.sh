@@ -10,20 +10,26 @@
 # change to a shared artefact can never skip a check it invalidates.
 #
 # Usage: paths.sh [<base-ref>]
-#   <base-ref>  the ref to diff against. In CI this is origin/<base_ref> for a
-#               pull request and HEAD~1 for a push. Defaults to HEAD~1, or the
-#               empty tree when there is no parent commit.
+#   <base-ref>  the ref to compare against; the merge base of HEAD and this ref
+#               is used, so a pull request is judged on the change it introduces
+#               rather than on everything the base branch gained. In CI this is
+#               the pull request's base SHA. On a push it defaults to HEAD~1, or
+#               to the empty tree when there is no parent commit.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-base="${1:-}"
-if [ -z "${base}" ]; then
+ref="${1:-}"
+if [ -z "${ref}" ]; then
   if git rev-parse --verify --quiet HEAD~1 >/dev/null 2>&1; then
-    base="HEAD~1"
+    ref="HEAD~1"
   else
-    base="$(git hash-object -t tree /dev/null)"
+    ref="$(git hash-object -t tree /dev/null)"
   fi
+fi
+
+if ! base="$(git merge-base HEAD "${ref}" 2>/dev/null)"; then
+  base="${ref}"
 fi
 
 if ! changed="$(git diff --name-only "${base}" HEAD 2>/dev/null)"; then
@@ -48,7 +54,6 @@ if has '^platform/' || has '^contracts/'; then
   unit_governance=true
   unit_orchestration=true
 else
-  if has '^platform/'; then unit_platform=true; fi
   if has '^ingestion/'; then unit_ingestion=true; fi
   if has '^batch/'; then unit_batch=true; fi
   if has '^governance/'; then unit_governance=true; fi

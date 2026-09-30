@@ -51,6 +51,8 @@ One `uv` workspace, one Python **distribution** per path that contains Python: `
 
 The packaging graph is the first line of defence: a distribution that is not declared as a dependency cannot be imported, so the inter-path rules become structural rather than conventional. `import-linter` carries the rules the packaging graph cannot express, which are the intra-distribution ones: the commerce/network split inside `batch/` and `ingestion/`, and `platform/` staying a leaf.
 
+**Correction, 2026-09-30 (ticket #30, after the workspace was built).** The claim above is too strong. A uv workspace installs every member into one virtual environment, so an undeclared cross-path import still resolves at runtime and the packaging graph alone does not stop it. The graph declares the edges, `deployment/scripts/check_packaging_graph.py` asserts they are the permitted ones, and `import-linter` is what fails a cross-path import; it therefore carries every inter-path rule as well as the intra-distribution ones.
+
 `serving/` and `observability/` get no distribution, because they hold SQL, YAML and JSON rather than code. Adding one later is a two-line change to the workspace, so this is a reversible call.
 
 ## The boundary rules
@@ -126,8 +128,8 @@ The prior repository was already a single repository, and its top-level shape (`
 
 ## Honest gaps
 
-- **The layout is a plan, not a build.** No directory in this document exists yet. The map is planning-only.
-- **The packaging model is unexercised.** The claim that the packaging graph enforces rules 1 to 4 has not been run, because there is no code to run it against.
+- **The layout is a plan, not a build.** No directory in this document exists yet. The map is planning-only. **Correction, 2026-09-30 (ticket #30).** The layout now exists: the eleven paths, the uv workspace with its five distributions, the packaging graph, the boundary rules 1 to 5 and the CI workflow are in the repository. The map was planning-only, and implementation runs from [the implementation roadmap](implementation-roadmap.md).
+- **The packaging model is unexercised.** The claim that the packaging graph enforces rules 1 to 4 has not been run, because there is no code to run it against. **Correction, 2026-09-30 (ticket #30).** It is exercised in CI, with the correction above: the graph asserts the declared edges and `import-linter` fails a cross-path import. A deliberate cross-path import is proven to fail by `deployment/scripts/test-check-boundaries.sh`.
 - **`sqlfluff`'s ClickHouse dialect is incomplete in every released version.** ClickHouse `PROJECTION` clauses in `CREATE TABLE`, `ALTER TABLE` and `GRANT` are unparsable up to and including 4.3.0 (sqlfluff issue 8583, September 2026), so `sqlfluff` covers ClickHouse query SQL and the subset of DDL it parses. The DDL's real validation is execution against the pinned ClickHouse in the serving profile, which is a behaviour rather than a signal and is consistent with the completion bar's split. **The fix is merged on `main` and unreleased**: PR 8585 landed on 2026-09-28 and closed the issue, with new fixtures for the three statements, and nothing has followed 4.3.0 (2026-08-07). Recorded as a documented limitation with a trigger rather than a reason to change the tool: take the pin at a release that carries 8585, at which point the limitation retires.
 - **The lint tool list is proposed, not measured.** Whether every named linter has a usable configuration for its target is unverified except for the `sqlfluff` finding above.
 - **The full CI/CD strategy and the testing strategy are not settled here.** This document fixes the layout's CI consequence and the test *location*, not the pipeline's job graph, branch protection, delivery path or test levels. Those are recorded on the map.

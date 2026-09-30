@@ -11,5 +11,5 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-bash deployment/scripts/check-gated.sh governance 32 \
+bash deployment/scripts/check-stub.sh governance 32 \
   governance/src/de_governance ! -name '__init__.py' -name '*.py' -print -quit

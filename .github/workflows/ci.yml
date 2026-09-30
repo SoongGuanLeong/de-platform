@@ -15,11 +15,6 @@ concurrency:
   group: ci-${{github.workflow}}-${{github.ref}}
   cancel-in-progress: true
 
-env:
-  # The uv version every job installs. The workspace's Python toolchain is pinned
-  # in uv.lock, so this is the one moving part and it is pinned too.
-  UV_VERSION: "0.12.7"
-
 jobs:
   # The path filter map. It runs first, always, and its outputs drive every
   # path-filtered job (docs/ci-cd-strategy.md sections 3 and 5).
@@ -70,10 +65,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install pinned uv
-        run: |
-          set -euo pipefail
-          python -m pip install --user "uv==${UV_VERSION}"
-          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+        run: bash deployment/scripts/install-uv.sh
       - name: Check boundaries
         run: bash deployment/scripts/check-boundaries.sh
       # Proves the boundary contracts are load-bearing: a deliberate cross-path
@@ -105,7 +97,7 @@ jobs:
       - name: Check the compose subset
         run: |
           set -euo pipefail
-          bash deployment/scripts/check-gated.sh compose 31 \
+          bash deployment/scripts/check-stub.sh compose 31 \
             deployment -path deployment/security-harness -prune -o \
             -name 'compose*.y*ml' -print -quit
 
@@ -117,10 +109,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install pinned uv
-        run: |
-          set -euo pipefail
-          python -m pip install --user "uv==${UV_VERSION}"
-          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+        run: bash deployment/scripts/install-uv.sh
       - name: Lint
         run: bash deployment/scripts/check-lint.sh
 
@@ -141,10 +130,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install pinned uv
-        run: |
-          set -euo pipefail
-          python -m pip install --user "uv==${UV_VERSION}"
-          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+        run: bash deployment/scripts/install-uv.sh
       - name: Run unit tests
         run: bash deployment/scripts/run-unit-tests.sh "${{matrix.distribution}}"
 
@@ -161,7 +147,7 @@ jobs:
       - name: Check the Flink jobs
         run: |
           set -euo pipefail
-          bash deployment/scripts/check-gated.sh java 38 \
+          bash deployment/scripts/check-stub.sh java 38 \
             streaming \( -name '*.java' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -print -quit
 
   # OpenTofu, Helm and the policy scan. The modules land with issue #74.
@@ -177,7 +163,7 @@ jobs:
       - name: Check the deployment artefacts
         run: |
           set -euo pipefail
-          bash deployment/scripts/check-gated.sh deployment 74 \
+          bash deployment/scripts/check-stub.sh deployment 74 \
             deployment \( -name '*.tf' -o -name '*.tfvars' -o -name 'Chart.yaml' \) -print -quit
 
   # The Prometheus rules and the dashboards. They land with issue #67.
@@ -193,7 +179,7 @@ jobs:
       - name: Check the observability artefacts
         run: |
           set -euo pipefail
-          bash deployment/scripts/check-gated.sh observability 67 \
+          bash deployment/scripts/check-stub.sh observability 67 \
             observability \( -name '*.yml' -o -name '*.yaml' -o -name '*.json' \) -print -quit
 
   # The one built image. The build lands with issue #75.
@@ -212,7 +198,7 @@ jobs:
       - name: Build the image
         run: |
           set -euo pipefail
-          bash deployment/scripts/check-gated.sh images 75 \
+          bash deployment/scripts/check-stub.sh images 75 \
             deployment \( -name 'Dockerfile' -o -name 'Dockerfile.*' -o -name '*.Dockerfile' \) -print -quit
 
   # The only status check the ruleset requires. It fails on any failure or
