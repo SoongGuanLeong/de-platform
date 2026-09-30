@@ -74,7 +74,7 @@ A table cell that has nothing in it carries one of two words, both lower case:
 | `n/a` | the column does not apply to that row |
 | `none` | the column applies, and there is nothing |
 
-`N/A` and `None` were each in use as well, for the same two meanings, in 72 cells. Lower-casing them is mechanical. Choosing between `n/a` and `none` is not: ask whether the column applies to the row at all.
+`N/A` and `None` were each in use as well, for the same two meanings, in 72 cells, and are replaced. Choosing between `n/a` and `none` is not mechanical: ask whether the column applies to the row at all.
 
 Do not use `-`. It was doing both jobs, in 29 cells across six tables, so a reader cannot tell which of the two it means.
 

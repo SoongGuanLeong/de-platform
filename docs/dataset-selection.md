@@ -84,7 +84,7 @@ Each source is the best available referent for a distinct named requirement, and
 | **Timestamp characteristics** | `o_orderdate` plus the `l_shipdate`, `l_commitdate` and `l_receiptdate` chain. No timezone and no late arrivals |
 | **CDC or event simulation** | **None.** Insert-only, with no updates and no deletes |
 | **Data-quality problems** | None genuine: no NULLs, no updates, no deletes. **Any defect demonstrated on TPC-H is one we manufactured** |
-| **Streaming suitability** | None |
+| **Streaming suitability** | none |
 | **Batch suitability** | Excellent. This is the batch centre |
 | **Lakehouse suitability** | Excellent analytical fixture, with answers that act as an assertion oracle |
 | **Analytical suitability** | Excellent, and comparable to published ClickHouse TPC-H figures because the queries and answers are published |
@@ -128,7 +128,7 @@ Each source is the best available referent for a distinct named requirement, and
 | **Timestamp characteristics** | `DOINTR` and `DOTERM` in `YYYYMM`, with **null meaning live**. Three different as-of dates inside a single release: postcodes, administrative areas, and health areas |
 | **CDC or event simulation** | Quarter-over-quarter diffing produces a real change stream of inserts, updates and terminations. T2, from a statutory source |
 | **Data-quality problems** | Publisher-documented: the ONSPD user guide admits that allocating addresses to geographies is imprecise through straddling and wrong assignment. Also two coordinate reference systems, and a null-means-live semantic |
-| **Streaming suitability** | None |
+| **Streaming suitability** | none |
 | **Batch suitability** | Excellent reference dimension |
 | **Lakehouse suitability** | A MERGE-heavy, delete-free write profile, in deliberate contrast to TPC-C's churn, and 137 columns make column pruning a demonstrable layout optimisation |
 | **Analytical suitability** | The geographic enrichment for the network spine |
@@ -190,8 +190,8 @@ Working through every pair, and naming which pairs have no question:
 | RIPE Atlas and ONSPD | Which UK postcode areas have the worst measured connectivity, and how does that change as postcodes are terminated? | **Genuine.** A real spatial join over a real SCD2 dimension |
 | ONSPD across releases | Which postcodes appeared, changed or terminated this quarter, and did the administrative geography they belong to change under them? | **Genuine.** Real SCD2 |
 | TPC-C and RIPE Atlas | On a shared time axis, how did order volume and UK network quality move over the same period? | **Time-only.** No key, no causality claimed. An honest correlation over a common clock |
-| TPC-C and TPC-H | None | **Domain relationship only.** They share a subject matter and a gold-layer style, nothing more |
-| TPC-C and ONSPD; TPC-H and ONSPD | None | **None.** Synthetic, US-shaped geography against UK postcodes |
+| TPC-C and TPC-H | none | **Domain relationship only.** They share a subject matter and a gold-layer style, nothing more |
+| TPC-C and ONSPD; TPC-H and ONSPD | none | **None.** Synthetic, US-shaped geography against UK postcodes |
 
 **The count is two genuine pairs, both inside the network spine, plus one time-only cross-spine correlation.** The combination's justification is not that every pair has a question. It is that each source is the best available referent for a distinct requirement, and that the platform's unity is the control plane: one catalog, one lineage graph, one data-quality framework, one serving layer, carrying a CDC-fed OLTP mirror and a live measurement stream without either degrading the other. That platform-level question is measurable, and it is the one the combination actually answers.
 

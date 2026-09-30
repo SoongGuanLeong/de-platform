@@ -43,7 +43,7 @@ Three premises in the assignment do not survive contact with the primary sources
 | **Confluent Schema Registry** | Company (Confluent, Inc.), no foundation ([S11], [S12]) | Public company, clear incentive | Pass: tags v64.7.7.2-2; not archived; pushed 2026-09-28 ([S14], [S15]) | Pass technically (JVM), but see licence | It *is* the reference API | **REJECTED - licence** |
 | **Redpanda Schema Registry** | Company (Redpanda Data, Inc.) ([S22], [S23]) | Funded company | Pass ([S29]) | Not a standalone service: **built into the broker**; adopting it means adopting Redpanda as the Kafka broker ([S25]) | Confluent-compatible serializers/endpoints, with enterprise-only ACLs ([S26], [S27]) | **REJECTED - broker lock-in and BSL** |
 | **AWS Glue Schema Registry** | Company (Amazon); proprietary managed service ([S30]) | Commercial incentive to keep it alive | N/A (SaaS) | **Fail: serverless AWS service, cannot run on podman** ([S30]) | Its own API, not the Confluent REST API ([S30]) | **REJECTED - cannot run locally** |
-| **No registry** | N/A | N/A | N/A | Trivially fits | N/A | **REJECTED - loses the evidence ticket #15 needs** |
+| **No registry** | n/a | n/a | n/a | Trivially fits | n/a | **REJECTED - loses the evidence ticket #15 needs** |
 
 ---
 
