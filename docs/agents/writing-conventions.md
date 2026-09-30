@@ -32,3 +32,12 @@ When a document is revised after it was written, mark the revision in place rath
 Do not use another noun. `Amended on`, `Amendment dated`, `Redaction` and `Revised` were all in use and are all replaced by this form. The action is still named in the sentence that follows, as "the values were redacted under ADR-0028".
 
 A correction to the input itself, a wrong premise or framing in the assignment, is part of the report's argument from the start and carries no date: `**Correction to the assignment's premise (<subject>).**`, or `**Correction <n>:**` for a numbered series inside one document.
+
+### Checking a document for conformance
+
+Scope the check to the marker substring, not to the line. A line-level scan both over-counts and under-counts:
+
+- `docs/research/11-schema-registry-comparison.md:29` is `**Correction 2:**`, which is undated, but the sentence after it cites the Apicurio ADR's own date. A line-level scan reads that as a dated marker. There are nine dated markers in the repository, not ten.
+- A heading-form marker is only a marker at the start of a line. One shown mid-line, as the bullet above does, matches neither a bold pattern nor an anchored heading pattern, so a line-level scan misses it entirely.
+
+A marker containing `<` and `>` is an example rather than a real marker. That one rule separates this file's examples from the corpus, so no path exclusion is needed.
