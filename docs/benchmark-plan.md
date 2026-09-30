@@ -185,7 +185,7 @@ Batch peaks at 6976 MiB and streaming at 7168 MiB against an enforceable 7168 Mi
 
 **Then the incident laboratory**, which needs both paths plus the observability overlay and runs after every benchmark, so a benchmark's co-tenancy is never polluted by an injected fault.
 
-Each benchmark declares its own resource entitlement inside its protocol, within the `benchmark` profile's rule of at most 7168 MiB and 12 vCPU. The worked example in [local-development section 4](local-development.md) is the precedent for B1's serving bring-up: ClickHouse 6144 MiB / 8 vCPU, SeaweedFS 256 / 1, peak 6400 MiB / 9 vCPU. **An entitlement is not a threshold**, and the ceilings live in `deployment/budgets/profiles.yaml` rather than in `docs/budgets.yaml` (ADR-0031).
+Each benchmark declares its own resource entitlement inside its protocol, within the `benchmark` profile's rule of at most 7168 MiB and 12 vCPU. **B5 is the exception.** It is measured over the whole CDC path, which the `benchmark` profile may never be ([completion bar section 8](completion-bar.md)), so it runs under `streaming` and takes that profile's declared peak rather than declaring one of its own. The worked example in [local-development section 4](local-development.md) is the precedent for B1's serving bring-up: ClickHouse 6144 MiB / 8 vCPU, SeaweedFS 256 / 1, peak 6400 MiB / 9 vCPU. **An entitlement is not a threshold**, and the ceilings live in `deployment/budgets/profiles.yaml` rather than in `docs/budgets.yaml` (ADR-0031).
 
 A reset is proven before each benchmark, not asserted: the reset procedure followed by a fresh bring-up that reaches the same readiness assertion. The `--keep` flag exists for a benchmark run that has to survive inspection.
 
