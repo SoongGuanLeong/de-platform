@@ -37,9 +37,9 @@ that survives the disorder test.
 
 ---
 
-# Candidates
+## Candidates
 
-## 1. RIPE Atlas measurement results
+### 1. RIPE Atlas measurement results
 
 ```
 Dataset
@@ -205,7 +205,7 @@ ingestion shapes. It also pairs with a time-series source (Citi Bike or Meteosta
 different windowed-aggregation shapes: bursty network events versus regular telemetry.
 ```
 
-## 2. Binance public market data
+### 2. Binance public market data
 
 ```
 Dataset
@@ -353,7 +353,7 @@ demonstrating either twice. Binance also supplies a natural slowly-changing dime
 metadata) and a natural business key (symbol pair) that other candidates in this angle lack.
 ```
 
-## 3. Wikimedia EventStreams (recentchange, revision-create, page-create/delete/undelete)
+### 3. Wikimedia EventStreams (recentchange, revision-create, page-create/delete/undelete)
 
 ```
 Dataset
@@ -508,7 +508,7 @@ pageviews are CC0, the RecentChanges feed is CC BY-SA - which is itself a govern
 why catalog-level licence metadata per table matters.
 ```
 
-## 4. Citi Bike trip history (NYC) and the Lyft GBFS live feeds
+### 4. Citi Bike trip history (NYC) and the Lyft GBFS live feeds
 
 ```
 Dataset
@@ -649,7 +649,7 @@ multi-source governance, or with Meteostat (candidate 7) if a second irregular t
 wanted.
 ```
 
-## 5. GDELT Global Database of Events 2.0
+### 5. GDELT Global Database of Events 2.0
 
 ```
 Dataset
@@ -801,7 +801,7 @@ relationship is as a *licence contrast*: it demonstrates what "unrestricted use"
 MIT, public domain, CC0 and CC BY-NC-SA.
 ```
 
-## 6. Wikimedia pageviews and pageview_complete (reported as a TIDY AGGREGATE - see verdict)
+### 6. Wikimedia pageviews and pageview_complete (reported as a TIDY AGGREGATE - see verdict)
 
 ```
 Dataset
@@ -907,7 +907,7 @@ best partner for a ClickHouse serving demo if the platform needs one candidate t
 "query performance tuning" rather than "streaming correctness".
 ```
 
-## 7. Meteostat hourly (reported as PARTLY REAL - irregular series, with a licence contradiction)
+### 7. Meteostat hourly (reported as PARTLY REAL - irregular series, with a licence contradiction)
 
 ```
 Dataset
@@ -1030,7 +1030,7 @@ Weaker on streaming mechanics than any other candidate, so it should be a suppor
 spine.
 ```
 
-## 8. USGS Earthquake Hazards Program real-time feeds and FDSN event service
+### 8. USGS Earthquake Hazards Program real-time feeds and FDSN event service
 
 ```
 Dataset
@@ -1170,7 +1170,7 @@ multi-source governance cheaply, and the best alarm source, because it moves fas
 public domain with no terms to negotiate.
 ```
 
-## 9. Criteo 1TB Click Logs (reported as a TIDY AGGREGATE WITH NO EVENT TIME AT ALL - rejected)
+### 9. Criteo 1TB Click Logs (reported as a TIDY AGGREGATE WITH NO EVENT TIME AT ALL - rejected)
 
 ```
 Dataset
@@ -1258,7 +1258,7 @@ actually a tidied aggregate. If someone proposes it as the platform's clickstrea
 section is the reason to decline.
 ```
 
-## 10. Amazon Reviews 2023 (reported as TIDY - rich but static and non-commercial)
+### 10. Amazon Reviews 2023 (reported as TIDY - rich but static and non-commercial)
 
 ```
 Dataset
@@ -1348,7 +1348,7 @@ or RIPE Atlas do that with genuinely live data, which is better. Not recommended
 keeping as an optional supplement.
 ```
 
-## 11. Open-Meteo (non-commercial free tier - licence-constrained but excellent for live weather)
+### 11. Open-Meteo (non-commercial free tier - licence-constrained but excellent for live weather)
 
 ```
 Dataset
@@ -1453,7 +1453,7 @@ on "the obvious free weather API", and the answer is: good licence on the data, 
 restriction on the free tier, hard rate caps.
 ```
 
-## 12. Rejected on licence, verification, or shape
+### 12. Rejected on licence, verification, or shape
 
 **OpenSky Network (live ADS-B flight positions and historical trajectories).** The best-engineered
 real-time telemetry source in existence, and rejected here on licence terms, not on merit.
@@ -1521,9 +1521,9 @@ dataset we cannot cleanly access. Recorded here so the shortlist's exclusions ar
 
 ---
 
-# Ranked shortlist
+## Ranked shortlist
 
-## 1. RIPE Atlas measurement results
+### 1. RIPE Atlas measurement results
 
 RIPE Atlas is the best candidate in this angle because it is the only source that is simultaneously
 genuinely live, genuinely large, and genuinely messy for reasons that are documented by the
@@ -1542,7 +1542,7 @@ lets us demonstrate a reproducible 24-hour capture. The licence permits non-comm
 explicitly, with a commercial carve-out we can simply record. It beats the runner-up because it
 manufactures nothing: every streaming problem it presents is a property of the domain.
 
-## 2. Binance public market data
+### 2. Binance public market data
 
 Binance is the best volume and time-series candidate in the entire angle, and it wins on licence
 outright - MIT, with no non-commercial clause, no share-alike, and no field-of-use restriction,
@@ -1562,7 +1562,7 @@ trade. It loses to RIPE Atlas only because it is not live - daily and monthly pu
 push stream - and because its payload is flat CSV with nothing nested, so it cannot carry the
 semi-structured and variably-typed ingestion story on its own.
 
-## 3. Wikimedia EventStreams
+### 3. Wikimedia EventStreams
 
 Wikimedia is the best CDC-shaped event stream available publicly, and it is the closest analogue to
 Debezium's insert-update-delete output that we can legally and practically build on. It is genuinely
@@ -1586,7 +1586,7 @@ that MIT and public-domain sources do not impose, and the ToS explicitly says th
 "intended for use by small scale external tool developers" and "should not be used to build
 production services", which is a real operational caveat to disclose.
 
-## 4. Citi Bike history plus the Lyft GBFS live feeds
+### 4. Citi Bike history plus the Lyft GBFS live feeds
 
 Citi Bike earns its place as the only candidate supplying three things nothing else here has: a real
 slowly-changing dimension with genuine history, because stations open, close and go out of service
@@ -1606,7 +1606,7 @@ licence is also the least certain in the shortlist, because the live feeds are s
 GBFS aggregator whose terms are separate from the historical files' operator terms, and that needs
 reading and dating rather than assuming.
 
-## 5. GDELT 2.0 Global Database of Events
+### 5. GDELT 2.0 Global Database of Events
 
 GDELT wins on licence by a distance no other candidate can match - "unlimited and unrestricted use
 for any academic, commercial, or governmental use of any kind without fee", with attribution as the
@@ -1633,7 +1633,7 @@ can answer alone.
 
 ---
 
-# Target-job requirements that remain UNDEMONSTRATED by this angle
+## Target-job requirements that remain UNDEMONSTRATED by this angle
 
 Stated plainly, because gaps matter as much as picks. Several of these are by construction the job of
 other angles in this proposal, and saying so is the point; others are genuine gaps that no dataset
