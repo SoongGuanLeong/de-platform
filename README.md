@@ -41,7 +41,7 @@ Twenty components, counted by the rule in [the system architecture](docs/system-
 - **Not a technology museum.** Every component is posting-named, a same-interface substitution, or a requirement-driven addition, and each rejected candidate has a recorded disposition.
 - **Not a build.** This repository holds a proposal. Implementation is a separate effort, begun only after the proposal is approved.
 - **Not measured.** Every figure is a declared budget or an arithmetic result over documented defaults, and the capability register ships empty.
-- **Not a finished claim.** [The proposal](PROPOSAL.md) section 11 names what it does not claim, including three mission deliverables with no owning document and the one not yet produced.
+- **Not a finished claim.** [The proposal](PROPOSAL.md) section 11 names what it does not claim, including three mission deliverables with no owning document.
 
 ## Where to go next
 

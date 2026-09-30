@@ -28,7 +28,7 @@ Two readers, two routes.
 6. **The evidence.** [The completion bar](docs/completion-bar.md), [the benchmark plan](docs/benchmark-plan.md), [the testing strategy](docs/testing-strategy.md), [the incident laboratory](docs/incident-laboratory.md). What makes a claim checkable, what may be measured, at what level, and what an incident must produce.
 7. **The delivery.** [The repository decomposition](docs/repository-decomposition.md), [the local development architecture](docs/local-development.md), [the cloud architecture](docs/cloud-architecture.md), [the CI/CD strategy](docs/ci-cd-strategy.md), [the phased implementation roadmap](docs/implementation-roadmap.md).
 
-**What is deliberately left out.** The ten-minute route carries no ADR, no budget and no measurement, because each needs the context its spec supplies. The suite carries no code walkthrough and no demo script: the walkthrough belongs to [the interview and demo narrative](https://github.com/SoongGuanLeong/de-platform/issues/29), issue #29, and the raw research reports under [`docs/research/`](docs/research/) are cited rather than reproduced. No document restates another's table; where two could claim a value, the owning document holds it and the other links.
+**What is deliberately left out.** The ten-minute route carries no ADR, no budget and no measurement, because each needs the context its spec supplies. The suite carries no code walkthrough and no demo script: [the interview and demo narrative](docs/demo-narrative.md) is the script, and the raw research reports under [`docs/research/`](docs/research/) are cited rather than reproduced. No document restates another's table; where two could claim a value, the owning document holds it and the other links.
 
 Every architectural decision along the route is an ADR under [`docs/adr/`](docs/adr/). Section 9 is the index.
 
@@ -121,7 +121,7 @@ The mission's Final Deliverables list ([`docs/mission/MISSION.md`](docs/mission/
 | 19 | Phased implementation roadmap | [The roadmap](docs/implementation-roadmap.md) sections 3 and 4 |
 | 20 | Definition of Done for every phase | [The roadmap](docs/implementation-roadmap.md) section 5, judged by [the completion bar](docs/completion-bar.md) and its register |
 | 21 | Incident laboratory design | [The incident laboratory](docs/incident-laboratory.md) |
-| 22 | Interview/demo scenarios | **Not yet produced.** [The interview and demo narrative](https://github.com/SoongGuanLeong/de-platform/issues/29), issue #29, open on the map |
+| 22 | Interview/demo scenarios | [The interview and demo narrative](docs/demo-narrative.md) |
 | 23 | Final portfolio presentation strategy | This document, with [`README.md`](README.md) |
 
 Two of the 23 have no owning document, items **13** and **14**, and one proposal item below does. That is a finding rather than an omission: every facet of each is decided and owned by one of the documents its row names, and giving any of them its own document would restate documents that already hold the authority. The check this asks of a reviewer is that no facet is undecided, not that a file exists. Item **18** is split across two named owners, which is a mapping rather than a gap.
@@ -143,6 +143,6 @@ The mission's other list, the 21 items of the Research & Architecture Proposal (
 - **The cloud arm is authored, not applied.** The AWS topology is statically validated and only ever run inside a priced, time-boxed demo window. Nothing in [the cloud architecture](docs/cloud-architecture.md) was deployed.
 - **Fourteen gaps are named, each with a substitute.** [The completion bar](docs/completion-bar.md) section 13 lists them. They are registered rather than hidden, and this index does not restate them.
 - **Three deliverables have no owning document.** Items 13 and 14 and proposal item 16 in section 10 are decided and distributed across the documents that own each facet, rather than carried by one. A reviewer checking the set should read those rows as findings: the test is that no facet is undecided, not that a file exists.
-- **Deliverable 22 is not yet produced.** [The interview and demo narrative](https://github.com/SoongGuanLeong/de-platform/issues/29), issue #29, is open on the map.
+- **The narrative is a script, not a result.** [The interview and demo narrative](docs/demo-narrative.md) names no number the platform has not measured; every figure it would show is a declared budget or the evidence item that will hold it.
 - **No performance result measured on TPC data is a TPC Benchmark Result.** Every such figure is labelled a TPC-derived result.
 - **Two limitations carried, not reopened.** From the Iceberg v3 review: the catalog read-through REST path was not exercised, and the Flink v3 upsert writer is unverified.
