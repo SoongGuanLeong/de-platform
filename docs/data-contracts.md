@@ -98,7 +98,7 @@ The compatibility rule only bites where a machine reads the schema. There are fo
 
 Two reasons, and the second is the load-bearing one. Completion bar 6.1's falsifiable test is that "a backward-incompatible schema is **rejected by the serializer**", and only a registry-backed serializer can do that; choosing JSON would quietly downgrade that evidence item to a CI check. And the platform replays partitions from offset 0 (M2's idempotence test) and reads historical data through the read-through arm, so every *historical* consumer must still read new data, which is what `BACKWARD_TRANSITIVE` means and plain `BACKWARD` does not.
 
-This **amends** the earlier `debezium-json` reading. Research 06 recommends `debezium-json` as *a* standard way to feed upsert mode, and research 11 read that as the platform's choice. Both carry dated correction notes.
+**Correction, 2026-09-28 (ticket #15).** This **amends** the earlier `debezium-json` reading. Research 06 recommends `debezium-json` as *a* standard way to feed upsert mode, and research 11 read that as the platform's choice; both carry dated correction notes, as does [ADR-0020](adr/0020-avro-on-the-cdc-topics-with-backward-transitive-compatibility.md).
 
 **The gold contracts are pushed into Apicurio's native Data Contracts feature by CI as a mirror, never authored there.** The registry can then answer "what version is this table's contract at" without becoming a second source of truth. The registry's ccompat path accepts data-contract rules but does not store or enforce them (research 11, [S8]), so the native feature is the only place the mirror can live.
 
