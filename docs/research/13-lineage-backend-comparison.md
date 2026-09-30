@@ -10,7 +10,7 @@
 
 ## 0. Method and the operational envelope
 
-The envelope is from the project brief and the measured baseline in `03-longevity-audit.md` §2:
+The envelope is from the assignment and the measured baseline in `03-longevity-audit.md` §2:
 
 - 12 CPU, **~7-8 GB free RAM** (host measured 14 GB total, 7 GB free / 7 GB available on 2026-09-27), 231 GB disk.
 - podman 6.1.x target (5.7.0 is installed and EOL; upgrade pending).
