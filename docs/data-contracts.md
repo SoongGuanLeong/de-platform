@@ -91,7 +91,7 @@ The compatibility rule only bites where a machine reads the schema. There are fo
 |---|---|---|
 | The CDC Kafka topic | Avro, subject `<topic>-value`, `BACKWARD_TRANSITIVE` | The serializer, against Apicurio's ccompat v7 endpoint |
 | The gold Iceberg tables | The contract: validated as a file in CI, asserted against the live table under a path profile ([testing strategy](testing-strategy.md) section 7) | CI plus the batch or streaming profile |
-| The ClickHouse serving copy | none of its own; it is derived | The contract's rule, inherited |
+| The ClickHouse serving copy | None of its own; it is derived | The contract's rule, inherited |
 | The consumer-facing interface | The view version rule, section 5 | The interface policy and CI |
 
 **The CDC topic carries Avro, not `debezium-json`.** The subject is `<topic>-value` (Debezium's default topic naming, the Confluent subject convention), one per CDC topic, mode `BACKWARD_TRANSITIVE`. The producer is Debezium's Kafka Connect `AvroConverter` in `as-confluent` mode; the reader is Flink's `avro-confluent` format, both pointed at Apicurio's `/apis/ccompat/v7`.

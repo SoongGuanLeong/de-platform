@@ -76,7 +76,9 @@ A table cell that has nothing in it carries one of two words, both lower case:
 
 `N/A` and `None` were each in use as well, for the same two meanings, in 72 cells, and are replaced. Choosing between `n/a` and `none` is not mechanical: ask whether the column applies to the row at all.
 
-Lower case wherever the word appears, including at the start of a longer cell: `none published`, `none needed. ClickHouse Cloud ...`, `none; [section 13 item 11](completion-bar.md) records it`.
+Lower case when the word names an absent value, including at the start of a longer cell: `none published`, `n/a (Java)`, `none; [section 13 item 11](completion-bar.md) records it`, `none needed. ClickHouse Cloud ...`.
+
+Capitalise it when it opens a sentence instead, because there it is ordinary prose and a cell's first word is capitalised everywhere else: `None of its own; it is derived`, `None. Writes data files only [S4], [S6], [S12]`. A bolded verdict follows the same rule, as `**None.** Synthetic, US-shaped geography against UK postcodes` in a column whose other values are `**Genuine.**` and `**Time-only.**`. The test is whether the word names the absence of a value or is the subject of a sentence.
 
 Do not use `-`. It was doing both jobs, in 29 cells across six tables, so a reader cannot tell which of the two it means.
 

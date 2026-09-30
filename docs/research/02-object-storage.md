@@ -556,7 +556,7 @@ Named, not hand-waved:
 | **EC ratio tunability** (SeaweedFS OSS fixed at 10+4 = 1.4x) | Medium | Budget 1.4x. Run the S3 storage-tiering demo (hot local / cold S3) to show we know what the knob would buy. |
 | **Console polish / UX** | Low | Irrelevant for a portfolio project; a bonus if we wire the admin UI into the docs. |
 | **A universally recognised name** | **Real and underrated** - every question now costs a paragraph | Own it. Lead the write-up with §6. A candidate that needs defending but whose defence is *better* than the incumbent's is a better story than a comfortable answer. |
-| **Flink and Spark checkpoint storage** | none - this is an improvement | Do **not** put Flink checkpoints or Spark shuffle on the S3 gateway. SeaweedFS's own Hadoop FS (`seaweedvfs://`) or local disk is correct there. Putting checkpoints behind an S3 API is a classic mistake and avoiding it is worth a line in the design doc. |
+| **Flink and Spark checkpoint storage** | None - this is an improvement | Do **not** put Flink checkpoints or Spark shuffle on the S3 gateway. SeaweedFS's own Hadoop FS (`seaweedvfs://`) or local disk is correct there. Putting checkpoints behind an S3 API is a classic mistake and avoiding it is worth a line in the design doc. |
 
 ---
 

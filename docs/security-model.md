@@ -342,7 +342,7 @@ That sentence replaces the earlier "audited in both engines", which was not true
 
 | Concern | Local | Cloud | What the difference means |
 |---|---|---|---|
-| Workload identity | none. Each container runs as a local process | IRSA, one IAM role per component, and a node role with no S3 or Secrets Manager permission | The local run evidences the shape of the credential flow, not IAM policy semantics |
+| Workload identity | None. Each container runs as a local process | IRSA, one IAM role per component, and a node role with no S3 or Secrets Manager permission | The local run evidences the shape of the credential flow, not IAM policy semantics |
 | Secret storage | Files under a gitignored `runtime/` | AWS Secrets Manager projected by the Secrets Store CSI driver into tmpfs | The local file mode and the cloud `filePermission` are different mechanisms serving the same rule |
 | Network boundary | One rootless podman network, with loopback for the UIs | A VPC with public and private subnets, security groups, and no NAT in the minimal arm | Local isolation is real but weaker, and it is the only thing standing behind the unauthenticated surfaces |
 | Transport | Five listeners with TLS and a negative test each | TLS terminated at the ALB for the browser surfaces, and TCP pass-through with in-pod TLS for the data plane | ALB termination is client-to-ALB only, and is labelled as such |
