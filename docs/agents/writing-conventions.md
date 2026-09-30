@@ -1,6 +1,6 @@
 # Writing Conventions
 
-Prose conventions for this repo's documents. Each exists because a term or a marker had drifted into more than one form.
+Prose conventions for this repo's documents. Each exists because a term or a marker had drifted into more than one form. Every example below uses `<angle-bracket>` placeholders, so a marker scan can tell an example from a real marker without excluding this file.
 
 ## Name the research input "the assignment"
 
@@ -15,20 +15,20 @@ Use it for the input and for the claims made in it: "the assignment says", "the 
 
 `docs/mission/MISSION.md` is a verbatim preservation copy and keeps its own "this brief", which refers to the Project Mission rather than to a research assignment. Do not edit that file.
 
-## Mark a revision with `**Correction, YYYY-MM-DD (authority).**`
+## Mark a revision with `**Correction, <date> (<authority>).**`
 
 When a document is revised after it was written, mark the revision in place rather than editing the original claim silently.
 
 ```
-**Correction, YYYY-MM-DD (authority or circumstance).**
+**Correction, <date> (<authority or circumstance>).**
 ```
 
 - Bold the marker only; the claim that follows is not bold.
-- The date is ISO, after a comma. A numbered correction puts the number first: `**Correction 4, YYYY-MM-DD (ticket #15):**`.
+- The date is ISO, after a comma. A numbered correction puts the number first: `**Correction <n>, <date> (<authority>):**`.
 - The parenthetical carries the authority (`ticket #15`) or the circumstance (`after peer review`, `after this ADR was accepted`). Every dated marker carries one.
 - The terminator follows grammar: `.` when a new sentence follows, `:` when the marker's own sentence continues.
-- A correction that is a whole section rather than a paragraph takes a heading instead, `## Correction, YYYY-MM-DD (authority)`, with no terminator.
+- A correction that is a whole section rather than a paragraph takes a heading instead, `## Correction, <date> (<authority>)`, with no terminator.
 
 Do not use another noun. `Amended on`, `Amendment dated`, `Redaction` and `Revised` were all in use and are all replaced by this form. The action is still named in the sentence that follows, as "the values were redacted under ADR-0028".
 
-A correction to the input itself, a wrong premise or framing in the assignment, is part of the report's argument from the start and carries no date: `**Correction to the assignment's premise (<subject>).**`, or `**Correction 1:**` for a numbered series inside one document.
+A correction to the input itself, a wrong premise or framing in the assignment, is part of the report's argument from the start and carries no date: `**Correction to the assignment's premise (<subject>).**`, or `**Correction <n>:**` for a numbered series inside one document.
