@@ -1,4 +1,4 @@
-# Writing Conventions
+# Writing conventions
 
 Prose conventions for this repo's documents. Each exists because a term or a marker had drifted into more than one form. Every example below uses `<angle-bracket>` placeholders, so a marker scan can tell an example from a real marker without excluding this file.
 
