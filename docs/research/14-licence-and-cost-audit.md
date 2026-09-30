@@ -3,7 +3,7 @@
 **Date of research:** 2026-09-28. All evidence accessed 2026-09-28 unless stated.
 **Scope:** the nineteen components in `docs/technology-selection.md`, the four documented fallbacks (Lakekeeper, RustFS, Karapace, Apache Airflow), the four datasets (TPC-C, TPC-H, RIPE Atlas, ONSPD), and the base images and runtimes (Eclipse Temurin JDK 17, Python 3.12, and the OCI images the components publish).
 **Question answered:** is every chosen component and data source actually free to use - no payment, no commercial-use restriction, open source rather than merely source-available - and what obligation or paid-only capability does each one carry?
-**Ticket:** [#20 Licence and cost audit](https://github.com/SoongGuanLeong/de-platform/issues/20) is issue #20 on map #9. Related decision: [ADR-0009](../adr/0009-dataset-licence-position-and-obligations.md).
+**Ticket:** [Licence and cost audit](https://github.com/SoongGuanLeong/de-platform/issues/20) is issue #20 on map #9. Related decision: [ADR-0009](../adr/0009-dataset-licence-position-and-obligations.md).
 
 ## The method
 

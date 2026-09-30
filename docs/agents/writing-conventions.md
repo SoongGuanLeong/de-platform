@@ -91,7 +91,7 @@ An issue link names the issue in its text, as a section link names its document,
 
 The number alone is enough where the sentence already names the issue, as it is for a section: `the salvage ticket ([#5](https://github.com/SoongGuanLeong/de-platform/issues/5))`. A bare `#N` is also this repo's shorthand for an issue in prose - `so #16 relocating the definitions is a move` - so a link whose text is only the number reads as that shorthand rather than as a name.
 
-Two lines were in use outside this file: `docs/research/14-licence-and-cost-audit.md:6` and `docs/research/19-polaris-iceberg-v3-metadata.md:6` each put the number inside the link text beside the title and then repeated the number in the prose that followed. Neither is the form to write.
+Two lines were in use outside this file: `docs/research/14-licence-and-cost-audit.md:6` and `docs/research/19-polaris-iceberg-v3-metadata.md:6` each put the number inside the link text beside the title and then repeated the number in the prose that followed. Neither is the form to write, and both now carry the title alone.
 
 ## Tables
 

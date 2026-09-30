@@ -3,7 +3,7 @@
 **Date of research:** 2026-09-28. All evidence accessed 2026-09-28 unless stated.
 **Scope:** Apache Polaris 1.7.0 (tag `apache-polaris-1.7.0`, published 2026-08-02) as the Iceberg REST catalog, read against Apache Iceberg 1.11.0 (tag `apache-iceberg-1.11.0`, published 2026-05-20), which is the Iceberg version Polaris 1.7.0 pins. Apache Polaris 1.8.0 (published 2026-09-28) is re-checked where it could differ. Lakekeeper (the documented fallback catalog) is checked at its current release v0.13.6 (2026-09-22).
 **Question answered:** Does Polaris 1.7.0 serve Iceberg format v3 table metadata over the Iceberg REST catalog; if not, which Polaris version does and when; does Polaris pass v3 metadata through or must it understand v3 features; does Lakekeeper support v3; and does the Iceberg REST specification itself version-gate the table format?
-**Ticket:** [#22 Full Iceberg v3 stack review](https://github.com/SoongGuanLeong/de-platform/issues/22) is issue #22 on map #9. Item 4 of that ticket is "The catalog question. Whether Polaris 1.7.0 serves v3 table metadata. Unverified." This file answers item 4.
+**Ticket:** [Full Iceberg v3 stack review](https://github.com/SoongGuanLeong/de-platform/issues/22) is issue #22 on map #9. Item 4 of that ticket is "The catalog question. Whether Polaris 1.7.0 serves v3 table metadata. Unverified." This file answers item 4.
 
 ---
 
