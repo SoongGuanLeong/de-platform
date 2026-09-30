@@ -17,11 +17,12 @@ Single-context repo (this repo):
 ```
 /
 ├── CONTEXT.md
-├── docs/adr/
-│   ├── 0001-why-apache-iceberg.md
-│   └── 0002-why-opentofu.md
-└── src/
+└── docs/adr/
+    ├── 0001-convergence-not-ordering.md
+    └── 0002-exactly-once-effect-not-delivery.md
 ```
+
+There is no platform code directory yet, so the tree shows only where the domain docs live.
 
 ## Use the glossary's vocabulary
 
@@ -33,4 +34,4 @@ If the concept you need isn't in the glossary yet, that's a signal: either you'r
 
 If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
 
-> _Contradicts ADR-0007 (event-sourced orders), but worth reopening because…_
+> _Contradicts ADR-0008 (two spines with no cross-domain join), but worth reopening because…_
