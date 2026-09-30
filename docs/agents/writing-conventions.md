@@ -64,3 +64,20 @@ A document that reproduces another document verbatim is not edited to conform. I
 The exemption covers the reproduced portion only. In `09`, lines 1 to 13 are this repo's own header and do follow the rules above: the H1 is sentence case and carries the `NN - ` prefix.
 
 A heading in a preservation copy is not a defect, and both entries above were checked against their source before being left alone.
+
+## Tables
+
+A table cell that has nothing in it carries one of two words, both lower case:
+
+| Write | Meaning |
+| --- | --- |
+| `n/a` | the column does not apply to that row |
+| `none` | the column applies, and there is nothing |
+
+`N/A` and `None` were each in use as well, for the same two meanings, in 72 cells. Lower-casing them is mechanical. Choosing between `n/a` and `none` is not: ask whether the column applies to the row at all.
+
+Do not use `-`. It was doing both jobs, in 29 cells across six tables, so a reader cannot tell which of the two it means.
+
+A cell left blank is not a way to say nothing either. Two tables have blank cells, and both are structural rather than a placeholder: the `**Total**` row in `docs/system-architecture.md` has no members to list, and the 10x and 100x rows in `docs/cloud-architecture.md` section 6.1 leave the per-class split unasserted on purpose.
+
+Table shape is uniform and stays that way: every table has a leading and a trailing pipe, a plain `---` separator row, and a blank line before it.
