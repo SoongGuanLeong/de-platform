@@ -26,6 +26,8 @@ One profile at a time, because the whole stack does not fit in the available mem
     deployment/security-harness/tests/seaweedfs.sh
     podman-compose -f deployment/security-harness/profiles/seaweedfs.yml down seaweedfs
 
+`tests/static.sh` needs no running service: it checks the gitignore rules, the tracked tree and the secret declarations.
+
 ### Wait for readiness before the test
 
 `podman-compose up -d` returns when the container is created, not when the service inside it accepts connections. A test run in that window reports refused connections, which read as control failures but are not: PostgreSQL fails its six authentication and TLS assertions with `Connection refused`, and passes all of them unchanged about three seconds later. Poll the service before running its test, and bound the loop so a service that never starts fails the run rather than hanging it.
@@ -40,8 +42,6 @@ One profile at a time, because the whole stack does not fit in the available mem
 | Polaris | `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:58181/api/catalog/v1/config` | prints `401` |
 
 Each probe waits on the listener the test then exercises, so a service that answers its probe has passed the test's own precondition. Kafka is the exception: its client needs a rendered SASL_SSL config, so the probe reads the broker's startup line instead. The two probes that expect a refusal status - SeaweedFS `403` and Polaris `401` - are waiting for the listener to answer at all, not for the request to succeed.
-
-`tests/static.sh` needs no running service: it checks the gitignore rules, the tracked tree and the secret declarations.
 
 ## Layout
 
