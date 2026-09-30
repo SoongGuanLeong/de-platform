@@ -7,7 +7,7 @@ No cloud arm is applied outside a priced demo window, so the platform has no sta
 ## Considered options
 
 - **Self-hosted Argo CD.** Rejected: it would be an addition with no local evidence path and an unsourceable footprint, and no requirement names it. The mission's Kubernetes section asks for deployments, services, config, secrets, health checks, resource limits, persistent storage, Helm packaging, rolling updates and failure or restart behaviour. The charts declare every one of them and the runbook is where they are exercised; the only item on that list a controller would add is continuous reconciliation, which is not on it.
-- **Managed Argo CD through EKS Capabilities.** Rejected: it adds AWS Identity Center as a mandatory prerequisite for a surface the platform otherwise never touches, it contradicts ADR-0027's self-host line, and it buys a demonstration the mission does not ask for. It remains the option to take **if** this decision is ever reversed, because it adds no component to the count.
+- **Managed Argo CD through EKS Capabilities.** Rejected: it adds AWS Identity Center as a mandatory prerequisite for a surface the platform otherwise never touches, it contradicts ADR-0027's self-host line, and it buys a demonstration the mission does not ask for. It remains the option to take **if** this decision is ever reversed, because it adds no component to the count: it is a capability rather than a service the platform runs.
 - **A controller that runs locally against a kind or k3s cluster.** Rejected: it would put a Kubernetes cluster inside the same 7 to 8 GB the path profiles already struggle to fit, and it would evidence a local cluster rather than the EKS shape.
 
 ## Consequences
