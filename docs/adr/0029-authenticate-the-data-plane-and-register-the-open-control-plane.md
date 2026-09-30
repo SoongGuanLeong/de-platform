@@ -14,7 +14,7 @@ Most components in this stack ship with authentication disabled or absent by def
 
 ## Considered options
 
-- **Authenticate everything locally, with an identity provider and a reverse proxy.** Rejected: an identity provider is a twenty-first component admitted to switch on a feature nothing depends on, and proxy authentication over loopback buys no boundary a reviewer would credit.
+- **Authenticate everything locally, with an identity provider and a reverse proxy.** Rejected: an identity provider is an addition admitted to switch on a feature nothing depends on, and proxy authentication over loopback buys no boundary a reviewer would credit.
 - **Authenticate nothing and document the absences only.** Rejected: the data plane is where a credential is a real boundary, and the vended prefix-scoped credential is the platform's strongest access claim.
 - **Mutual TLS between every pair.** Rejected: no certificate lifecycle story exists to justify it, and it is the same ceremony in a different mechanism.
 - **TLS on every listener.** Rejected on the same ground as the proxy, with two additional facts: the Dagster webserver has no native TLS option and Marquez documents none, so both would need a proxy.
