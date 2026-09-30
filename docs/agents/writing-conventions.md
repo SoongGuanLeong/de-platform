@@ -80,7 +80,7 @@ The link text carries the document's name or the section locator, never both. Wh
 
 Header metadata lines and further-reading lists keep the backticked path, because there the reference is to the whole document: ``**Base:** the evidence standard in [`docs/requirements-matrix.md`](requirements-matrix.md) section 3``.
 
-Two other forms were in use outside this file: 28 links put the section number inside the link text beside the document's name or path, and 12 prose references put `section N` directly after a backticked file name or path that was not a link. Neither is the form to write; the 28 links now name the document and put the locator after the link.
+Two other forms were in use outside this file: 28 links put the section number inside the link text beside the document's name or path, and 12 prose references put `section N` directly after a backticked file name or path that was not a link. Neither is the form to write; the 28 links now name the document and put the locator after the link, and the rest of the corpus was brought to the table above.
 
 ## Cite an issue by naming it, then the number
 

@@ -139,7 +139,7 @@ Two gaps, registered rather than filled with invented names.
 - **The Iceberg-side layout for the batch-written gold tables** (section 7).
 - **`fact_lineitem`'s `ORDER BY` and `proj_supplier`**, the most contestable choice in the layout, tested by the B1 sweep.
 - **The P3 read pattern**: `FINAL` against the `argMax` latest-version idiom, benchmarked for correctness and measured for latency.
-- **A discrepancy between two closed tickets, recorded rather than silently resolved.** [The serving layer](serving-layer.md) section 11 says the B1 sweep "test[s] the Iceberg-side partition transform and sort order"; [the benchmark plan](benchmark-plan.md) section 4 defines B1's three variants as ClickHouse partition and `ORDER BY` values. Either the sweep varies the Iceberg side too, in which case the benchmark plan's variant table is missing that column, or the serving layer's sentence overstates what B1 varies. The synthesis does not pick one; it is named here so the two documents are reconciled before B1 runs.
+- **A discrepancy between two closed tickets, recorded rather than silently resolved.** [the serving layer](serving-layer.md) section 11 says the B1 sweep "test[s] the Iceberg-side partition transform and sort order"; [the benchmark plan](benchmark-plan.md) section 4 defines B1's three variants as ClickHouse partition and `ORDER BY` values. Either the sweep varies the Iceberg side too, in which case the benchmark plan's variant table is missing that column, or the serving layer's sentence overstates what B1 varies. The synthesis does not pick one; it is named here so the two documents are reconciled before B1 runs.
 
 ---
 

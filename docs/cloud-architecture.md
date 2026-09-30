@@ -298,6 +298,6 @@ Carried forward rather than silently assumed:
 - **The reference arm's node counts are budgets**, not measured footprints, and the demo's 3-node shape is a budget too.
 - **The demo has not been run**, so its cost is arithmetic rather than an observed bill.
 - **Spot pricing** could not be confirmed from a live source, so Spot is authored nowhere.
-- **The local-versus-cloud difference in IAM policy evaluation**: local has none, and M19 already records it. The full diff, including this row, is written in [`docs/local-development.md`](local-development.md) section 8; this document owns only the cloud half of it.
+- **The local-versus-cloud difference in IAM policy evaluation**: local has none, and M19 already records it. The full diff, including this row, is written in [the local development architecture](local-development.md) section 8; this document owns only the cloud half of it.
 - **The Secrets Store CSI driver projects values**, and the secrets mechanism itself - what a secret is, rotation, and who may read it - is settled in [`docs/security-model.md`](security-model.md) and ADR-0028. This document owns only the cloud placement and the secret-specific local-versus-cloud difference.
 - **TLS termination is not end-to-end by default.** ALB TLS termination encrypts the client-to-ALB hop only; the ALB-to-pod hop is plaintext unless it is re-encrypted or the listener is an NLB in TCP pass-through mode with TLS terminating in the pod. Any end-to-end encryption claim must name which of the two the topology uses.

@@ -27,7 +27,7 @@ It is not a test plan with a named test per claim. The named obligations already
 | **integration** | one component plus its real dependency, at most two containers, under `smoke` | `signal`, or `behaviour` when a declared boundary condition is present | yes, under that condition |
 | **end-to-end** | a full path profile, `batch` or `streaming` | `behaviour` | yes |
 
-**A drill is not a level.** The incident laboratory runs a path profile plus the observability overlay, and it is the only thing that promotes an observability item from signal to behaviour, per [`docs/completion-bar.md`](completion-bar.md) section 5. It is listed separately because it is an incident, not a test.
+**A drill is not a level.** The incident laboratory runs a path profile plus the observability overlay, and it is the only thing that promotes an observability item from signal to behaviour, per [the completion bar](completion-bar.md) section 5. It is listed separately because it is an incident, not a test.
 
 **Ownership.** Unit owns logic: transform functions, key and content-hash derivation, the watermark and lateness arithmetic, contract parsing, DQ check evaluation. Contract owns the declaration: that the contract and schema files are well-formed and internally consistent. Integration owns one boundary: that a component and its real dependency behave as declared, which is where the vended-credential `AccessDenied` scope test, an Avro rejection by the serializer, and a NULL-to-value `UPDATE` through real Debezium live. End-to-end owns the path claim, which is where M2 and M3's convergence claims are actually made.
 
@@ -72,7 +72,7 @@ A double may stand in for a component **off** the path of the claim, never for o
 
 ## 6. What runs in CI, and what runs under a profile
 
-CI runs the static set plus the one artefact the platform authors, and nothing else. This is [`docs/repository-decomposition.md`](repository-decomposition.md)'s CI consequence, amended by [the CI/CD strategy](ci-cd-strategy.md) section 4, which adds the arm64 image build as the single non-static job; [`docs/local-development.md`](local-development.md) section 9 already states that `tests/<profile>/` is never in CI and that `smoke` stays a one-command local re-run.
+CI runs the static set plus the one artefact the platform authors, and nothing else. This is [`docs/repository-decomposition.md`](repository-decomposition.md)'s CI consequence, amended by [the CI/CD strategy](ci-cd-strategy.md) section 4, which adds the arm64 image build as the single non-static job; [the local development architecture](local-development.md) section 9 already states that `tests/<profile>/` is never in CI and that `smoke` stays a one-command local re-run.
 
 | Runs in CI | Needs a profile |
 |---|---|
@@ -84,7 +84,7 @@ CI runs the static set plus the one artefact the platform authors, and nothing e
 
 **One runner, one directory per profile.** `pytest tests/smoke`, `pytest tests/batch` and `pytest tests/streaming` are the commands, so a profile names a command rather than a convention, and the preflight in `deployment/` runs before the suite rather than beside it.
 
-**A correction to the completion bar's smoke row.** [`docs/completion-bar.md`](completion-bar.md) section 8 described `smoke` as "Re-run in CI or on a laptop". The container half is not a CI job, as `#25` and ADR-0031 already settled, so the row now reads as a laptop re-run and this document is the reason.
+**A correction to the completion bar's smoke row.** [the completion bar](completion-bar.md) section 8 described `smoke` as "Re-run in CI or on a laptop". The container half is not a CI job, as `#25` and ADR-0031 already settled, so the row now reads as a laptop re-run and this document is the reason.
 
 ## 7. The contract tests
 
@@ -129,6 +129,6 @@ Three design inputs, none of them copied, all recorded in the salvage list.
 - **The benchmark protocol.** The baseline, hypothesis, change and result protocol is [the benchmark plan](benchmark-plan.md). This document says which tests are benchmarks; it does not say how one is recorded.
 - **The pipeline job graph, branch protection and the delivery path.** [The CI/CD strategy](https://github.com/SoongGuanLeong/de-platform/issues/24) owns those. This document names which tests run inside CI, not how CI is wired.
 - **No test has been written or run.** The register ships empty and nothing here is a result.
-- **The fixture volumes are budgets, not measurements.** They come from [`docs/dataset-selection.md`](dataset-selection.md) section 7, which labels every figure an initial budget, and the two slice sizes are derived by scaling rather than measured.
+- **The fixture volumes are budgets, not measurements.** They come from [the dataset selection](dataset-selection.md) section 7, which labels every figure an initial budget, and the two slice sizes are derived by scaling rather than measured.
 - **The mutation notes are obligations, not results.** Eleven are required and none exists.
 - **`tests/fixtures.yaml` is a plan.** No fixture has been generated, and the checksum column is empty by construction.
