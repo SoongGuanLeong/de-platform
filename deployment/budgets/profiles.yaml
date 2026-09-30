@@ -169,8 +169,9 @@ profiles:
 
   benchmark:
     description: >-
-      One component at a time under a declared resource budget. Never the whole
-      stack.
+      The benchmark profile, per completion bar section 8: one component under
+      test at a time, never the whole path profile. The entitlement is declared
+      per run in the benchmark's protocol.
     resident: []
     transient: []
     declared_per_run: true
@@ -178,12 +179,11 @@ profiles:
       max_peak_memory_mib: 7168
       max_peak_cpus: 12
     worked_example:
-      name: clickhouse layout benchmark (M5, completion bar section 6.5)
+      name: clickhouse layout benchmark, serving bring-up (M5, completion bar section 6.5)
       services:
         clickhouse: { memory_mib: 6144, cpus: 8.0 }
-        postgres:   { memory_mib: 384,  cpus: 1.0 }
         seaweedfs:  { memory_mib: 256,  cpus: 1.0 }
-      peak: { memory_mib: 6784, cpus: 10.0 }
+      peak: { memory_mib: 6400, cpus: 9.0 }
     note: >-
       Every other benchmark declares its own ceiling in its protocol and records
       it with the run, per completion bar section 8.

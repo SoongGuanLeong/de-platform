@@ -104,7 +104,7 @@ Every throughput, latency or file-count figure measured on TPC-C or TPC-H data i
 
 [MISSION.md section 24](mission/MISSION.md) names nine families to define benchmarks for. None may be dropped silently, and none may be double-counted.
 
-| Mission family | Benchmark | Profile | Matrix rows |
+| Mission family | Benchmark | Path | Matrix rows |
 |---|---|---|---|
 | Ingestion throughput | **B5** CDC ingest cost per GB: objects written, bytes written, compaction work per GB ingested | streaming, plus a compaction window | M18, M17 |
 | Streaming throughput | **B3** the Flink state and checkpoint tuning record, throughput per arm | streaming | M3 |
@@ -115,6 +115,8 @@ Every throughput, latency or file-count figure measured on TPC-C or TPC-H data i
 | File counts | **B1** the layout sweep, file count and size distribution per variant | batch | M5, M6 |
 | Compaction effectiveness | **B1**'s compaction duration and equality-delete collapse, and **B5**'s compaction work per GB | batch and streaming | M5, M3 |
 | Resource utilisation | Recorded inside every benchmark, as the declared peak against the observed use. No separate run, because a resource figure without a workload is not a benchmark | n/a | M18 |
+
+**The `Path` column groups by path, not by profile.** It names the path whose services the benchmark's bring-up narrows, which is why one cell reads "batch and streaming". The profile a record names in its `profile` field is the profile the run executed under.
 
 Two further benchmarks, outside the nine families because the mission names them elsewhere:
 
@@ -143,6 +145,8 @@ Choosing arms after seeing results is the same failure as writing a budget after
 
 Each variant re-materialises the ClickHouse copy, because a changed Iceberg layout changes what ClickHouse reads, and the p50 and p95 figures are only comparable when both sides moved together.
 
+**B1 is two bring-ups, because Spark and a serving-sized ClickHouse cannot co-reside under the profile's 7168 MiB rule.** The **write bring-up** runs Spark resident to lay down the variant's Iceberg layout and its compaction, and produces the file-count, file-size and compaction-duration figures. The **serving bring-up** runs ClickHouse sized up to materialise the copy and answer the query set, and produces the latency figures. The worked example in [local development section 4](local-development.md) is the serving bring-up.
+
 **B2, the two-arm comparison:** read-through against materialised, on C1 to C3 and N1 to N3, with P3 excluded. Fixed by [serving-layer section 8](serving-layer.md).
 
 **B3, the tuning record:** checkpoint interval 10 / 60 / 180 s, parallelism 2 / 4, sink flush size 64 / 128 / 256 MiB. The state backend is declared as the baseline rather than varied, because changing it changes the state representation and would confound the other two axes. Fixed by [streaming-jobs section 7](streaming-jobs.md).
@@ -167,7 +171,7 @@ Batch peaks at 6976 MiB and streaming at 7168 MiB against an enforceable 7168 Mi
 
 **Then the batch benchmarks, in this order:**
 
-1. **B1**, the layout sweep. First, because B2's materialised arm must carry B1's winning layout: if it does not, the two-arm delta confounds layout with architecture and measures neither.
+1. **B1**, the layout sweep, as two bring-ups: a write and compaction run with Spark resident, then a serving run with ClickHouse sized up (section 4). First, because B2's materialised arm must carry B1's winning layout: if it does not, the two-arm delta confounds layout with architecture and measures neither.
 2. **B2**, the two-arm comparison, at `c=1` and `c=4`.
 3. **B6**, the M17 per-operation cost counters.
 4. **B7**, the batch wall-clock and resource use.
@@ -181,7 +185,7 @@ Batch peaks at 6976 MiB and streaming at 7168 MiB against an enforceable 7168 Mi
 
 **Then the incident laboratory**, which needs both paths plus the observability overlay and runs after every benchmark, so a benchmark's co-tenancy is never polluted by an injected fault.
 
-Each benchmark declares its own resource entitlement inside its protocol, within the `benchmark` profile's rule of at most 7168 MiB and 12 vCPU. The worked example in [local-development section 4](local-development.md) is the precedent for B1: ClickHouse 6144 MiB / 8 vCPU, PostgreSQL 384 / 1, SeaweedFS 256 / 1, peak 6784 MiB / 10 vCPU. **An entitlement is not a threshold**, and the ceilings live in `deployment/budgets/profiles.yaml` rather than in `docs/budgets.yaml` (ADR-0031).
+Each benchmark declares its own resource entitlement inside its protocol, within the `benchmark` profile's rule of at most 7168 MiB and 12 vCPU. The worked example in [local-development section 4](local-development.md) is the precedent for B1's serving bring-up: ClickHouse 6144 MiB / 8 vCPU, SeaweedFS 256 / 1, peak 6400 MiB / 9 vCPU. **An entitlement is not a threshold**, and the ceilings live in `deployment/budgets/profiles.yaml` rather than in `docs/budgets.yaml` (ADR-0031).
 
 A reset is proven before each benchmark, not asserted: the reset procedure followed by a fresh bring-up that reaches the same readiness assertion. The `--keep` flag exists for a benchmark run that has to survive inspection.
 
