@@ -17,12 +17,29 @@ One compose file over the pinned component images, brought up one profile at a t
 One profile at a time, because the whole stack does not fit in the available memory.
 
     podman-compose -f deployment/security-harness/compose.yml up -d postgres
+    until podman exec de-platform-security-postgres pg_isready -h 127.0.0.1 -p 5432 -U deplatform >/dev/null 2>&1; do sleep 1; done
     deployment/security-harness/tests/postgres.sh
     podman-compose -f deployment/security-harness/compose.yml down postgres
 
     podman-compose -f deployment/security-harness/profiles/seaweedfs.yml up -d seaweedfs
+    until [ "$(curl -s -o /dev/null -w '%{http_code}' --cacert runtime/certs/ca.crt https://127.0.0.1:58333/)" = 403 ]; do sleep 1; done
     deployment/security-harness/tests/seaweedfs.sh
     podman-compose -f deployment/security-harness/profiles/seaweedfs.yml down seaweedfs
+
+### Wait for readiness before the test
+
+`podman-compose up -d` returns when the container is created, not when the service inside it accepts connections. A test run in that window reports refused connections, which read as control failures but are not: PostgreSQL fails its six authentication and TLS assertions with `Connection refused`, and passes all of them unchanged about three seconds later. Poll the service before running its test, and bound the loop so a service that never starts fails the run rather than hanging it.
+
+| Profile | Probe, run from the repository root | Ready when |
+| --- | --- | --- |
+| PostgreSQL | `podman exec de-platform-security-postgres pg_isready -h 127.0.0.1 -p 5432 -U deplatform` | exits 0 |
+| ClickHouse | `podman exec de-platform-security-clickhouse clickhouse-client --config-file /harness/client-config.xml --secure --port 9440 --user svc_platform --password "$(cat runtime/secrets/clickhouse_svc_password)" -q 'select 1'` | exits 0 |
+| Kafka | `podman exec de-platform-security-kafka sh -c 'grep -q "Kafka Server started" /opt/kafka/logs/server.log'` | exits 0 |
+| SeaweedFS | `curl -s -o /dev/null -w '%{http_code}' --cacert runtime/certs/ca.crt https://127.0.0.1:58333/` | prints `403` |
+| Grafana | `curl -s -o /dev/null -w '%{http_code}' --cacert runtime/certs/ca.crt https://127.0.0.1:53000/api/health` | prints `200` |
+| Polaris | `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:58181/api/catalog/v1/config` | prints `401` |
+
+Each probe waits on the listener the test then exercises, so a service that answers its probe has passed the test's own precondition. Kafka is the exception: its client needs a rendered SASL_SSL config, so the probe reads the broker's startup line instead. The two probes that expect a refusal status - SeaweedFS `403` and Polaris `401` - are waiting for the listener to answer at all, not for the request to succeed.
 
 `tests/static.sh` needs no running service: it checks the gitignore rules, the tracked tree and the secret declarations.
 
