@@ -80,4 +80,4 @@ Do not use `-`. It was doing both jobs, in 29 cells across six tables, so a read
 
 A cell left blank is not a way to say nothing either. Two tables have blank cells, and both are structural rather than a placeholder: the `**Total**` row in `docs/system-architecture.md` has no members to list, and the 10x and 100x rows in `docs/cloud-architecture.md` section 6.1 leave the per-class split unasserted on purpose.
 
-Table shape is uniform and stays that way: every table has a leading and a trailing pipe, a plain `---` separator row, and a blank line before it.
+Table shape is uniform and stays that way: a leading and a trailing pipe, a plain `---` separator row, and a blank line before the table. Two tables lack that blank line, and both are legitimate: `docs/research/02-object-storage.md` indents one inside a list item, and `docs/research/09-olist-repo-inventory.md` has one inside its preserved body.
