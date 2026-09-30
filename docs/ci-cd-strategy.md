@@ -9,7 +9,7 @@
 
 ## 0. Status of this document
 
-A plan, not a build. **No job described here has been executed, and no check described here has produced a result.** The repository contains one workflow file, `.github/workflows/security.yml`, written during the security round, and **that one has run**: section 4 records its history. The existing check is therefore exercised, while everything proposed below is not. Every statement below about a job, a filter or a protection rule is a statement about a plan.
+A plan, not a build. **No job of the graph proposed below has run and no check it describes has produced a result, with one exception.** The repository contains one workflow file, `.github/workflows/security.yml`, written during the security round, and **that one has run**: section 4 records its history. The existing check is therefore exercised, while everything proposed below is not. Every statement below about a job, a filter or a protection rule is a statement about a plan.
 
 The lint tool list is **proposed, not measured**, which is the gap [the repository decomposition](repository-decomposition.md) already records; the one entry checked against its source is `sqlfluff`, which cannot parse ClickHouse `PROJECTION` clauses (issue 8583, September 2026), so it covers ClickHouse query SQL and the subset of DDL it parses. Nothing in this document was measured, and no cloud bill was observed.
 
