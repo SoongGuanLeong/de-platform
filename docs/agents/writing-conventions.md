@@ -65,6 +65,23 @@ The exemption covers the reproduced portion only. In `09`, lines 1 to 13 are thi
 
 A heading in a preservation copy is not a defect, and both entries above were checked against their source before being left alone.
 
+## Cite a section by naming the document, then the section
+
+A link here points at a document, not at a place inside it: no link this repository authors carries a `#` fragment, the only two being quoted upstream text in `docs/research/26-compose-resource-limits-and-portability.md`. A section number written inside the link text is therefore a locator that cannot also be a jump target. Name the document in the link, and put the section after it.
+
+| Write | Do not write | Why |
+| --- | --- | --- |
+| `[the benchmark plan](benchmark-plan.md) section 5.2` | `[the benchmark plan section 5.2](benchmark-plan.md)` | the link text is the document's name; the section is a locator beside it |
+| `[the serving layer](serving-layer.md) section 8` | `[serving-layer section 8](serving-layer.md)` | prose names the document, not its file stem |
+| `[the cloud architecture](cloud-architecture.md) section 2.3` | ``[`docs/cloud-architecture.md` section 6.5](cloud-architecture.md)`` | the backticked path names a whole document, not a section of one |
+| `[the completion bar](completion-bar.md) section 8` | `[The completion bar](completion-bar.md) section 8` | mid-sentence the article is lower case, as it is outside a link |
+
+The link text carries the document's name or the section locator, never both. Where the sentence already names the document, the locator alone is enough: `per [section 8](completion-bar.md)`.
+
+Header metadata lines and further-reading lists keep the backticked path, because there the reference is to the whole document: ``**Base:** the evidence standard in [`docs/requirements-matrix.md`](requirements-matrix.md) section 3``.
+
+Two other forms were in use outside this file: 28 links put the section number inside the link text beside the document's name or path, and 11 prose references cited the section after a backticked path that was not a link. Neither is the form to write.
+
 ## Tables
 
 A table cell that has nothing in it carries one of two words, both lower case:
