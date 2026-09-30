@@ -20,6 +20,14 @@
 #             Until then `threshold` is `pending`, and an evidence item citing a
 #             pending entry fails CI.
 #
+# `profile` names the workload the threshold belongs to, not the profile a run
+# executed under. `batch` and `streaming` name the path whose services the
+# workload uses, which is the grouping the benchmark plan's inventory calls
+# `Path`; `benchmark` appears only where no single path owns the threshold (the
+# M17 maintenance counters). So a benchmark of the batch path carries
+# `profile: batch` here while its evidence item's own `profile` field names the
+# profile the run executed under, and the two legitimately differ.
+#
 # `declared_commit` names the commit that introduced the entry. A commit cannot
 # name itself, so a new entry is committed with a placeholder value and the
 # follow-up commit writes the sha in its place.
