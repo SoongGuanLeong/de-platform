@@ -22,4 +22,4 @@ Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/age
 
 ### Writing conventions
 
-Which word to use for a thing, how to mark a revision in place, how headings are cased and levelled, how a section of another document is cited, and what a table cell holds when it has nothing to hold - where more than one form was in use. See `docs/agents/writing-conventions.md`.
+Which word to use for a thing, how to mark a revision in place, how headings are cased and levelled, how a section of another document and an issue are cited, and what a table cell holds when it has nothing to hold - where more than one form was in use. See `docs/agents/writing-conventions.md`.

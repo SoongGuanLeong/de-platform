@@ -80,7 +80,18 @@ The link text carries the document's name or the section locator, never both. Wh
 
 Header metadata lines and further-reading lists keep the backticked path, because there the reference is to the whole document: ``**Base:** the evidence standard in [`docs/requirements-matrix.md`](requirements-matrix.md) section 3``.
 
-Two other forms were in use outside this file: 28 links put the section number inside the link text beside the document's name or path, and 12 prose references put `section N` directly after a backticked file name or path that was not a link. Neither is the form to write.
+## Cite an issue by naming it, then the number
+
+An issue link names the issue in its text, as a section link names its document, and the number is a locator beside it. The link text carries the name or the number, never both.
+
+| Write | Do not write | Why |
+| --- | --- | --- |
+| `[Licence and cost audit](https://github.com/SoongGuanLeong/de-platform/issues/20), issue #20` | `[#20 Licence and cost audit](https://github.com/SoongGuanLeong/de-platform/issues/20) is issue #20` | the number is a locator, not part of the title, and the prose already carries it |
+| `[the map](https://github.com/SoongGuanLeong/de-platform/issues/9)` | `[map #9](https://github.com/SoongGuanLeong/de-platform/issues/9)` | the name and the number are not both the link text |
+
+The number alone is enough where the sentence already names the issue, as it is for a section: `the salvage ticket ([#5](https://github.com/SoongGuanLeong/de-platform/issues/5))`. A bare `#N` is also this repo's shorthand for an issue in prose - `so #16 relocating the definitions is a move` - so a link whose text is only the number reads as that shorthand rather than as a name.
+
+Two lines were in use outside this file: `docs/research/14-licence-and-cost-audit.md:6` and `docs/research/19-polaris-iceberg-v3-metadata.md:6` each put the number inside the link text beside the title and then repeated the number in the prose that followed. Neither is the form to write.
 
 ## Tables
 
