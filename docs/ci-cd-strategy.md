@@ -11,7 +11,7 @@
 
 A plan, not a build. **No job described here has been executed, and no check described here has produced a result.** The repository contains one workflow file, `.github/workflows/security.yml`, written during the security round, and **that one has run**: section 4 records its history. The existing check is therefore exercised, while everything proposed below is not. Every statement below about a job, a filter or a protection rule is a statement about a plan.
 
-The lint tool list is **proposed, not measured**, which is the gap [the repository decomposition](repository-decomposition.md) already records; the one measured finding is that `sqlfluff` cannot parse ClickHouse `PROJECTION` clauses, so it covers ClickHouse query SQL and the subset of DDL it parses. Nothing in this document was measured, and no cloud bill was observed.
+The lint tool list is **proposed, not measured**, which is the gap [the repository decomposition](repository-decomposition.md) already records; the one entry checked against its source is `sqlfluff`, which cannot parse ClickHouse `PROJECTION` clauses (issue 8583, September 2026), so it covers ClickHouse query SQL and the subset of DDL it parses. Nothing in this document was measured, and no cloud bill was observed.
 
 **Unproven is not undecided.** Where a decision is settled but its evidence is missing, this document says so and names the test that would produce the evidence, rather than reopening the decision.
 
@@ -222,7 +222,7 @@ The rest of the tool set is inherited from [the repository decomposition](reposi
 
 ## 11. What this document does not claim
 
-- **No job has run and no check has produced a result.** The job graph is a plan, and the first implementation task is to make each script pass locally before the workflow is written.
+- **No job of the planned graph has run and no check it describes has produced a result, with one exception.** The `gitleaks` check that already exists **has run**, and section 4 records its history. The job graph is a plan, and the first implementation task is to make each script pass locally before the workflow is written.
 - **The lint tool list is unmeasured**, except that `sqlfluff` cannot parse ClickHouse `PROJECTION` clauses (sqlfluff issue 8583, September 2026), which is carried as a documented limitation.
 - **The arm64 Marquez build has not been built or run.** The build job is the mechanism that would produce it; the image running on Graviton is a separate claim with no local evidence path.
 - **ECR is authored and unused**, the demo does not create it, and the switch to it is unproven (section 8).
