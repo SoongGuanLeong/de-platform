@@ -1,0 +1,18 @@
+# yamllint configuration for de-platform.
+#
+# Scope: the compose files under deployment/ and the contract files under
+# contracts/, which is the scope docs/ci-cd-strategy.md section 4 gives the tool.
+# actionlint covers the workflows and sqlfluff covers SQL, so neither is read
+# here. The budget registers are read by their own validators.
+#
+# document-start is disabled because no committed YAML file opens with "---".
+# line-length is raised to 200 because a compose file carries long unbreakable
+# values (image references, environment entries).
+extends: default
+
+rules:
+  document-start: disable
+  line-length:
+    max: 200
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true

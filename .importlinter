@@ -1,0 +1,81 @@
+# Dependency-boundary rules for de-platform (ADR-0026,
+# docs/repository-decomposition.md section "The boundary rules").
+#
+# Rules 1 to 4 are enforced here. Rule 5 (no notebooks under a code path) is not
+# a module-graph rule and lives in deployment/scripts/check-notebooks.sh; the
+# packaging graph itself is asserted by deployment/scripts/check-packaging-graph.sh.
+#
+# The import packages carry a "de_" prefix (see each distribution's pyproject.toml),
+# so "de_batch" is the path "batch/" and "de_ingestion" is the path "ingestion/".
+#
+# Orchestration is deliberately absent from the forbidden contracts: it is the
+# composition root and the only module permitted to import both spines (ADR-0026).
+
+[importlinter]
+root_packages =
+    de_platform
+    de_ingestion
+    de_batch
+    de_governance
+    de_orchestration
+
+# Rule 1: commerce must not import network, in any path, in either direction.
+[importlinter:contract:rule-1-batch-commerce-network]
+name = Rule 1: commerce and network are independent within a path
+type = independence
+modules =
+    de_batch.commerce
+    de_batch.network
+
+[importlinter:contract:rule-1-ingestion-commerce-network]
+name = Rule 1: commerce and network are independent within a path
+type = independence
+modules =
+    de_ingestion.commerce
+    de_ingestion.network
+
+# Rule 2: no path imports another path. Cross-path communication is only through
+# contracts/, platform/ or the catalog, so de_platform is not forbidden here.
+[importlinter:contract:rule-2-ingestion]
+name = Rule 2: no path imports another path
+type = forbidden
+source_modules =
+    de_ingestion
+forbidden_modules =
+    de_batch
+    de_governance
+    de_orchestration
+
+[importlinter:contract:rule-2-batch]
+name = Rule 2: no path imports another path
+type = forbidden
+source_modules =
+    de_batch
+forbidden_modules =
+    de_ingestion
+    de_governance
+    de_orchestration
+
+# Rule 3: platform/ is a leaf. It imports no path.
+[importlinter:contract:rule-3-platform-is-a-leaf]
+name = Rule 3: platform is a leaf and imports no path
+type = forbidden
+source_modules =
+    de_platform
+forbidden_modules =
+    de_ingestion
+    de_batch
+    de_governance
+    de_orchestration
+
+# Rule 4: governance's framework must not import a path; paths may import the
+# framework. de_platform is not forbidden: it is the shared core, not a path's code.
+[importlinter:contract:rule-4-governance]
+name = Rule 4: governance imports no path
+type = forbidden
+source_modules =
+    de_governance
+forbidden_modules =
+    de_ingestion
+    de_batch
+    de_orchestration

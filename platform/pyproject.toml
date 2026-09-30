@@ -1,0 +1,17 @@
+[project]
+name = "platform"
+version = "0.0.0"
+description = "The shared Python core: the catalog connection, the contract loader, the naming conventions and the OpenLineage configuration."
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+# The import package carries the "de_" prefix because the repository root is a
+# valid sys.path entry, and a top-level package named "ingestion" would be
+# shadowed by the "ingestion/" distribution directory beside it. The prefix
+# applies uniformly to every distribution in the workspace.
+[tool.uv.build-backend]
+module-name = "de_platform"
