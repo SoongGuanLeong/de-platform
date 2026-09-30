@@ -295,7 +295,7 @@ A namespace `db` and tables `table_a`/`table_b` were created (Polaris placed the
 ]
 ```
 
-**Redaction, 2026-09-29.** The `s3.secret-access-key` and `s3.session-token` values in the response above were redacted under [ADR-0028](../adr/0028-secrets-live-only-in-the-runtime-directory.md). They were temporary STS credentials minted by this local interop test. The test stack was never deployed, so no running service accepts them, and the record is otherwise unchanged.
+**Correction, 2026-09-29 (ticket #18).** The `s3.secret-access-key` and `s3.session-token` values in the response above were redacted under [ADR-0028](../adr/0028-secrets-live-only-in-the-runtime-directory.md). They were temporary STS credentials minted by this local interop test. The test stack was never deployed, so no running service accepts them, and the record is otherwise unchanged.
 
 Decoding the session token (a SeaweedFS-signed JWT) shows Polaris's role and its inline policy landed in the token:
 
