@@ -212,7 +212,7 @@ A limitation with a substitute gets a phase. A limitation that waits on the worl
 
 ## 9. Named constraints
 
-1. **No new component and no new profile.** Every phase is expressed in the nineteen components and the five profiles already settled.
+1. **No new component and no new profile.** Every phase is expressed in the twenty components and the five profiles already settled.
 2. **This is a plan, not a schedule.** No dates, no durations, no time estimates, and no measured result.
 3. **No benchmark moves.** The measurement order is the benchmark plan's, and this roadmap's phase boundaries are drawn around it.
 4. **The register is the definition of done.** No per-phase DoD document is written, and the completion bar is not restated.
