@@ -228,9 +228,9 @@ A limitation with a substitute gets a phase. A limitation that waits on the worl
 
 ## 11. Impact items for approval
 
-None outstanding.
+One, found while writing the run sequences, and not applied here.
 
-The one item found while writing the run sequences, the `benchmark` profile's description being narrower than its own worked example, was approved and applied after this document was committed. The fix set is recorded in [the completion bar section 8](completion-bar.md), the register, [local development section 4](local-development.md) and [the benchmark plan](benchmark-plan.md).
+**The `benchmark` profile's description is narrower than its own worked example.** [The completion bar section 8](completion-bar.md) describes `benchmark` as "One component at a time under a declared resource budget. Never the whole stack", while `deployment/budgets/profiles.yaml`'s worked example for the M5 layout benchmark is three services (ClickHouse 6144 MiB, PostgreSQL 384, SeaweedFS 256, peak 6784 MiB), and [the benchmark plan section 5.2](benchmark-plan.md) calls that example the precedent for B1. This roadmap reads `benchmark` as **a narrowed bring-up of the path's services with the component under test sized up, never the whole path profile**, which is what the worked example already demonstrates. On that reading the only amendment needed is one clause in completion-bar section 8: "one component under test at a time, never the whole path profile". Flagged rather than applied, because it edits a closed ticket's artefact.
 
 ---
 
