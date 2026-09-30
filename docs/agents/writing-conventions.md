@@ -20,7 +20,7 @@ Use it for the input and for the claims made in it: "the assignment says", "the 
 When a document is revised after it was written, mark the revision in place rather than editing the original claim silently.
 
 ```
-**Correction, YYYY-MM-DD (authority or circumstance).** the corrected claim
+**Correction, YYYY-MM-DD (authority or circumstance).**
 ```
 
 - Bold the marker only; the claim that follows is not bold.
