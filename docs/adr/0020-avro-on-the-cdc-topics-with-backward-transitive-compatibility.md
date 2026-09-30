@@ -11,4 +11,4 @@ The CDC Kafka topics carry Avro, one subject per topic named `<topic>-value`, wi
 
 ## Consequences
 
-The Git YAML contracts are the sole authoring source; CI pushes them into Apicurio's native Data Contracts feature as a mirror, never the reverse, because the ccompat path accepts data-contract rules but does not store or enforce them. Research 06 and 11 carry dated correction notes. Evidence: ticket [Data contracts and schema compatibility policy](https://github.com/SoongGuanLeong/de-platform/issues/15).
+The Git YAML contracts are the sole authoring source; CI pushes them into Apicurio's native Data Contracts feature as a mirror, never the reverse, because the ccompat path accepts data-contract rules but does not store or enforce them. Research 06 and 11 carry dated correction notes, as does this ADR. Evidence: ticket [Data contracts and schema compatibility policy](https://github.com/SoongGuanLeong/de-platform/issues/15).
