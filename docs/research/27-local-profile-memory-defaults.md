@@ -175,7 +175,7 @@ The total process memory is heap plus overhead: "the memory for a running execut
 
 **(a) Documented/default memory setting.** None published. The Helm chart's `resources` block is empty, with commented examples only (`limits: memory: 1Gi`, `requests: memory: 256Mi`) and the comment "Typically best to not specify these settings, unless you've got a specific reason to customize."
 
-**(b) Published minimum/recommendation - the quickstart RAM figure could not be confirmed.** The task states that Marquez's own docs give a quickstart RAM figure. I could not find one. The README's "Requirements" section lists only Java 17 and PostgreSQL 14. The quickstart prerequisites list only Docker 17.05+ and Docker Compose. The deployment and AWS pages give no memory figure. **Not published.** This is a documented gap, not an estimate: no RAM number is asserted here.
+**(b) Published minimum/recommendation - the quickstart RAM figure could not be confirmed.** The assignment states that Marquez's own docs give a quickstart RAM figure. I could not find one. The README's "Requirements" section lists only Java 17 and PostgreSQL 14. The quickstart prerequisites list only Docker 17.05+ and Docker Compose. The deployment and AWS pages give no memory figure. **Not published.** This is a documented gap, not an estimate: no RAM number is asserted here.
 
 **(c) JVM heap.** JVM service, but no documented heap default. The entrypoint sets no `-Xmx`, which the project's own prior research already flagged (see `docs/research/13-lineage-backend-comparison.md` line 217: "The entrypoint sets no `-Xmx`, so without this the JVM will size its heap to the host").
 
@@ -284,7 +284,7 @@ These are listed plainly. No figure is estimated or interpolated for them.
 | Spark 4.1.3 | A minimum RAM | Spark 4.1.3 configuration reference |
 | Dagster 1.13.x | Any RAM/CPU guidance for self-hosted OSS | docs.dagster.io deployment, daemon and webserver pages |
 | Apicurio Registry 3.3.x | Any memory guidance or heap default | Getting-started page, image README, configuring-the-registry docs |
-| Marquez 0.51.x | **The quickstart RAM figure the task asserts exists** | README Requirements, quickstart docs, deployment docs, AWS page, Helm values.yaml, site quickstart page |
+| Marquez 0.51.x | **The quickstart RAM figure the assignment asserts exists** | README Requirements, quickstart docs, deployment docs, AWS page, Helm values.yaml, site quickstart page |
 | Prometheus 3.14.0 | A minimum RAM | Storage docs, FAQ |
 | Alertmanager 0.34.x | Any memory guidance | Repository docs tree |
 | Debezium 3.6.1 | A Debezium-published worker memory figure | Debezium docs, image Dockerfiles |

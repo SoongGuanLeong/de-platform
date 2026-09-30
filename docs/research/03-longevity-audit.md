@@ -422,7 +422,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ### 5.1 Apache Polaris — is depending on it a risk worth taking?
 
-**No, not any more — the risk the brief describes was resolved in February 2026.**
+**No, not any more — the risk the assignment describes was resolved in February 2026.**
 
 The job posting calls Polaris an "Apache *incubating* project." That framing is **out of date**.
 
@@ -644,7 +644,7 @@ All URLs accessed **2026-09-27** unless the item carries its own date.
 ## 8. What this changes in the plan
 
 1. **Drop Terraform, adopt OpenTofu.** Terraform fails L1/L2 on a BUSL licence. OpenTofu is LF-governed, MPL-2.0, and a drop-in for HCL.
-2. **Keep Polaris.** The "incubating" risk in the brief is resolved — it is a TLP as of 15 Feb 2026 — but pin the minor version and reach it only through the Iceberg REST spec so Lakekeeper stays a same-day escape.
+2. **Keep Polaris.** The "incubating" risk in the assignment is resolved — it is a TLP as of 15 Feb 2026 — but pin the minor version and reach it only through the Iceberg REST spec so Lakekeeper stays a same-day escape.
 3. **Keep Grafana, but hold the dashboards in Git.** Grafana OSS is maintained and free. The hedge is cheap and is the thing that keeps the Grafana/Perses switch affordable.
 4. **Treat Dagster as the weakest link in an otherwise strong stack**, not because of the licence (Apache-2.0, safe) but because its owner changed hands on 13 Jul 2026 and the consolidation is unfinished. Emit OpenLineage from Dagster so lineage outlives it.
 5. **Pin JDK 17 and Python 3.12 in every image.** Java 26 and Python 3.14 are not viable for any engine here.

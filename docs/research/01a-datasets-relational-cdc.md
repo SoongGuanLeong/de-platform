@@ -308,7 +308,7 @@ From an independent full-table profiling pass (verified, per-table):
 - **Lineage/reproducibility:** `olist_order_reviews` is reported as both 99,224 and 104,719 rows by different sources, and the translation table as both 71 and 70. You must pin and record the exact upstream artefact hash. Good governance lesson, bad day for reproducibility.
 
 **CDC suitability, and whether change events are real or synthesised**
-**T3 - synthesised, and the honest weak point.** A final-state export with **no version history, no status-transition log, no prior states**. Ironically it is *full of* things that would be updates - `order_status` implies a lifecycle (`created → approved → invoiced → processing → shipped → delivered`, plus `unavailable`, `canceled`), and `order_approved_at` / `order_delivered_carrier_date` / `order_delivered_customer_date` are NULLs that were filled in later - but the export discarded the history. To get CDC you would load the final state and *invent* a replay moving each order through its transitions, inferring intermediate states from the timestamps. **That is a plausible, defensible simulation, and it must be labelled `simulated` in the README, the Dagster asset name, the Iceberg table properties, and the blog post.** A reviewer who spots unlabelled synthetic CDC will discount the whole project. This is exactly the risk the brief asked me to surface.
+**T3 - synthesised, and the honest weak point.** A final-state export with **no version history, no status-transition log, no prior states**. Ironically it is *full of* things that would be updates - `order_status` implies a lifecycle (`created → approved → invoiced → processing → shipped → delivered`, plus `unavailable`, `canceled`), and `order_approved_at` / `order_delivered_carrier_date` / `order_delivered_customer_date` are NULLs that were filled in later - but the export discarded the history. To get CDC you would load the final state and *invent* a replay moving each order through its transitions, inferring intermediate states from the timestamps. **That is a plausible, defensible simulation, and it must be labelled `simulated` in the README, the Dagster asset name, the Iceberg table properties, and the blog post.** A reviewer who spots unlabelled synthetic CDC will discount the whole project. This is exactly the risk the assignment asked me to surface.
 
 **Batch suitability**
 **Very good.** 1.5M+ rows, real dimensional star, time-phased facts, a real SLA metric (delivery lateness vs promise), a real geographic drill-down. But it is small - Spark tuning at 1.5M rows is theatre unless you scale it, and scaling means synthesising more orders, further weakening the "real data" claim.
@@ -683,7 +683,7 @@ Fine. **Irrelevant given the licence decision.**
 Everything you would expect from a Q&A corpus; nothing you could not get from a cleaner source.
 
 **Expected engineering challenges it forces**
-Login-gated, click-through-gated download → **fails the brief's automation bar outright.** Post-state reconstruction. Deeply nested HTML bodies.
+Login-gated, click-through-gated download → **fails the assignment's automation bar outright.** Post-state reconstruction. Deeply nested HTML bodies.
 
 **Which target-job requirements it demonstrates**
 Nothing the others don't; the SCD/audit-trail material is genuinely good but reached through a licence you don't want to defend.
@@ -695,7 +695,7 @@ None usable. **If you want the "real change log" idea, get it honestly from A3 (
 
 ## Group B - Reference, dimension and geographic companions
 
-The brief asks for the supporting cast: datasets that should be **looked up, not ingested as facts**. In each case the interesting engineering is the *join*, the *versioning*, and the decision **not** to denormalise them into the fact table.
+The assignment asks for the supporting cast: datasets that should be **looked up, not ingested as facts**. In each case the interesting engineering is the *join*, the *versioning*, and the decision **not** to denormalise them into the fact table.
 
 ---
 

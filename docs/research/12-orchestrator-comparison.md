@@ -15,7 +15,7 @@
 
 **Longevity rubric** (from doc 03): foundation governance preferred; company-backed with disclosed funding **and** a commercial incentive acceptable; observable activity (not archived, not maintenance-only, releases/commits in the last ~12 months) is a hard floor [S39 section 0].
 
-**One correction to the brief's framing.** The brief says "the JD names Dagster" as if that settles the stack. The JD's *requirements* section does not require any orchestrator; orchestration appears only under "Nice to have" as "Dagster, Airflow, or equivalent", and the About-the-role paragraph is the only place the stack names Dagster [S42]. A JD mention is therefore weak evidence and is not treated as a reason to pick a tool. It is used only in section 3.9 as a portfolio tiebreaker.
+**One correction to the assignment's framing.** The assignment says "the JD names Dagster" as if that settles the stack. The JD's *requirements* section does not require any orchestrator; orchestration appears only under "Nice to have" as "Dagster, Airflow, or equivalent", and the About-the-role paragraph is the only place the stack names Dagster [S42]. A JD mention is therefore weak evidence and is not treated as a reason to pick a tool. It is used only in section 3.9 as a portfolio tiebreaker.
 
 ---
 

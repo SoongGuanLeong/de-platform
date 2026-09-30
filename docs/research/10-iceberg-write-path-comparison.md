@@ -77,9 +77,9 @@ This is the write path that satisfies ADR-0002 exactly as written: equality dele
 
 ## 4. (b) The Kafka Connect Iceberg sink
 
-### 4.1 First, a naming correction that the task itself needs
+### 4.1 First, a naming correction that the assignment itself needs
 
-The task asks about "Confluent's iceberg-kafka-connect distribution". That distribution does not exist as an open-source project:
+The assignment asks about "Confluent's iceberg-kafka-connect distribution". That distribution does not exist as an open-source project:
 
 - `https://github.com/confluentinc/iceberg-kafka-connect` returns **404** [S15].
 - A GitHub repository search for `org:confluentinc iceberg` returns **0** results [S15].
@@ -120,7 +120,7 @@ This is the load-bearing finding, and it is stated by the project's own maintain
 
 **Config evidence.** The 1.11.0 configuration reference lists `iceberg.tables.default-id-columns` but has **no** `cdc-field` and **no** `upsert-mode-enabled`, the two properties the pre-donation distribution documented [S2]. The Apache module's `IcebergSinkConfig.java` at 1.11.0 has no upsert or CDC constant at all, and the `main` branch as of 2026-09-28 is the same [S3], [S29]. So the old keys are silently ignored as unknown connector properties.
 
-**Documentation defect to flag.** The same 1.11.0 doc still claims, in its feature list, "Exactly-once delivery semantics" [S2], and it still documents a "CDC feature" via the `DebeziumTransform` and `DmsTransform` SMTs that add `_cdc.op`, `_cdc.ts`, `_cdc.source`, `_cdc.key` fields [S2]. But the sink module contains no reference to those fields and no code that acts on `_cdc.op`. The transform produces metadata columns; the sink writes them as ordinary columns. This is a documentation claim about a capability the sink does not implement, and it is exactly the kind of plausible-sounding claim the task warned about.
+**Documentation defect to flag.** The same 1.11.0 doc still claims, in its feature list, "Exactly-once delivery semantics" [S2], and it still documents a "CDC feature" via the `DebeziumTransform` and `DmsTransform` SMTs that add `_cdc.op`, `_cdc.ts`, `_cdc.source`, `_cdc.key` fields [S2]. But the sink module contains no reference to those fields and no code that acts on `_cdc.op`. The transform produces metadata columns; the sink writes them as ordinary columns. This is a documentation claim about a capability the sink does not implement, and it is exactly the kind of plausible-sounding claim the assignment warned about.
 
 ### 4.4 What its "exactly-once" actually is
 
@@ -212,7 +212,7 @@ Rationale: it is the only candidate that writes equality deletes, so it is the o
 - **Unreleased work in flight:** delta writer support (issue #10842, PR #12070) and real CDC upsert/delete support (issue #17542) are open, unreleased [S10], [S12]. They would change this verdict if and when they ship; they cannot be relied on today.
 - **Not measured:** I did not run any of the three paths, so I state no throughput, latency or row-count numbers. The performance and footprint statements are structural (which engines must run, what files are written), not benchmarked.
 - **Not read in full:** the Flink SinkV2 `Committer` invocation timing (FLIP-191) is covered in research 06 [S25] as an open item and does not change the comparison here. The Debezium at-least-once statement is taken from Flink's Debezium format documentation via research 06 [S28]; I did not independently read Debezium's own exactly-once documentation.
-- **Confluent naming:** I could not find any Confluent-published open-source Kafka Connect Iceberg sink. The 404 and the zero-result org search are the evidence; if the task intended a private or renamed Confluent distribution, it is not publicly verifiable [S15].
+- **Confluent naming:** I could not find any Confluent-published open-source Kafka Connect Iceberg sink. The 404 and the zero-result org search are the evidence; if the assignment intended a private or renamed Confluent distribution, it is not publicly verifiable [S15].
 
 ---
 

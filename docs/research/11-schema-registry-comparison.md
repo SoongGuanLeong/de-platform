@@ -8,7 +8,7 @@ This is primary-source research. Every licence, release date, API claim and inte
 
 ---
 
-## 0. Method, the rubric, and three corrections to the brief
+## 0. Method, the rubric, and three corrections to the assignment
 
 ### 0.1 The rubric applied
 
@@ -20,13 +20,13 @@ The standing support-and-longevity rubric, read as three legs that must all hold
 | **L2 - backing and incentive** | Foundation, or a company with disclosed funding *and* a commercial reason for the OSS core to stay healthy | Funding evidence, foundation membership, vendor revenue model |
 | **L3 - observable activity (hard floor)** | Not archived, not maintenance-only; releases and commits in the last ~12 months | GitHub repository metadata, release API, commit API |
 
-### 0.2 Corrections to the brief, stated up front
+### 0.2 Corrections to the assignment, stated up front
 
-Three premises in the task brief do not survive contact with the primary sources. They are corrected here and then used consistently below.
+Three premises in the assignment do not survive contact with the primary sources. They are corrected here and then used consistently below.
 
 **Correction 1:** the target job posting does not name a schema registry at all. The cached posting ([S34]) lists, under ingestion and streaming, "Debezium CDC -> Apache Kafka" and names no registry, no Avro, and no schema-compatibility tool. Its governance line is "catalog organization, access control, data lineage, retention/compliance, and automated data-quality checks", and its governance nice-to-have is "OpenLineage/Marquez, Great Expectations, dbt tests, catalog-based access control". So the honest answer to "which JD requirement does a registry demonstrate" is: **none by name**. A registry is justified, if at all, by the *data-contracts and schema-compatibility* requirement the platform has adopted for itself (map issue #9, ticket #15, M9 and M17), not by a line in the posting. A registry is therefore a platform choice, not a JD compliance item, and it must earn its place on merit.
 
-**Correction 2:** Apicurio's Confluent compatibility is v7 and v8, not v6. The brief and the prior audit ([S] 03-longevity-audit section 3.9) both say "v6". Apicurio's own documentation says "Confluent Schema Registry API v7" ([S5]), and its own accepted ADR dated **2026-05-09** states: "The compatibility layer exposes the Confluent v7 and v8 REST API at `/apis/ccompat/v7/` and `/apis/ccompat/v8/`" ([S7]). Both are marked "Fully supported" in the shipped docs ([S8]). Use v7/v8, not v6.
+**Correction 2:** Apicurio's Confluent compatibility is v7 and v8, not v6. The assignment and the prior audit ([S] 03-longevity-audit section 3.9) both say "v6". Apicurio's own documentation says "Confluent Schema Registry API v7" ([S5]), and its own accepted ADR dated **2026-05-09** states: "The compatibility layer exposes the Confluent v7 and v8 REST API at `/apis/ccompat/v7/` and `/apis/ccompat/v8/`" ([S7]). Both are marked "Fully supported" in the shipped docs ([S8]). Use v7/v8, not v6.
 
 **Correction 3:** Karapace's "Apache-2.0 exit" claim is verified on licence, but it is not a foundation project. The map records Karapace as "the Apache-2.0 exit" with no research behind it ([S36]). The licence claim is **true**: `Aiven-Open/karapace` ships an Apache License 2.0 `LICENSE` ([S16]) and the package metadata declares the "Apache Software License" classifier ([S21]). But Karapace is a single-company project under the Aiven-Open organisation ([S18], [S20]), so its L1 is company governance, not foundation governance. The claim survives as an *exit*; it does not survive as a *foundation-grade primary*. See section 2c.
 

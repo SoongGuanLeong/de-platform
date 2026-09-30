@@ -336,7 +336,7 @@ The boundary Polaris claims is real against SeaweedFS: a credential vended for o
 
 ## 9. Supplementary - the `stsUnavailable: true` branch
 
-Not required by the brief, but doc 04 lists it as assertion (5) and it directly informs how the ClickHouse connection must be provisioned, so it was measured. A second catalog `swfs_nosts` was created with `"stsUnavailable": true` (in a separate bucket to satisfy Polaris's location-overlap validation).
+Not required by the assignment, but doc 04 lists it as assertion (5) and it directly informs how the ClickHouse connection must be provisioned, so it was measured. A second catalog `swfs_nosts` was created with `"stsUnavailable": true` (in a separate bucket to satisfy Polaris's location-overlap validation).
 
 ```
 [stsUnavailable=true] loadTable WITH delegation header    -> HTTP 400
