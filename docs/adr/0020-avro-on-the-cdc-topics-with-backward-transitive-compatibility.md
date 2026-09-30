@@ -2,7 +2,7 @@
 
 **Status:** accepted
 
-The CDC Kafka topics carry Avro, one subject per topic named `<topic>-value`, with `BACKWARD_TRANSITIVE` compatibility enforced by the serializer against Apicurio's ccompat v7 endpoint. The producer is Debezium's Kafka Connect `AvroConverter` in `as-confluent` mode and the reader is Flink's `avro-confluent` format. **Amendment dated 2026-09-28.** This amends the earlier reading that the platform's CDC path was Flink's `debezium-json`, which needs no registry.
+The CDC Kafka topics carry Avro, one subject per topic named `<topic>-value`, with `BACKWARD_TRANSITIVE` compatibility enforced by the serializer against Apicurio's ccompat v7 endpoint. The producer is Debezium's Kafka Connect `AvroConverter` in `as-confluent` mode and the reader is Flink's `avro-confluent` format. **Correction, 2026-09-28 (ticket #15).** This amends the earlier reading that the platform's CDC path was Flink's `debezium-json`, which needs no registry.
 
 ## Considered options
 
