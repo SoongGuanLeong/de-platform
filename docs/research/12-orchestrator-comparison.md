@@ -77,9 +77,9 @@ The platform emits OpenLineage; doc 13 fixed that contract and assumed Dagster a
 |---|---|---|---|---|
 | **Airflow** | `apache-airflow-providers-openlineage` | **Apache Airflow project (first-party)** | **2.20.1**, 2026-08-23 (repo README tracks 2.20.2) [S9, S8] | Actively maintained inside the Airflow monorepo; listed in OpenLineage's own integrations docs [S38] |
 | **Dagster** | `dagster-openlineage` | **community**, hosted in `dagster-io/community-integrations` | **0.2.1**, 2026-05-22 [S18, S19, S20] | Dagster's own docs mark it "community-supported"; emits asset-centric events including schema, column-lineage, data-quality-assertion and partition nominal-time facets [S18] |
-| **Prefect** | none | - | - | No `prefect-openlineage` package on PyPI (HTTP 404); not listed in OpenLineage's integrations docs [S38] |
-| **Argo Workflows** | none | - | - | Not listed in OpenLineage's integrations docs [S38] |
-| **Flyte** | none | - | - | Not listed in OpenLineage's integrations docs [S38] |
+| **Prefect** | none | n/a | n/a | No `prefect-openlineage` package on PyPI (HTTP 404); not listed in OpenLineage's integrations docs [S38] |
+| **Argo Workflows** | none | n/a | n/a | Not listed in OpenLineage's integrations docs [S38] |
+| **Flyte** | none | n/a | n/a | Not listed in OpenLineage's integrations docs [S38] |
 
 The OpenLineage project's own integrations tree lists exactly `airflow`, `dbt`, `feast`, `flink`, `great-expectations`, `hive`, `presto` and `spark` [S38]. Dagster's integration is community-owned and not in that list; its docs are first-party but label the package community-supported [S18]. This is a point **in Airflow's favour**: it is the only candidate with a first-party OpenLineage provider maintained by the orchestrator's own project. For Dagster, M11's "OpenLineage emitted from Dagster" rests on a community package at v0.2.1, which is a real dependency risk that the current plan does not record.
 
@@ -222,7 +222,7 @@ Well-governed (LF AI & Data Graduated) and Python-first, with a genuine local de
 | Activity (latest) | 1.13.24, 2026-09-21 | 3.3.2, 2026-09-17 | 3.8.7, 2026-09-26 | v4.1.4, 2026-09-18 | v2.0.50, 2026-09-24 |
 | Python-first | yes | yes | yes | **no** | yes |
 | JD hit | stack names it | explicitly accepted | "equivalent" | "equivalent" | "equivalent" |
-| Migration cost (from Dagster) | - | medium | medium | high | medium-high |
+| Migration cost (from Dagster) | n/a | medium | medium | high | medium-high |
 
 ---
 

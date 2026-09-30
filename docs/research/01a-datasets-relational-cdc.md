@@ -717,7 +717,7 @@ A community-maintained catalogue of 85,000+ airports with runways, navaids, freq
 | File | Bytes | Rows (approx) |
 |---|---|---|
 | `airports.csv` | 12,727,797 | 85,000+ |
-| `airport-comments.csv` | 4,680,827 | - |
+| `airport-comments.csv` | 4,680,827 | not counted |
 | `runways.csv` | 3,964,978 | ~50,000 |
 | `airport-frequencies.csv` | 1,299,761 | ~40,000 |
 | `navaids.csv` | 1,524,946 | ~13,000 |

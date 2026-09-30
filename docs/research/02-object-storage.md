@@ -238,15 +238,15 @@ They are **alternatives, not complements.** Polaris *is* the catalog; a built-in
 | S3 / FUSE / HDFS / Iceberg APIs | yes | yes |
 | Erasure Coding | **"Fixed ratio"** | Customizable (20+4 = 1.2x) |
 | Storage Compression | **gzip** | zstd by default + gzip |
-| Sealed Directories (18-58x filer metadata reduction) | - | yes |
-| Data Recovery (undelete) | - | yes |
-| Point-in-Time Recovery | - | yes |
-| Self-Healing Storage | - | yes |
-| Automatic EC Repair & Vacuum | - | yes |
-| Remote Volume Vacuum | - | yes |
-| EC Bitrot Scrub | - | yes |
-| Admin UI with OIDC | - | yes |
-| Multi-Tenancy & S3 QoS | - | yes |
+| Sealed Directories (18-58x filer metadata reduction) | no | yes |
+| Data Recovery (undelete) | no | yes |
+| Point-in-Time Recovery | no | yes |
+| Self-Healing Storage | no | yes |
+| Automatic EC Repair & Vacuum | no | yes |
+| Remote Volume Vacuum | no | yes |
+| EC Bitrot Scrub | no | yes |
+| Admin UI with OIDC | no | yes |
+| Multi-Tenancy & S3 QoS | no | yes |
 | Support | Community | 24h on business days |
 
 `weed version` prints, unprompted: *"For enterprise users, please visit https://seaweedfs.com for the SeaweedFS Enterprise Edition, which has advanced features, including data recovery, self-healing storage, customizable erasure coding, EC vacuum and repair, etc."*
@@ -576,10 +576,10 @@ Named, not hand-waved:
 | | Local SeaweedFS | Backblaze B2 | Cloudflare R2 |
 |---|---|---|---|
 | 150 GB | $0 (hardware amortised) | $1.04/mo | $2.10/mo |
-| 1 TB | - | **$6.95/mo** | $15.00/mo |
-| 10 TB | - | $69.50/mo | $150.00/mo |
+| 1 TB | n/a | **$6.95/mo** | $15.00/mo |
+| 10 TB | n/a | $69.50/mo | $150.00/mo |
 | 1 TB/mo egress | not applicable | $0 (within 3x) | **$0, always** |
-| Same at AWS S3, 1 TB + 1 TB egress | - | - | ~$71/mo (~$26 storage + $45 egress) |
+| Same at AWS S3, 1 TB + 1 TB egress | n/a | n/a | ~$71/mo (~$26 storage + $45 egress) |
 
 **The honest conclusion, which is also the best interview material:** *at this scale, self-hosting was never about cost - it was about control and about not paying egress. The moment egress matters, the free tier and then B2/R2 beat any box we own, and the whole value of the self-hosted tier is that it is a *drop-in*, not a commitment.* Self-hosting is the dev/demo substrate; S3 is the production destination; the engineering work is making the handover boring. Say exactly that.
 
