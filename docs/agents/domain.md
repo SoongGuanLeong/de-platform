@@ -30,6 +30,8 @@ When your output names a domain concept (in an issue title, a refactor proposal,
 
 If the concept you need isn't in the glossary yet, that's a signal: either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
 
+A term is not a domain concept merely because it is a word. A prose or terminology convention, such as the noun a document uses for its input, belongs in [writing-conventions.md](writing-conventions.md) instead.
+
 ## Flag ADR conflicts
 
 If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:

@@ -2,6 +2,8 @@
 
 Prose conventions for this repo's documents. Each exists because a term or a marker had drifted into more than one form. Every example below uses `<angle-bracket>` placeholders, so a marker scan can tell an example from a real marker without excluding this file.
 
+Scope: this file holds conventions about prose, not vocabulary. A term that names a platform domain concept belongs in `CONTEXT.md` rather than here; [domain.md](domain.md) covers how to use it.
+
 ## Name the research input "the assignment"
 
 A report in `docs/research/` is produced from a task document. That document is **the assignment**.
