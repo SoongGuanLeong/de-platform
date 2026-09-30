@@ -137,7 +137,7 @@ What a local run cannot exercise, per [`docs/cloud-architecture.md`](cloud-archi
 | Provider parity | podman-compose only | containerd via EKS | docker compose behaviour | none; [section 13 item 11](completion-bar.md) records it |
 | Cost | $0 | The EKS control plane at $0.10 per cluster-hour is the one unbudgeable line | Any AWS bill | The priced cost model, which is arithmetic rather than an observed invoice |
 
-Two rows are **not** differences and are recorded so they are not mistaken for gaps: neither environment has an autoscaler (ADR-0027 rejects Cluster Autoscaler and Karpenter), and neither uses Spot.
+Two rows are **not** differences and are recorded so they are not mistaken for gaps: neither environment has an autoscaler ([cloud architecture section 2.3](cloud-architecture.md) rejects Cluster Autoscaler and Karpenter), and neither uses Spot.
 
 ## 9. What a profile run produces
 
