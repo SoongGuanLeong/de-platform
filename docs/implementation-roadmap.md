@@ -16,7 +16,7 @@ A plan, not a schedule. **No phase has been started, no profile has been run, an
 
 ## 1. What this document settles
 
-1. **The phase list and its gates**, replacing the twelve-block sketch in [MISSION.md section 33](mission/MISSION.md). Every phase leaves a working system (section 3).
+1. **The phase list and its gates**, replacing the twelve-block sketch in [the Project Mission](mission/MISSION.md) section 33. Every phase leaves a working system (section 3).
 2. **The run sequence and the readiness assertion per phase**, so "phase complete" is a reproducible statement rather than a vague one (section 4).
 3. **The ordering against the benchmark order**, which this roadmap does not diverge from, and the reason it does not (section 3).
 4. **The definition of done per phase**, expressed as the register entries the phase completes rather than as prose (section 5).
@@ -24,13 +24,13 @@ A plan, not a schedule. **No phase has been started, no profile has been run, an
 
 ## 2. The five principles
 
-**1. A phase closes on a declared sequence of profile runs that are never co-resident.** `batch` peaks at 6976 MiB and `streaming` at 7168 MiB against an enforceable 7168 MiB, so the two path profiles never run together ([local development section 4](local-development.md)). A phase that needed both simultaneously would be unclosable on this host.
+**1. A phase closes on a declared sequence of profile runs that are never co-resident.** `batch` peaks at 6976 MiB and `streaming` at 7168 MiB against an enforceable 7168 MiB, so the two path profiles never run together ([the local development architecture](local-development.md) section 4). A phase that needed both simultaneously would be unclosable on this host.
 
 **2. A phase leaves a working system.** The documented bring-up reaches its readiness assertion at the end of the phase, with no manual step in between. This is the mission's own instruction, and it is why Phase 0 is a repository rather than a path: there is no profile that carries a minimal end-to-end path, because `smoke` runs one service at a time and never the stack.
 
 **3. A phase gate is a register snapshot, not a new artefact.** A phase closes when every register instance it admits is `complete` with at least one `behaviour` evidence item, every budget it cites resolves and none is `pending`, and the `required` CI check is green on `main`. No per-phase document is written, because [the completion bar](completion-bar.md) is already the standard and a second statement of it could only drift.
 
-**4. The benchmark order is a measurement order, not a build order.** P0, then B1, B2, B6, B7, B9, then B3, B4, B5, then the incident laboratory ([benchmark plan section 5.2](benchmark-plan.md)). This roadmap draws its phase boundaries around those groups rather than across them, so it diverges nowhere. A phase may build a capability before the benchmark that measures it; no benchmark moves.
+**4. The benchmark order is a measurement order, not a build order.** P0, then B1, B2, B6, B7, B9, then B3, B4, B5, then the incident laboratory ([the benchmark plan](benchmark-plan.md) section 5.2). This roadmap draws its phase boundaries around those groups rather than across them, so it diverges nowhere. A phase may build a capability before the benchmark that measures it; no benchmark moves.
 
 **5. No phase leaves the portfolio less demonstrable than it found it.** The system is demonstrable from Phase 1, at a labelled reduced volume where a volume-dependent claim is not yet earned.
 
@@ -56,7 +56,7 @@ Eleven phases, named for what each leaves standing. The run sequence column is e
 
 **Three placements are forced by dependencies rather than chosen.**
 
-- **The network spine precedes the commerce CDC path.** The `streaming` profile declares the RIPE Atlas collector as a resident ([profiles register](../deployment/budgets/profiles.yaml)), and the collector is the network spine's producer. The profile is the reproducibility unit an evidence item names, so the first phase to close under `streaming` must be one where the RIPE path exists. The alternative, amending the profile so a phase closes more easily, is rejected: the service list is fixed by [the completion bar section 8](completion-bar.md), and the register's own relief valve for that residency is a measured ClickHouse workload that does not exist yet.
+- **The network spine precedes the commerce CDC path.** The `streaming` profile declares the RIPE Atlas collector as a resident ([profiles register](../deployment/budgets/profiles.yaml)), and the collector is the network spine's producer. The profile is the reproducibility unit an evidence item names, so the first phase to close under `streaming` must be one where the RIPE path exists. The alternative, amending the profile so a phase closes more easily, is rejected: the service list is fixed by [the completion bar](completion-bar.md) section 8, and the register's own relief valve for that residency is a measured ClickHouse workload that does not exist yet.
 - **The data-quality gate precedes the observability class.** Completion bar 6.10 requires the dashboard set to cover DQ pass rate, so the check results must exist before the observability instances can be complete. The gate is therefore a prerequisite of the incident laboratory, not a peer of it.
 - **The incident laboratory is last.** The benchmark plan puts it after every benchmark so a benchmark's co-tenancy is never polluted by an injected fault.
 
@@ -66,7 +66,7 @@ Eleven phases, named for what each leaves standing. The run sequence column is e
 
 ### 4.1 The runs
 
-A run is one bring-up under one profile, following the four-phase runbook in [local development section 6](local-development.md): preflight, ordered start, readiness confirmation, teardown and reset.
+A run is one bring-up under one profile, following the four-phase runbook in [the local development architecture](local-development.md) section 6: preflight, ordered start, readiness confirmation, teardown and reset.
 
 **The readiness assertion is the same for every run**, and this is what "the exact readiness assertion" means: the profile's assertions under `tests/<profile>/` pass, an OOM-killed profile service is surfaced as a profile-budget failure rather than as an application bug, the observed peak from `podman stats` is within the declared entitlement, and the resolved `podman-compose config` and the image digests actually pulled are captured. A profile that starts but fails its assertions is not ready. A benchmark run additionally proves its reset, by following the reset procedure and reaching the same assertion on a fresh bring-up.
 
@@ -90,7 +90,7 @@ A run is one bring-up under one profile, following the four-phase runbook in [lo
 | 9 | none | n/a | CI validation only | n/a | n/a |
 | 10 | none | n/a | CI validation only | n/a | n/a |
 
-**The host tiers are the preflight's, from [local development section 5](local-development.md).** Tier 1 is 7.5 GiB free or more, where the full path profile fits. Tier 2 is between 7.0 and 7.5 GiB free, where the preflight offers the profile's declared reduced variant and **no alert drill can be produced**. Below 7.0 GiB the preflight refuses, and neither path profile fits.
+**The host tiers are the preflight's, from [the local development architecture](local-development.md) section 5.** Tier 1 is 7.5 GiB free or more, where the full path profile fits. Tier 2 is between 7.0 and 7.5 GiB free, where the preflight offers the profile's declared reduced variant and **no alert drill can be produced**. Below 7.0 GiB the preflight refuses, and neither path profile fits.
 
 **Tier 2 is sufficient for every phase except Phase 8.** Phases 4 to 7 need no alert to fire, so a reduced run is a legitimate closure for them, and its evidence item is labelled as reduced. Phase 8 is the only phase whose gate requires an unprompted alert reaching a real destination, and a reduced run drops the three services that make that possible. **Phase 8 therefore cannot close on a host with between 7.0 and 7.5 GiB free.** That is a property of the gate, not a caveat.
 
@@ -155,7 +155,7 @@ The **representative** column is what makes "every populated class has exactly o
 
 ## 6. The mapping from the mission's twelve blocks
 
-[MISSION.md section 33](mission/MISSION.md) sketches twelve blocks, Phase 0 to Phase 11. This roadmap has eleven phases, and the mapping is not one to one.
+[the Project Mission](mission/MISSION.md) section 33 sketches twelve blocks, Phase 0 to Phase 11. This roadmap has eleven phases, and the mapping is not one to one.
 
 | Mission block | Where it lands |
 |---|---|
@@ -174,7 +174,7 @@ The **representative** column is what makes "every populated class has exactly o
 
 ## 7. The interview-facing mapping
 
-**This is a mapping, not an ordering driver.** The phase order is fixed by engineering dependencies, and section 3 records the three that are forced. [The requirements matrix section 4](requirements-matrix.md) ranks the five load-bearing rows, and that ranking decides where the roadmap's emphasis and demo effort goes, not when a phase runs.
+**This is a mapping, not an ordering driver.** The phase order is fixed by engineering dependencies, and section 3 records the three that are forced. [the requirements matrix](requirements-matrix.md) section 4 ranks the five load-bearing rows, and that ranking decides where the roadmap's emphasis and demo effort goes, not when a phase runs.
 
 | Rank | Row | First evidenced | Why there and not earlier |
 |---|---|---|---|
@@ -230,7 +230,7 @@ A limitation with a substitute gets a phase. A limitation that waits on the worl
 
 One, found while writing the run sequences, and not applied here.
 
-**The `benchmark` profile's description is narrower than its own worked example.** [The completion bar section 8](completion-bar.md) describes `benchmark` as "One component at a time under a declared resource budget. Never the whole stack", while `deployment/budgets/profiles.yaml`'s worked example for the M5 layout benchmark is three services (ClickHouse 6144 MiB, PostgreSQL 384, SeaweedFS 256, peak 6784 MiB), and [the benchmark plan section 5.2](benchmark-plan.md) calls that example the precedent for B1. This roadmap reads `benchmark` as **a narrowed bring-up of the path's services with the component under test sized up, never the whole path profile**, which is what the worked example already demonstrates. On that reading the only amendment needed is one clause in completion-bar section 8: "one component under test at a time, never the whole path profile". Flagged rather than applied, because it edits a closed ticket's artefact.
+**The `benchmark` profile's description is narrower than its own worked example.** [the completion bar](completion-bar.md) section 8 describes `benchmark` as "One component at a time under a declared resource budget. Never the whole stack", while `deployment/budgets/profiles.yaml`'s worked example for the M5 layout benchmark is three services (ClickHouse 6144 MiB, PostgreSQL 384, SeaweedFS 256, peak 6784 MiB), and [the benchmark plan](benchmark-plan.md) section 5.2 calls that example the precedent for B1. This roadmap reads `benchmark` as **a narrowed bring-up of the path's services with the component under test sized up, never the whole path profile**, which is what the worked example already demonstrates. On that reading the only amendment needed is one clause in completion-bar section 8: "one component under test at a time, never the whole path profile". Flagged rather than applied, because it edits a closed ticket's artefact.
 
 ---
 

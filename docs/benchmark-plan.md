@@ -25,7 +25,7 @@ It is a plan, not a result. Nothing has been measured. No latency, throughput, f
 
 The tempting mistake is a second, benchmark-only record schema. It would drift from the completion bar's evidence-item schema the first time a field changed, and a reviewer would then be reading two documents to check one claim.
 
-The benchmark record **is** an evidence item. It lives at `docs/evidence/<class>/<instance>/<item>.md` with its raw output committed under `raw/` beside it, it carries the fields fixed in [completion-bar section 7](completion-bar.md), and it adds a benchmark block described below. There is one schema, one directory layout, one CI validator.
+The benchmark record **is** an evidence item. It lives at `docs/evidence/<class>/<instance>/<item>.md` with its raw output committed under `raw/` beside it, it carries the fields fixed in [the completion bar](completion-bar.md) section 7, and it adds a benchmark block described below. There is one schema, one directory layout, one CI validator.
 
 ### 2.2 The three modes
 
@@ -65,7 +65,7 @@ One run of a 600-million-row layout benchmark on a shared 12-CPU host is noise, 
 
 - **Latency: 5 runs, the first discarded as warm-up.** Report the median and the p95 per query, plus the raw per-run values. The budget is judged on the p95.
 - **Throughput and counters: 3 runs.** Report the median and the spread. A spread above 10% is recorded as noise rather than hidden, and a run whose spread is that wide may still be valid evidence, with the noise stated.
-- **Two concurrency points for the nine-query set.** `c=1` for the per-query latency budgets, and `c=4` for the mission's concurrent-queries family, with the degradation between them judged as a ratio. Four is chosen because the worked example in [local-development section 4](local-development.md) gives ClickHouse 8 vCPU in the benchmark profile, so four concurrent queries keep the engine above the queueing knee instead of measuring a queue.
+- **Two concurrency points for the nine-query set.** `c=1` for the per-query latency budgets, and `c=4` for the mission's concurrent-queries family, with the degradation between them judged as a ratio. Four is chosen because the worked example in [the local development architecture](local-development.md) section 4 gives ClickHouse 8 vCPU in the benchmark profile, so four concurrent queries keep the engine above the queueing knee instead of measuring a queue.
 
 ### 2.5 The controls block
 
@@ -77,7 +77,7 @@ Declared with every record, because a figure without them is a figure the review
 - The exact command, which is the literal invocation of the benchmark's entry point (section 8).
 - Concurrency, and the query set where one applies.
 - The pinned Iceberg snapshot id, or a tag, since tags never expire while `expire_snapshots` would remove the snapshot.
-- Cache settings where a cache exists, including the ClickHouse read-through arm's metadata cache, which is measured on with one uncached run recorded as well ([serving-layer section 8](serving-layer.md)).
+- Cache settings where a cache exists, including the ClickHouse read-through arm's metadata cache, which is measured on with one uncached run recorded as well ([the serving layer](serving-layer.md) section 8).
 - Co-tenancy: only the profile's resident services plus the declared transient. The host's desktop applications are named as an uncontrolled variable rather than claimed away.
 
 ### 2.6 What invalidates a record
@@ -102,7 +102,7 @@ Every throughput, latency or file-count figure measured on TPC-C or TPC-H data i
 
 ### 3.1 The mission's nine benchmark families, mapped
 
-[MISSION.md section 24](mission/MISSION.md) names nine families to define benchmarks for. None may be dropped silently, and none may be double-counted.
+[the Project Mission](mission/MISSION.md) section 24 names nine families to define benchmarks for. None may be dropped silently, and none may be double-counted.
 
 | Mission family | Benchmark | Path | Matrix rows |
 |---|---|---|---|
@@ -141,15 +141,15 @@ Choosing arms after seeing results is the same failure as writing a budget after
 |---|---|---|---|
 | **A** (baseline) | `toYYYYMM(l_shipdate)` | `(l_shipdate, l_partkey, l_suppkey)` | The [serving-layer](serving-layer.md) baseline, declared as the reference the other two are compared against |
 | **B** | `toYYYYMMDD(l_shipdate)` | as A | Partition granularity against file count and partition pruning |
-| **C** | `toYYYYMM(l_shipdate)` | `(l_suppkey, l_shipdate)` | The `proj_supplier` hypothesis named as an open measurement in [serving-layer section 11](serving-layer.md) |
+| **C** | `toYYYYMM(l_shipdate)` | `(l_suppkey, l_shipdate)` | The `proj_supplier` hypothesis named as an open measurement in [the serving layer](serving-layer.md) section 11 |
 
 Each variant re-materialises the ClickHouse copy, because a changed Iceberg layout changes what ClickHouse reads, and the p50 and p95 figures are only comparable when both sides moved together.
 
-**B1 is two bring-ups, because Spark and a serving-sized ClickHouse cannot co-reside under the profile's 7168 MiB rule.** The **write bring-up** declares the batch path's materialisation set: Spark at 2048 MiB, ClickHouse at its batch ceiling of 1792 MiB as the staging target, SeaweedFS at 256 MiB, and Polaris at 768 MiB to resolve the Iceberg table for Spark, 4864 MiB and 8 vCPU in all. Spark writes the variant's Iceberg layout, compacts it, and rebuilds the ClickHouse copy with a partition swap ([serving layer section 6](serving-layer.md)), so this bring-up produces the write-throughput, file-count, file-size and compaction-duration figures. The **serving bring-up** is the worked example in [local development section 4](local-development.md): Spark and Polaris are gone and ClickHouse is sized up, and it produces the latency figures.
+**B1 is two bring-ups, because Spark and a serving-sized ClickHouse cannot co-reside under the profile's 7168 MiB rule.** The **write bring-up** declares the batch path's materialisation set: Spark at 2048 MiB, ClickHouse at its batch ceiling of 1792 MiB as the staging target, SeaweedFS at 256 MiB, and Polaris at 768 MiB to resolve the Iceberg table for Spark, 4864 MiB and 8 vCPU in all. Spark writes the variant's Iceberg layout, compacts it, and rebuilds the ClickHouse copy with a partition swap ([the serving layer](serving-layer.md) section 6), so this bring-up produces the write-throughput, file-count, file-size and compaction-duration figures. The **serving bring-up** is the worked example in [the local development architecture](local-development.md) section 4: Spark and Polaris are gone and ClickHouse is sized up, and it produces the latency figures.
 
-**B2, the two-arm comparison:** read-through against materialised, on C1 to C3 and N1 to N3, with P3 excluded. Fixed by [serving-layer section 8](serving-layer.md).
+**B2, the two-arm comparison:** read-through against materialised, on C1 to C3 and N1 to N3, with P3 excluded. Fixed by [the serving layer](serving-layer.md) section 8.
 
-**B3, the tuning record:** checkpoint interval 10 / 60 / 180 s, parallelism 2 / 4, sink flush size 64 / 128 / 256 MiB. The state backend is declared as the baseline rather than varied, because changing it changes the state representation and would confound the other two axes. Fixed by [streaming-jobs section 7](streaming-jobs.md).
+**B3, the tuning record:** checkpoint interval 10 / 60 / 180 s, parallelism 2 / 4, sink flush size 64 / 128 / 256 MiB. The state backend is declared as the baseline rather than varied, because changing it changes the state representation and would confound the other two axes. Fixed by [the streaming jobs](streaming-jobs.md) section 7.
 
 **B4, freshness:** one arm, the materialised CDC copy, with the read-through arm measured as its baseline. Fixed by M8.
 
@@ -159,9 +159,9 @@ Each variant re-materialises the ClickHouse copy, because a changed Iceberg layo
 
 ### 5.1 The declared volume
 
-Every benchmark runs at the declared volume, because the volume-dependent claims cannot be reduced: M5's layout trade-off, M6's file counts and fan-out, M7's serving latency and freshness, M18's cost, and every compaction measurement. The declared volumes are TPC-C W=100 (about 30M rows, target 10 GB in PostgreSQL), TPC-H SF100 (26 GB, a 600M-row `lineitem`), the RIPE Atlas 24-hour replay (target cap 5 GB), and ONSPD whole (a 235 MB multi-CSV zip). The working-set arithmetic is in [dataset-selection section 4](dataset-selection.md) and fits the 140 GB data ceiling against 231 GB of disk.
+Every benchmark runs at the declared volume, because the volume-dependent claims cannot be reduced: M5's layout trade-off, M6's file counts and fan-out, M7's serving latency and freshness, M18's cost, and every compaction measurement. The declared volumes are TPC-C W=100 (about 30M rows, target 10 GB in PostgreSQL), TPC-H SF100 (26 GB, a 600M-row `lineitem`), the RIPE Atlas 24-hour replay (target cap 5 GB), and ONSPD whole (a 235 MB multi-CSV zip). The working-set arithmetic is in [the dataset selection](dataset-selection.md) section 4 and fits the 140 GB data ceiling against 231 GB of disk.
 
-A reduced run at SF30 or W=10 is permitted only as a labelled reduction that cannot evidence a volume-dependent claim. That rule is [testing-strategy section 4](testing-strategy.md)'s and this plan applies it rather than restating it.
+A reduced run at SF30 or W=10 is permitted only as a labelled reduction that cannot evidence a volume-dependent claim. That rule is [the testing strategy](testing-strategy.md) section 4's and this plan applies it rather than restating it.
 
 ### 5.2 The order, given the profiles cannot be co-resident
 
@@ -185,7 +185,7 @@ Batch peaks at 6976 MiB and streaming at 7168 MiB against an enforceable 7168 Mi
 
 **Then the incident laboratory**, which needs both paths plus the observability overlay and runs after every benchmark, so a benchmark's co-tenancy is never polluted by an injected fault.
 
-Each benchmark declares its own resource entitlement inside its protocol, within the `benchmark` profile's rule of at most 7168 MiB and 12 vCPU. **B5 is the exception.** It is measured over the whole CDC path, which the `benchmark` profile may never be ([completion bar section 8](completion-bar.md)), so it runs under `streaming` and takes that profile's declared peak rather than declaring one of its own. The worked example in [local-development section 4](local-development.md) is the precedent for B1's serving bring-up: ClickHouse 6144 MiB / 8 vCPU, SeaweedFS 256 / 1, peak 6400 MiB / 9 vCPU. **An entitlement is not a threshold**, and the ceilings live in `deployment/budgets/profiles.yaml` rather than in `docs/budgets.yaml` (ADR-0031).
+Each benchmark declares its own resource entitlement inside its protocol, within the `benchmark` profile's rule of at most 7168 MiB and 12 vCPU. **B5 is the exception.** It is measured over the whole CDC path, which the `benchmark` profile may never be ([the completion bar](completion-bar.md) section 8), so it runs under `streaming` and takes that profile's declared peak rather than declaring one of its own. The worked example in [the local development architecture](local-development.md) section 4 is the precedent for B1's serving bring-up: ClickHouse 6144 MiB / 8 vCPU, SeaweedFS 256 / 1, peak 6400 MiB / 9 vCPU. **An entitlement is not a threshold**, and the ceilings live in `deployment/budgets/profiles.yaml` rather than in `docs/budgets.yaml` (ADR-0031).
 
 A reset is proven before each benchmark, not asserted: the reset procedure followed by a fresh bring-up that reaches the same readiness assertion. The `--keep` flag exists for a benchmark run that has to survive inspection.
 
@@ -209,7 +209,7 @@ Both classes satisfy the evidence standard's rule that a threshold is declared b
 
 **Class `fixed`.** The threshold is a design constraint: it comes from an external limit, a declared architectural target, or a mechanism that must work at all. The value is committed with this plan. Examples: the per-incident MTTD and MTTR ceilings, the consumer-lag band, the freshness p99 band, the checkpoint-duration ceiling, the persona latency classes, the cross-path tolerance, the session-policy size, the swap-drill hours, the median file size, the small-file share, the rewrite improvement ratio, the quarantine share, and storage-reclaimed greater than zero.
 
-**Class `derived`.** The threshold is relative: it can only be set once the baseline arm exists on this hardware. The **derivation rule** is committed with this plan and the **value** is committed in a commit that precedes the run that is judged. Examples: the nine per-query p50 budgets, the M5 write throughput and compaction duration, the two-arm delta, the batch wall-clock, the freshness p50, and the three M18 counters. The derivation rule is what stops the number being free once the run happens: [serving-layer section 9](serving-layer.md) already ruled that a per-query threshold invented before the workload is measured on this hardware would be a guess wearing a threshold's clothes, and a rule committed in advance is the honest alternative to a number committed in advance.
+**Class `derived`.** The threshold is relative: it can only be set once the baseline arm exists on this hardware. The **derivation rule** is committed with this plan and the **value** is committed in a commit that precedes the run that is judged. Examples: the nine per-query p50 budgets, the M5 write throughput and compaction duration, the two-arm delta, the batch wall-clock, the freshness p50, and the three M18 counters. The derivation rule is what stops the number being free once the run happens: [the serving layer](serving-layer.md) section 9 already ruled that a per-query threshold invented before the workload is measured on this hardware would be a guess wearing a threshold's clothes, and a rule committed in advance is the honest alternative to a number committed in advance.
 
 A `derived` entry carries `threshold: pending` until its value lands. **An evidence item citing an entry whose threshold is `pending` fails CI**, which is the mechanism that stops a derived budget being cited before it exists.
 
@@ -228,7 +228,7 @@ A `derived` entry carries `threshold: pending` until its value lands. **An evide
 
 ## 7. M18's measured axis, and what stays an extrapolation
 
-**The axis is inherited, not chosen here.** [`docs/cloud-architecture.md` section 6.5](cloud-architecture.md) already fixes it: **cost per GB ingested**, measured locally as objects written, bytes written and compaction work per GB of CDC ingested. Section 6.2 records why: file count rises superlinearly with ingest rate, so S3 request cost and compaction compute are the two lines that dominate a lakehouse bill at 10x, and neither is a function of stored bytes. ADR-0027 carries it. This plan supplies the protocol and the budgets, and does not reopen the choice.
+**The axis is inherited, not chosen here.** [the cloud architecture](cloud-architecture.md) section 6.5 already fixes it: **cost per GB ingested**, measured locally as objects written, bytes written and compaction work per GB of CDC ingested. Section 6.2 records why: file count rises superlinearly with ingest rate, so S3 request cost and compaction compute are the two lines that dominate a lakehouse bill at 10x, and neither is a function of stored bytes. ADR-0027 carries it. This plan supplies the protocol and the budgets, and does not reopen the choice.
 
 **B5 is the measured experiment.** One arm, the CDC path, at the declared volume, under the streaming profile, with the `rewrite_data_files` procedure in a following window. The three counters are `m18-objects-per-gb`, `m18-bytes-per-gb` and `m18-compaction-work-per-gb`.
 

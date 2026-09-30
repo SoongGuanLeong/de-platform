@@ -80,7 +80,7 @@ A profile's peak is **the sum of its resident ceilings plus the largest single t
 - **`batch`** carries the larger ClickHouse ceiling because it owns the serving materialisation. Spark runs as `spark-submit --master local[3]` with `spark.driver.memory=1536m`.
 - **`streaming`** carries the smaller ClickHouse ceiling because it serves one CDC table, and that ceiling is 832 MiB rather than 1024 because the profile's peak already equals the enforceable peak: the RIPE Atlas collector is a resident of this profile, so the space for it had to come from an existing resident, and ClickHouse is the resident whose reduction cannot confound the evidence. **The collector is here because incidents 1 and 6 run under this profile with the collector among their components**, and incident 1 is the live-stack injection M16 requires; before it was admitted, the profile could not evidence them. **Dagster is deliberately absent**: the completion bar fixes this profile's service list and this ticket does not re-litigate it, so the profile script starts the Flink job, and the Dagster-owned lifecycle (deploy, restart, savepoint) is exercised in `batch` against a Flink cluster brought up for the purpose. The seam is a row in the diff (section 8).
 - **`observability`** is the overlay alone, for dashboard authoring and for reading a dashboard without a path.
-- **`benchmark`** takes its definition from [completion bar section 8](completion-bar.md): one component under test at a time, never the whole path profile. Its budget is declared in each benchmark's protocol rather than as a fixed peak. Worked example, the serving bring-up of the ClickHouse layout benchmark that M5 and [section 6.5](completion-bar.md) need: ClickHouse 6144 MiB / 8 vCPU plus SeaweedFS 256 / 1, peak **6400 MiB / 9 vCPU**.
+- **`benchmark`** takes its definition from [the completion bar](completion-bar.md) section 8: one component under test at a time, never the whole path profile. Its budget is declared in each benchmark's protocol rather than as a fixed peak. Worked example, the serving bring-up of the ClickHouse layout benchmark that M5 and [section 6.5](completion-bar.md) need: ClickHouse 6144 MiB / 8 vCPU plus SeaweedFS 256 / 1, peak **6400 MiB / 9 vCPU**.
 
 ## 5. The preflight, and the refusal policy
 
@@ -118,7 +118,7 @@ One entry point per profile, in `deployment/`, in four phases. **The named provi
 
 ## 8. The local-versus-cloud diff
 
-What a local run cannot exercise, per [`docs/cloud-architecture.md`](cloud-architecture.md) and [completion bar section 13](completion-bar.md). Every row names the mechanism, the gap, and what stands in its place.
+What a local run cannot exercise, per [`docs/cloud-architecture.md`](cloud-architecture.md) and [the completion bar](completion-bar.md) section 13. Every row names the mechanism, the gap, and what stands in its place.
 
 | Aspect | Local | Cloud (ADR-0027) | What the local run cannot exercise | What stands in its place |
 |---|---|---|---|---|
@@ -137,7 +137,7 @@ What a local run cannot exercise, per [`docs/cloud-architecture.md`](cloud-archi
 | Provider parity | podman-compose only | containerd via EKS | docker compose behaviour | none; [section 13 item 11](completion-bar.md) records it |
 | Cost | $0 | The EKS control plane at $0.10 per cluster-hour is the one unbudgeable line | Any AWS bill | The priced cost model, which is arithmetic rather than an observed invoice |
 
-Two rows are **not** differences and are recorded so they are not mistaken for gaps: neither environment has an autoscaler ([cloud architecture section 2.3](cloud-architecture.md) rejects Cluster Autoscaler and Karpenter), and neither uses Spot.
+Two rows are **not** differences and are recorded so they are not mistaken for gaps: neither environment has an autoscaler ([the cloud architecture](cloud-architecture.md) section 2.3 rejects Cluster Autoscaler and Karpenter), and neither uses Spot.
 
 ## 9. What a profile run produces
 
