@@ -82,7 +82,7 @@ Lower case when the word names an absent value, including at the start of a long
 
 Capitalise it when it opens a sentence instead, because there it is ordinary prose and a cell's first word is capitalised everywhere else: `None of its own; it is derived`, `None. Writes data files only [S4], [S6], [S12]`. A bolded verdict follows the same rule, as `**None.** Synthetic, US-shaped geography against UK postcodes` in a column whose other values are `**Genuine.**` and `**Time-only.**`. The test is whether the word names the absence of a value or is the subject of a sentence.
 
-Do not use `-`. Across six tables it stood for four different things: either placeholder, a negative in a yes/no column (`no`), a value that was never taken (`not counted`), and - in the scorecard in `docs/research/02-object-storage.md` - a defined score, because that table's legend reads `-` as *weak*. Those eight scorecard cells are the only ones that stay.
+Do not use `-`. Across six tables it stood for four different things: either placeholder, a negative in a yes/no column (`no`), a value that was never taken (`not counted`), and - in the scorecard in `docs/research/02-object-storage.md` - a defined score, because that table's legend reads `-` as *weak*. All eleven placeholder cells resolved to `n/a`, and the eight scorecard cells are the only ones that stay.
 
 A cell left blank is not a way to say nothing either. Two tables have blank cells, and both are structural rather than a placeholder: the `**Total**` row in `docs/system-architecture.md` has no members to list, and the 10x and 100x rows in `docs/cloud-architecture.md` section 6.1 leave the per-class split unasserted on purpose.
 
