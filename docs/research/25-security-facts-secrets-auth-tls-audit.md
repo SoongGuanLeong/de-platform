@@ -1,4 +1,4 @@
-# Security facts: secrets intake, per-component authentication, TLS and auditability
+# 25 - Security facts: secrets intake, per-component authentication, TLS and auditability
 
 **Date:** 2026-09-29
 **Ticket:** [The security model beyond governance](https://github.com/SoongGuanLeong/de-platform/issues/18) on [the map](https://github.com/SoongGuanLeong/de-platform/issues/9)

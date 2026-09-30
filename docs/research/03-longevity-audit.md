@@ -1,4 +1,4 @@
-# 03 — Longevity & Governance Audit
+# 03 - Longevity and governance audit
 
 **Date of research:** 2026-09-27. All evidence accessed 2026-09-27 unless stated.
 **Scope:** every component named in the job posting (ONL Biz Solutions, Senior Data Engineer — Data Lakehouse, cached at `career-ops/data/jd-cache/031.md`) plus the object-storage candidates being screened in place of MinIO.

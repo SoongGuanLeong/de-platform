@@ -1,4 +1,4 @@
-# Local profile memory defaults: documented figures for the 19 pinned components
+# 27 - Local profile memory defaults: documented figures for the 19 pinned components
 
 **Date read: 2026-09-29.** Ticket #25 ("The local development architecture"), wayfinder map #9.
 
