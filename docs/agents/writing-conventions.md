@@ -1,6 +1,6 @@
 # Writing conventions
 
-Prose conventions for this repo's documents. Each exists because a term or a marker had drifted into more than one form. Every example below uses `<angle-bracket>` placeholders, so a marker scan can tell an example from a real marker without excluding this file.
+Prose conventions for this repo's documents. Each exists because a term or a marker had drifted into more than one form. Every marker example below uses `<angle-bracket>` placeholders, so a marker scan can tell an example from a real marker without excluding this file.
 
 Scope: this file holds conventions about prose, not vocabulary. A term that names a platform domain concept belongs in `CONTEXT.md` rather than here; [domain.md](domain.md) covers how to use it.
 
@@ -15,7 +15,7 @@ A report in `docs/research/` is produced from a task document. That document is 
 
 Use it for the input and for the claims made in it: "the assignment says", "the assignment's premise", "corrections to the assignment". Four research documents already use this form in their own header metadata, as `**Ticket:** ... (no issue number was supplied with this assignment)`.
 
-`docs/mission/MISSION.md` is a verbatim preservation copy and keeps its own "this brief", which refers to the Project Mission rather than to a research assignment. Do not edit that file.
+`docs/mission/MISSION.md` is a verbatim preservation copy and keeps its own "this brief", which refers to the Project Mission rather than to a research assignment. Do not edit that file: it is one of the preservation copies listed under Headings below.
 
 ## Mark a revision with `**Correction, <date> (<authority>).**`
 
@@ -43,3 +43,24 @@ Scope the check to the marker substring, not to the line. A line-level scan both
 - A heading-form marker is only a marker at the start of a line. One shown mid-line, as the bullet above does, matches neither a bold pattern nor an anchored heading pattern, so a line-level scan misses it entirely.
 
 A marker containing `<` and `>` is an example rather than a real marker. That one rule separates this file's examples from the corpus, so no path exclusion is needed.
+
+## Headings
+
+- One H1 per document, and it is the document's title. Sections below it use `##`, and their subsections `###`.
+- Sentence case, leaving proper nouns and acronyms alone: `# 13 - Lineage backend comparison`, not `# 13 - Lineage Backend Comparison`.
+- A research report's H1 carries its number, as `NN - <title>`.
+
+Do not add a level because content feels important. A section is `##` because it is a section. A document that puts its section titles at H1 flattens the outline and breaks any table of contents built from it.
+
+### Preservation copies are exempt
+
+A document that reproduces another document verbatim is not edited to conform. It keeps its own headings, in their original case and at their original level, because the copy's value is that it is unaltered.
+
+| Copy | Exempt portion | Why |
+| --- | --- | --- |
+| `docs/mission/MISSION.md` | the whole file, 36 H1s in title case | the brief is reproduced verbatim from its own `# Project Mission` heading |
+| `docs/research/09-olist-repo-inventory.md` | line 15 to the end, whose H1 is the report's own title in title case | the body matches `opencode.db` row `prt_0e141f8df0015Z8W9wa1i0yx9p` line for line, 443 lines |
+
+The exemption covers the reproduced portion only. In `09`, lines 1 to 13 are this repo's own header and do follow the rules above: the H1 is sentence case and carries the `NN - ` prefix.
+
+A heading in a preservation copy is not a defect, and both entries above were checked against their source before being left alone.
