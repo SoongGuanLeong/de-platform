@@ -26,7 +26,7 @@ Read as three independent legs, all of which must hold:
 
 ## 1. Verdict summary
 
-### FAIL — removed from consideration
+### FAIL - removed from consideration
 
 | Component | Leg failed | Evidence |
 |---|---|---|
@@ -83,7 +83,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ## 3. Per-component audit
 
-### 3.1 Apache Iceberg — **PASS**
+### 3.1 Apache Iceberg - **PASS**
 
 - **Governance:** Apache Software Foundation Top-Level Project. Donated Nov 2018, **graduated May 2020** [Wikipedia, 2026-08-20 snapshot; iceberg.apache.org]. Steward: the ASF, via the Iceberg PMC.
 - **Licence:** Apache-2.0. No relicensing history, no threat of one.
@@ -100,7 +100,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.2 Apache Polaris — **PASS-WITH-CAUTION** (deep dive, §5.1)
+### 3.2 Apache Polaris - **PASS-WITH-CAUTION** (deep dive, §5.1)
 
 - **Governance:** ASF. **Graduated to Top-Level Project 15 Feb 2026**; announced 18–19 Feb 2026 [incubator.apache.org/projects/polaris.html: "2024-08-09 Project enters incubation. 2026-02-15 Graduation as TLP"; polaris.apache.org/blog/2026/02/19]. Site has moved to `polaris.apache.org`.
 - **Licence:** Apache-2.0.
@@ -113,7 +113,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.3 Apache Kafka — **PASS**
+### 3.3 Apache Kafka - **PASS**
 
 - **Governance:** ASF TLP. Apache-2.0.
 - **Last release:** **4.3.1, 23 Jun 2026**; 4.4.0-rc0 cut 21 Aug 2026 [releasealert.dev/github/apache/kafka; kafka.apache.org/blog/releases]. Prior: 4.2.1 28 May 2026, 4.3.0 20 May 2026, 4.2.0 16 Feb 2026, 4.1.2 16 Mar 2026.
@@ -130,7 +130,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.4 Apache Flink — **PASS**
+### 3.4 Apache Flink - **PASS**
 
 - **Governance:** ASF TLP. Apache-2.0.
 - **Last release:** **2.3.0, 25 Jun 2026**; 2.3.0 on PyPI as `apache-flink` [pypi.org/project/apache-flink]. Prior: 2.2.1 11 May 2026, 2.1.3 11 Jun 2026, 2.0.2 9 May 2026.
@@ -142,7 +142,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.5 Apache Spark — **PASS-WITH-CAUTION** (Java 25 only)
+### 3.5 Apache Spark - **PASS-WITH-CAUTION** (Java 25 only)
 
 - **Governance:** ASF TLP. Apache-2.0.
 - **Last release:** **4.2.0, 14 Jul 2026**; 4.1.3 15 Jul 2026; 4.0.4 15 Jul 2026; 3.5.9 16 Jul 2026 [spark.apache.org/news]. Four supported lines in one week — the 4.x train is moving fast.
@@ -154,7 +154,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.6 ClickHouse — **PASS-WITH-CAUTION** (deep dive, §5.3)
+### 3.6 ClickHouse - **PASS-WITH-CAUTION** (deep dive, §5.3)
 
 - **Governance:** company. ClickHouse, Inc. (San Francisco, incorporated Sept 2021) and ClickHouse B.V. (Amsterdam). Steward: Alexey Milovidov (CTO) and Aaron Katz (CEO).
 - **Licence:** **Apache-2.0, unchanged.** `LICENSE` reads "Copyright 2016-2026 ClickHouse, Inc. … Apache License Version 2.0" [github.com/ClickHouse/ClickHouse/blob/master/LICENSE, accessed 2026-09-27]. The project published a tenth-anniversary post on 16 Jun 2026 explicitly marking ten years of Apache 2.0.
@@ -169,7 +169,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.7 Dagster — **PASS-WITH-CAUTION** (deep dive, §5.3)
+### 3.7 Dagster - **PASS-WITH-CAUTION** (deep dive, §5.3)
 
 - **Governance:** company → **company, and the company changed hands three months ago.** On **13 Jul 2026 Prefect acquired Dagster Labs** (Elementl, Inc. d.b.a. Dagster Labs), including the product, codebase, customer relationships and much of the team. "Following the close of the transaction, the combined company is expected to operate under the **Prefect** name beginning in August 2026" [dagster.io/prefect, letter from the Dagster and Prefect teams, 13 Jul 2026; BusinessWire 20260713065285]. Steward: Pete Hunt (CEO, Dagster Labs), Nick Schrock (founder/CTO), Jeremiah Lowin (founder/CEO, Prefect).
 - **Licence:** **Apache-2.0, unchanged** [github.com/dagster-io/dagster/blob/master/LICENSE, "Copyright 2025 Dagster Labs, Inc."].
@@ -184,7 +184,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.8 Debezium — **PASS-WITH-CAUTION** (deep dive, §5.4)
+### 3.8 Debezium - **PASS-WITH-CAUTION** (deep dive, §5.4)
 
 - **Governance:** **Commonhaus Foundation**, since **December 2024**. Move announced 4 Nov 2024 by Chris Cranford [debezium.io/blog/2024/11/04/debezium-moving-to-commonhaus]; completed and reported by InfoQ on 3 Feb 2025. **This is no longer a Red Hat project.** All projects under the `debezium` GitHub org moved; Red Hat donated the trademark and domain names. Commonhaus's IP policy "legally binds the project to remain open-source forever" [debezium.io/foundation/faq]. Steward: the Debezium Steering Committee, majority-vote self-governance [debezium.io/community/governance].
 - **Licence:** Apache-2.0. DCO, not CLA. From **January 2026** Debezium only accepts contributions with `Signed-off-by` [debezium.io/blog/2025/12/12/contribution-requirements-changing, 12 Dec 2025].
@@ -199,7 +199,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.9 Apicurio Registry — **PASS-WITH-CAUTION** (deep dive, §5.4)
+### 3.9 Apicurio Registry - **PASS-WITH-CAUTION** (deep dive, §5.4)
 
 - **Governance:** **CNCF Sandbox project**, "Copyright Apicurio Registry a Series of LF Projects, LLC" [github.com/apicurio/apicurio-registry README, accessed 2026-09-27]. **It is no longer Red Hat-governed** — the JD's framing is out of date. Development happens on `#apicurio` in CNCF Slack; mailing lists `cncf-apicurio-registry-dev@lists.cncf.io`. Red Hat ships the commercial "Red Hat build of Apicurio Registry" alongside.
 - **Licence:** Apache-2.0.
@@ -216,7 +216,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.10 OpenLineage — **PASS**
+### 3.10 OpenLineage - **PASS**
 
 - **Governance:** **LF AI & Data Foundation, Graduate** maturity. "OpenLineage is an LF AI & Data Foundation Graduate project under active development" [openlineage.io/docs/1.46.0].
 - **Licence:** Apache-2.0.
@@ -231,7 +231,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.11 Prometheus — **PASS**
+### 3.11 Prometheus - **PASS**
 
 - **Governance:** CNCF. **Graduated 9 Aug 2018** [cncf.io/projects/prometheus].
 - **Licence:** Apache-2.0.
@@ -244,7 +244,7 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.12 Alertmanager — **PASS**
+### 3.12 Alertmanager - **PASS**
 
 - **Governance:** Prometheus project under CNCF. Apache-2.0.
 - **Last release:** **v0.34.1, published 17 Sep 2026** [pkg.go.dev/github.com/prometheus/alertmanager/api/v2/restapi]. v0.34.0 16 Aug 2026; v0.33.1 4 Jul 2026.
@@ -255,13 +255,13 @@ $ df -h / → 231G available on /dev/nvme1n1p3
 
 ---
 
-### 3.13 Grafana — **PASS-WITH-CAUTION** (deep dive, §5.2)
+### 3.13 Grafana - **PASS-WITH-CAUTION** (deep dive, §5.2)
 
 Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicensing in 2025–26, Grafana 13 shipped 21 Apr 2026, Grafana OSS still free and still shipping features. Caution: Grafana OnCall OSS archived 2026-03-24; the Prometheus datasource was extracted to a standalone plugin in 13.2; core alerting, RBAC, audit and Vault integration are Enterprise.
 
 ---
 
-### 3.14 Helm — **PASS-WITH-CAUTION**
+### 3.14 Helm - **PASS-WITH-CAUTION**
 
 - **Governance:** CNCF. **Graduated 1 May 2020** [cncf.io/projects/helm].
 - **Licence:** Apache-2.0.
@@ -274,7 +274,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-### 3.15 OpenTofu — **PASS**
+### 3.15 OpenTofu - **PASS**
 
 - **Governance:** **Linux Foundation** — "OpenTofu is a Series of LF Projects, LLC" [opentofu.org/docs/v1.11/intro/whats-new footer]. Created Sept 2023 specifically as the response to HashiCorp relicensing Terraform from MPL-2.0 to BUSL 1.1, with a founding commitment of "a minimum of 18 full-time developers over at least the next five years" from the founding companies [linuxfoundation.org/press/announcing-opentofu, 20 Sep 2023]. Note the founding commitment window is exactly our 5-year horizon — worth re-checking in 2028.
 - **Licence:** **MPL-2.0** (file-level copyleft, weaker than AGPL; no network-use clause).
@@ -287,7 +287,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-### 3.16 PostgreSQL — **PASS**
+### 3.16 PostgreSQL - **PASS**
 
 - **Governance:** the PostgreSQL Global Development Group — a traditional non-profit-style consortium of companies and individuals, not a foundation, but with 30+ years of unbroken governance and no corporate steward to pivot away.
 - **Licence:** PostgreSQL License (BSD-2-Clause-like). No relicensing history.
@@ -300,7 +300,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-### 3.17 SeaweedFS — **PASS-WITH-CAUTION**
+### 3.17 SeaweedFS - **PASS-WITH-CAUTION**
 
 - **Governance:** **individual, patron-funded.** "SeaweedFS is an independent Apache-licensed open source project with its ongoing development made possible entirely thanks to the support of these awesome backers" — Patreon-funded, with a commercial SeaweedFS Enterprise Edition at seaweedfs.com [github.com/seaweedfs/seaweedfs README, accessed 2026-09-27].
 - **Licence:** Apache-2.0.
@@ -315,7 +315,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-### 3.18 RustFS — **PASS-WITH-CAUTION**
+### 3.18 RustFS - **PASS-WITH-CAUTION**
 
 - **Governance:** company. **RustFS**, rustfs.com. Steward: the RustFS org (27 public repositories).
 - **Licence:** **Apache-2.0** — a genuine advantage over MinIO's AGPL and over Garage's.
@@ -330,7 +330,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-### 3.19 Garage — **PASS-WITH-CAUTION**
+### 3.19 Garage - **PASS-WITH-CAUTION**
 
 - **Governance:** individual/association. Built by **Deuxfleurs**, described on its own Docker Hub page as "an experimental small-scale self hosted service provider, which has been using it in production since its first release in 2020" [hub.docker.com/r/dxflrs/garage]. No foundation, no VC.
 - **Licence:** **AGPLv3** — "Garage is entirely free software released under the terms of the AGPLv3."
@@ -346,7 +346,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-### 3.20 Apache Ozone — **PASS** (excluded on fit, not longevity)
+### 3.20 Apache Ozone - **PASS** (excluded on fit, not longevity)
 
 - **Governance:** ASF TLP. Apache-2.0.
 - **Last release:** **2.2.1, 27 Aug 2026**; 2.1.2 18 Sep 2026; 2.1.1 21 Jun 2026; 2.0.0 4 Apr 2025 [release-catalog.apache.org/ozone; ozone.apache.org/download].
@@ -359,7 +359,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-### 3.21 Container runtime — **Podman PASS (upgrade required) / Docker Engine PASS-WITH-CAUTION**
+### 3.21 Container runtime - **Podman PASS (upgrade required) / Docker Engine PASS-WITH-CAUTION**
 
 **Podman**
 - **Governance:** Red Hat–developed, part of the `containers` community, Apache-2.0. Not a foundation project, but Red Hat is a durable 30-year steward with clear incentive and the project is upstream for RHEL, Fedora and CentOS.
@@ -377,7 +377,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ---
 
-## 4. JDK and Python pinning — the concrete answer
+## 4. JDK and Python pinning - the concrete answer
 
 ### What the engines actually support
 
@@ -420,7 +420,7 @@ Full detail in §5.2. Summary: AGPL-3.0-only since v8 (20 Apr 2021), no relicens
 
 ## 5. The four deep dives
 
-### 5.1 Apache Polaris — is depending on it a risk worth taking?
+### 5.1 Apache Polaris - is depending on it a risk worth taking?
 
 **No, not any more — the risk the assignment describes was resolved in February 2026.**
 
@@ -448,7 +448,7 @@ The job posting calls Polaris an "Apache *incubating* project." That framing is 
 
 ---
 
-### 5.2 Grafana — is Grafana OSS still maintained and still free?
+### 5.2 Grafana - is Grafana OSS still maintained and still free?
 
 **Yes on both counts. Grafana OSS is alive, is AGPL-3.0, and is free forever unless Grafana Labs changes its mind again.**
 
@@ -490,11 +490,11 @@ Prometheus and Alertmanager are **unaffected by any of this** — they are CNCF-
 
 ---
 
-### 5.3 ClickHouse and Dagster — company-backed, is the backing durable, and is the core being pulled?
+### 5.3 ClickHouse and Dagster - company-backed, is the backing durable, and is the core being pulled?
 
 These two look similar (company-backed, commercial cloud on top) and are in fact opposites.
 
-#### ClickHouse — **backing is extremely durable; the core is not being pulled, but it is being outrun**
+#### ClickHouse - **backing is extremely durable; the core is not being pulled, but it is being outrun**
 
 - **Backing durability: very high.** $1.05B raised across 7 rounds; **$400M Series D on 16 Jan 2026**; ~$15B post-money; 623 employees. Investors include Dragoneer, Bessemer, Khosla, Index, Lightspeed, GIC, T. Rowe Price, WCM, Benchmark, Coatue, FirstMark, Nebius. This is not a company that runs out of money and archives a repo [clickhouse.com/blog/clickhouse-raises-400-million-series-d…, 16 Jan 2026].
 - **What the licence actually permits.** **Apache-2.0, unchanged since 15 June 2016** — verified against `LICENSE` on 27 Sep 2026, which reads "Copyright 2016-2026 ClickHouse, Inc. … Licensed under the Apache License, Version 2.0." Apache-2.0 grants perpetual, irrevocable rights to use, modify and redistribute, with an express patent grant. **Nothing ClickHouse has done since 2016 restricts what we can do with it.** The clickhousectl CLI, clickhouse-connect, clickhouse-java, pg_clickhouse and ClickStack are all separately Apache-2.0.
@@ -502,7 +502,7 @@ These two look similar (company-backed, commercial cloud on top) and are in fact
 - **The actual operational risk is release cadence, not governance.** ClickHouse ships **monthly** and each release carries a "Backward Incompatible Change" section. 26.8 alone changed `X-ClickHouse-Format` semantics, removed the Arrow-library reader/writer, made `SOURCE(LIBRARY(...))` an error, forbade TLS credential paths from SQL, and changed `clickhouse-client`'s connection behaviour. **Rule: read the changelog on every monthly release, never skip a minor, and treat LTS releases (26.6, 26.8) as the upgrade target.**
 - **Verdict: PASS-WITH-CAUTION.** All three legs, strongly. Caution = monthly breaking changes + an AI-pivoting corporate narrative.
 
-#### Dagster — **the backing changed shape 3 months ago; the core licence is safe, the roadmap risk is not**
+#### Dagster - **the backing changed shape 3 months ago; the core licence is safe, the roadmap risk is not**
 
 - **What happened, with dates.** **13 July 2026: Prefect acquired Dagster Labs** (Elementl, Inc. d.b.a. Dagster Labs) — the product, the codebase, customer relationships and much of the team [BusinessWire 20260713065285]. "The combined company is expected to operate under the **Prefect** name beginning in **August 2026**" [dagster.io/prefect]. Signed by Pete Hunt (CEO, Dagster Labs), Nick Schrock (founder/CTO, Dagster) and Jeremiah Lowin (founder/CEO, Prefect).
 - **What they have committed to, in writing:** "**Name and open source licence remain unchanged.** We remain committed to the Dagster open source project and community." "Dagster continues support with a full roadmap. Our focus is on **stability and continuity**." "Dagster's open source project continues under its existing license, and Dagster+ remains a supported commercial offering." "Nothing about your Dagster deployment changes as a result of today's announcement."
@@ -514,11 +514,11 @@ These two look similar (company-backed, commercial cloud on top) and are in fact
 
 ---
 
-### 5.4 Debezium and Apicurio — has a Red Hat priority shift already damaged either?
+### 5.4 Debezium and Apicurio - has a Red Hat priority shift already damaged either?
 
 **Short answer: no, and both have already escaped Red Hat governance. The one measurable Red Hat retreat is in the *commercial builds*, not the community projects.**
 
-#### Debezium — moved to Commonhaus; Red Hat's *build* has cooled, the project has not
+#### Debezium - moved to Commonhaus; Red Hat's *build* has cooled, the project has not
 
 - **Governance timeline:** exclusively Red Hat-sponsored from 2015 → **4 Nov 2024** announcement of the move to Commonhaus [debezium.io/blog/2024/11/04/…] → **December 2024** completed [debezium.io/blog/2025/12/12/…] → **3 Feb 2025** reported by InfoQ. The donation included the **Debezium trademark and all related domain names**. Commonhaus's IP policy "**legally binds the project to remain open-source forever**" — the strongest available protection short of ASF neutral governance [debezium.io/foundation/faq].
 - **The honest caveat: the headcount did not de-Red-Hat.** Of the eight Commonhaus project representatives listed for Debezium and neighbours, four are Red Hat and two more are IBM [commonhaus.org/about, 27 Sep 2026]. The Debezium Steering Committee is a majority-vote body of committers, but the committers are overwhelmingly Red Hat/IBM. The move gave the project *legal* independence and a durable home. It did not create a second employer of Debezium engineers.
@@ -527,7 +527,7 @@ These two look similar (company-backed, commercial cloud on top) and are in fact
 - **The governance changes that *did* land** are the Commonhaus compliance work: Jira → GitHub Issues, and **from January 2026, signed-off commits are mandatory** (DCO) [12 Dec 2025]. For us: sign off your fork commits.
 - **Verdict: PASS-WITH-CAUTION.** L1 satisfied and legally protected. L2 is the weak leg — no funding vehicle of its own (Patreon-equivalent via OpenCollective plus Red Hat's build) — but the incentive is *continuity*, which is the right incentive. Caution = headcount concentration plus a Red Hat build that has visibly deprioritised. **For our purposes the Red Hat build is irrelevant; take community builds.**
 
-#### Apicurio Registry — moved to CNCF Sandbox; the Red Hat build was narrowed to OpenShift, the community project was unharmed
+#### Apicurio Registry - moved to CNCF Sandbox; the Red Hat build was narrowed to OpenShift, the community project was unharmed
 
 - **Governance:** the current README states plainly: "**Apicurio Registry is a Cloud Native Computing Foundation Sandbox project.** … Copyright Apicurio Registry a Series of LF Projects, LLC" [github.com/apicurio/apicurio-registry, 27 Sep 2026]. Development is on CNCF Slack; the security list is `cncf-apicurio-registry-security@lists.cncf.io`. The repo also carries a `GOVERNANCE.md`, a `dco.txt` and a `GENERAL_TECHNICAL_REVIEW.md`. **This is a proper foundation home, not a Red Hat community project.** The JD's framing here is wrong in the project's favour.
 - **The Red Hat priority shift, measured:** the "Red Hat build of Apicurio Registry" supported configuration is now **OpenShift 4.16, 4.17, 4.18, 4.19, 4.20 only**, plus OpenShift Service on AWS 4.18 and Azure Red Hat OpenShift 4.17 — with **OpenJDK 17 or 11** [access.redhat.com/articles/7014952, updated 16 Jun 2026]. **A Red Hat-supported product that requires OpenShift is a Red Hat product for OpenShift, not for Kubernetes generally.** And the Red Hat build is at **3.2 GA** while the community is at **3.3.3** (9 Sep 2026) — a one-minor lag.
