@@ -24,7 +24,7 @@ When a document is revised after it was written, mark the revision in place rath
 ```
 
 - Bold the marker only; the claim that follows is not bold.
-- The date is ISO, after a comma. A numbered correction puts the number first: `**Correction 4, 2026-09-28 (ticket #15):**`.
+- The date is ISO, after a comma. A numbered correction puts the number first: `**Correction 4, YYYY-MM-DD (ticket #15):**`.
 - The parenthetical carries the authority (`ticket #15`) or the circumstance (`after peer review`, `after this ADR was accepted`). Every dated marker carries one.
 - The terminator follows grammar: `.` when a new sentence follows, `:` when the marker's own sentence continues.
 - A correction that is a whole section rather than a paragraph takes a heading instead, `## Correction, YYYY-MM-DD (authority)`, with no terminator.
