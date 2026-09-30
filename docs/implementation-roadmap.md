@@ -193,7 +193,7 @@ A limitation with a substitute gets a phase. A limitation that waits on the worl
 
 | Limitation | Disposition |
 |---|---|
-| `sqlfluff` cannot parse ClickHouse `PROJECTION` clauses | **Phase 3**, where the ClickHouse DDL is executed against the pinned engine. That execution is the substitute and it is already the completion bar's standard. Permanent, no trigger |
+| `sqlfluff` cannot parse ClickHouse `PROJECTION` clauses | **Phase 3**, where the ClickHouse DDL is executed against the pinned engine. That execution is the substitute and it is already the completion bar's standard. The permanence claim is superseded: PR 8585 merged on 2026-09-28 and is unreleased as of 2026-09-30, the latest release being 4.3.0. Trigger: a release carrying 8585, which is when the pin should be taken and the limitation retires |
 | The read-through REST path was not exercised ([ADR-0025](adr/0025-iceberg-v3-copy-on-write-for-schema-evolution.md)) | **Closed, not deferred.** B2's comparison arm at Phase 3 exercises it |
 | The Flink v3 upsert writer is unverified ([ADR-0025](adr/0025-iceberg-v3-copy-on-write-for-schema-evolution.md)) | **Phase 5** covers the v2 upsert writer. Trigger: a table that needs v3 upsert, or the ClickHouse LTS that reads deletion vectors (27.3, late March 2027) |
 | The arm64 Marquez image has never been executed | **Phase 9** authors and pushes it on a `demo-*` tag. Trigger: the priced demo window, where it is pulled on arm64 EKS. The limit stands: the build being produced is not the image running |
