@@ -74,6 +74,8 @@ A table cell that has nothing in it carries one of two words, both lower case:
 | `n/a` | the column does not apply to that row |
 | `none` | the column applies, and there is nothing |
 
+The word takes the table's own terminal punctuation. `docs/requirements-matrix.md` ends all 23 values of each of its middle three columns with a full stop, so its placeholder is `none.`, which is not a violation.
+
 `N/A` and `None` were each in use as well, for the same two meanings, in 72 cells, and are replaced. Choosing between `n/a` and `none` is not mechanical: ask whether the column applies to the row at all.
 
 Lower case when the word names an absent value, including at the start of a longer cell: `none published`, `n/a (Java)`, `none; [section 13 item 11](completion-bar.md) records it`, `none needed. ClickHouse Cloud ...`.
