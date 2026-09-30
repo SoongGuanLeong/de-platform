@@ -24,9 +24,10 @@
 # executed under. `batch` and `streaming` name the path whose services the
 # workload uses, which is the grouping the benchmark plan's inventory calls
 # `Path`; `benchmark` appears only where no single path owns the threshold (the
-# M17 maintenance counters). So a benchmark of the batch path carries
-# `profile: batch` here while its evidence item's own `profile` field names the
-# profile the run executed under, and the two legitimately differ.
+# M17 schema-evolution and maintenance counters). So a benchmark of the batch
+# path carries `profile: batch` here while its evidence item's own `profile`
+# field names the profile the run executed under, and the two legitimately
+# differ.
 #
 # `declared_commit` names the commit that introduced the entry. A commit cannot
 # name itself, so a new entry is committed with a placeholder value and the
@@ -618,6 +619,11 @@ budgets:
   # --- M17: operating an open table format, from docs/data-contracts.md section 8 ---
   # Declared before the schema-evolution matrix is run. The numbers these budgets
   # judge are produced during implementation, never here.
+  #
+  # These five are the register's only `profile: benchmark` entries. The matrix
+  # runs over two representative tables, one per write path (Flink upsert and
+  # Spark MERGE), and verifies all four read paths, so no single path owns the
+  # threshold. B6 measures the counters under the benchmark profile.
   - id: m17-commit-latency
     metric: Wall-clock elapsed for one schema-change ALTER, MERGE or rollback operation
     unit: seconds

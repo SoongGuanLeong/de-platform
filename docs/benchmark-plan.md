@@ -120,7 +120,7 @@ Every throughput, latency or file-count figure measured on TPC-C or TPC-H data i
 
 Two further benchmarks, outside the nine families because the mission names them elsewhere:
 
-- **B6** the schema-evolution per-operation cost counters (M17, batch profile), whose thresholds already exist as the five `m17-*` entries.
+- **B6** the schema-evolution per-operation cost counters (M17, benchmark profile), whose thresholds already exist as the five `m17-*` entries.
 - **B9** the two timed component-swap drills (M1, batch profile), which produce a wall-clock figure each.
 
 ### 3.2 Correctness only, no benchmark
