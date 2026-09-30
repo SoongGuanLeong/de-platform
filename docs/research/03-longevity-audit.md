@@ -77,7 +77,7 @@ $ nproc   → 12
 $ df -h / → 231G available on /dev/nvme1n1p3
 ```
 
-**Correction to the brief:** the host JDK is **26**, not 25. This makes the situation slightly worse than assumed — 26 is further from anything the JVM data stack supports. See §6.
+**Correction to the assignment's premise (host JDK):** the host JDK is **26**, not 25. This makes the situation slightly worse than assumed — 26 is further from anything the JVM data stack supports. See §6.
 
 ---
 

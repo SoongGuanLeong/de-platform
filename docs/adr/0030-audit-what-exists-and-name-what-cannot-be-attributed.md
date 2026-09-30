@@ -29,7 +29,7 @@ Two further limits follow from the components rather than from this decision. Th
 
 The audit matrix, the retention table, the cannot-list and the evidence plan are in [`docs/security-model.md`](../security-model.md).
 
-## Correction, 2026-09-29
+## Correction, 2026-09-29 (ticket #18)
 
 Two factual premises in this record were checked against the running components while the runtime evidence was produced, and both are wrong. The decision is unaffected; the prerequisites change.
 
