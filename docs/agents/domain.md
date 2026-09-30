@@ -24,7 +24,7 @@ Single-context repo (this repo):
 
 There is no platform code directory yet, so the tree shows only where the domain docs live.
 
-## Use the glossary's vocabulary
+## Use the glossary's vocabulary, and know where other terms go
 
 When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
 
