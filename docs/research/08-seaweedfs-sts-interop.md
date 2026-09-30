@@ -1,4 +1,4 @@
-# 08 - SeaweedFS STS Interop Test
+# 08 - SeaweedFS STS interop test
 
 **Date of research:** 2026-09-27. All evidence measured 2026-09-27 unless stated.
 **Scope:** Whether Apache Polaris 1.7.0 can vend a scoped storage credential against SeaweedFS 4.47's STS endpoint, and whether SeaweedFS enforces the inline session policy Polaris attaches. This is the live interop test that doc 04 ("Polaris authorisation model and credential vending") names as the thing that would raise its confidence, and it selects the M10 (data governance) matrix wording.

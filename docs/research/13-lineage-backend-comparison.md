@@ -1,4 +1,4 @@
-# 13 - Lineage Backend Comparison
+# 13 - Lineage backend comparison
 
 **Date of research:** 2026-09-28. All evidence accessed 2026-09-28 unless stated.
 **Question answered:** which lineage backend should the platform run, if any?
