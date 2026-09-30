@@ -120,7 +120,7 @@ Mechanisms available where they are turned on:
 | Polaris | Quarkus level | `quarkus.http.ssl.certificate.*` with `quarkus.http.insecure-requests=disabled`; not in the shipped defaults | Low local value |
 | Prometheus, Alertmanager | Yes | `--web.config.file` with `tls_server_config`, which the docs mark experimental for Prometheus | Low local value |
 | Dagster webserver | **No** | The CLI exposes host, port, path-prefix and read-only; it runs uvicorn with no TLS options | A proxy would be needed |
-| Marquez | None found | No TLS code in the API module | A proxy would be needed |
+| Marquez | none found | No TLS code in the API module | A proxy would be needed |
 | Apicurio | Expected at the Quarkus level | Not documented on its security page | Unverified (section 10) |
 
 **Certificate tooling against a 14 GB host.** `openssl` adds nothing and is already present. `mkcert` is a binary that issues a local CA and leaf certificates and can expose its root for JVM truststores. `step-ca` is a real CA daemon with ACME and rotation. `cfssl` is a CA API with JSON configuration. Caddy and Traefik would add a proxy and an internal CA. Only `openssl` and `mkcert` add no runtime component.

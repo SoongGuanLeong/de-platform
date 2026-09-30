@@ -251,21 +251,21 @@ The Debezium image chain sets no override: `debezium/docker-images` `connect/3.6
 
 | Component | Default memory key and value | Published minimum | Server or client | Citation (read 2026-09-29) |
 |---|---|---|---|---|
-| Kafka 4.3.1 (`apache/kafka`) | `KAFKA_HEAP_OPTS=-Xmx1G -Xms1G` (broker, from `kafka-server-start.sh`; image sets none) | None published | Server | `apache/kafka` `bin/kafka-server-start.sh` L28-29, `docker/jvm/Dockerfile`, `docker/jvm/launch`; hub.docker.com/r/apache/kafka |
+| Kafka 4.3.1 (`apache/kafka`) | `KAFKA_HEAP_OPTS=-Xmx1G -Xms1G` (broker, from `kafka-server-start.sh`; image sets none) | none published | Server | `apache/kafka` `bin/kafka-server-start.sh` L28-29, `docker/jvm/Dockerfile`, `docker/jvm/launch`; hub.docker.com/r/apache/kafka |
 | ClickHouse 26.8 LTS | `max_server_memory_usage=0` (all available) x `max_server_memory_usage_to_ram_ratio=0.9` (90%); `max_memory_usage=0` (unlimited) | "total memory shouldn't be below 8GB" (sizing guide) | Server | clickhouse.com max-server-memory-usage, max-memory-usage, sizing-and-hardware-recommendations |
-| Polaris 1.7.0 | None; Helm `resources: {}` by design; Dockerfile.jvm sets no heap | Production recommendation 8Gi memory / 4 CPU (requests and limits) | Server | polaris `Dockerfile.jvm`, `helm/polaris/values.yaml` L501-515, polaris.apache.org/releases/1.7.0/helm-chart/production/ |
-| PostgreSQL 18 (`postgres:18-alpine`) | `shared_buffers=128MB`; `work_mem=4MB`; `maintenance_work_mem=64MB`; image tunes nothing | None published (setting minimum 128 kB) | Server | postgresql.org/docs/18/runtime-config-resource.html L249-293; docker-library/postgres 18/alpine3.23/Dockerfile |
-| SeaweedFS 4.47 (`weed mini`) | None; `defaultMiniVolumeSizeMB=128`, `s3.cacheCapacityMB=0`, `s3.readerCacheSizeMB=0`, `volume.index=memory` | None published; "auto-tuned for one node" | Server | seaweedfs README L87, weed/command/mini.go L51-55, wiki Quick-Start-with-weed-mini |
-| Flink 2.1.3 JM | `jobmanager.memory.process.size` default **(none)** | None published | Server | flink-docs-release-2.1 config; JobManagerOptions.java L132-135 |
-| Flink 2.1.3 TM | `taskmanager.memory.process.size` default **(none)**; `taskmanager.numberOfTaskSlots=1`; framework heap 128MB | None published | Server (worker) | flink-docs-release-2.1 config; TaskManagerOptions.java L296-299 |
-| Spark 4.1.3 | `spark.driver.memory=1g`; `spark.executor.memory=1g`; `spark.executor.cores=1` (YARN) / all (standalone); overhead factor 0.10 | None published | Driver/executor long-running; `spark-submit` client | spark.apache.org/docs/4.1.3/configuration.html |
-| Dagster 1.13.x | None published | None published | Webserver/daemon server; runs client | docs.dagster.io deployment/oss, dagster-daemon, webserver |
-| Apicurio Registry 3.3.x | None published (Quarkus; no heap default) | None published | Server | apicur.io/registry/getting-started/; apicurio-registry distro/docker/README.md |
-| Marquez 0.51.x | None; Helm `resources` empty (commented 1Gi/256Mi examples) | **Quickstart RAM figure not found** | Server | marquez README Requirements; docs/docs/quickstart/index.mdx; chart/values.yaml L59-69 |
-| Prometheus 3.14.0 | No memory setting; `--storage.tsdb.retention.time` default `15d` | None published | Server | prometheus docs/storage.md L94-96, L141-149 |
+| Polaris 1.7.0 | none; Helm `resources: {}` by design; Dockerfile.jvm sets no heap | Production recommendation 8Gi memory / 4 CPU (requests and limits) | Server | polaris `Dockerfile.jvm`, `helm/polaris/values.yaml` L501-515, polaris.apache.org/releases/1.7.0/helm-chart/production/ |
+| PostgreSQL 18 (`postgres:18-alpine`) | `shared_buffers=128MB`; `work_mem=4MB`; `maintenance_work_mem=64MB`; image tunes nothing | none published (setting minimum 128 kB) | Server | postgresql.org/docs/18/runtime-config-resource.html L249-293; docker-library/postgres 18/alpine3.23/Dockerfile |
+| SeaweedFS 4.47 (`weed mini`) | none; `defaultMiniVolumeSizeMB=128`, `s3.cacheCapacityMB=0`, `s3.readerCacheSizeMB=0`, `volume.index=memory` | none published; "auto-tuned for one node" | Server | seaweedfs README L87, weed/command/mini.go L51-55, wiki Quick-Start-with-weed-mini |
+| Flink 2.1.3 JM | `jobmanager.memory.process.size` default **(none)** | none published | Server | flink-docs-release-2.1 config; JobManagerOptions.java L132-135 |
+| Flink 2.1.3 TM | `taskmanager.memory.process.size` default **(none)**; `taskmanager.numberOfTaskSlots=1`; framework heap 128MB | none published | Server (worker) | flink-docs-release-2.1 config; TaskManagerOptions.java L296-299 |
+| Spark 4.1.3 | `spark.driver.memory=1g`; `spark.executor.memory=1g`; `spark.executor.cores=1` (YARN) / all (standalone); overhead factor 0.10 | none published | Driver/executor long-running; `spark-submit` client | spark.apache.org/docs/4.1.3/configuration.html |
+| Dagster 1.13.x | none published | none published | Webserver/daemon server; runs client | docs.dagster.io deployment/oss, dagster-daemon, webserver |
+| Apicurio Registry 3.3.x | none published (Quarkus; no heap default) | none published | Server | apicur.io/registry/getting-started/; apicurio-registry distro/docker/README.md |
+| Marquez 0.51.x | none; Helm `resources` empty (commented 1Gi/256Mi examples) | **Quickstart RAM figure not found** | Server | marquez README Requirements; docs/docs/quickstart/index.mdx; chart/values.yaml L59-69 |
+| Prometheus 3.14.0 | No memory setting; `--storage.tsdb.retention.time` default `15d` | none published | Server | prometheus docs/storage.md L94-96, L141-149 |
 | Grafana 13.x | No memory setting | **512 MB memory, 1 CPU core** (recommended minimum) | Server | grafana.com/docs/grafana/next/setup-grafana/installation.md |
-| Alertmanager 0.34.x | None published | None published | Server | alertmanager docs/alertmanager.md, docs/overview.md |
-| Debezium 3.6.1 (Connect distributed) | `KAFKA_HEAP_OPTS=-Xms256M -Xmx2G` (worker, from `connect-distributed.sh`; image sets none) | None published | Server | apache/kafka `bin/connect-distributed.sh` L29-31; debezium docker-images connect/3.6 and connect-base/3.6 Dockerfiles |
+| Alertmanager 0.34.x | none published | none published | Server | alertmanager docs/alertmanager.md, docs/overview.md |
+| Debezium 3.6.1 (Connect distributed) | `KAFKA_HEAP_OPTS=-Xms256M -Xmx2G` (worker, from `connect-distributed.sh`; image sets none) | none published | Server | apache/kafka `bin/connect-distributed.sh` L29-31; debezium docker-images connect/3.6 and connect-base/3.6 Dockerfiles |
 
 ---
 

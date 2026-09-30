@@ -134,7 +134,7 @@ What a local run cannot exercise, per [`docs/cloud-architecture.md`](cloud-archi
 | Keys | No KMS | One CMK per bucket | Key policies and envelope encryption | Nothing; recorded as absent |
 | Architecture | x86_64 host | Graviton arm64 | arm64 execution of any image | Verified arm64 manifests for 13 of 14 components, and Marquez's self-build recorded as unbuilt and unrun |
 | Streaming lifecycle | The profile script starts the Flink job | Dagster owns deploy, restart and savepoint | The Dagster-driven lifecycle on the `streaming` profile | Exercised in `batch`, where Dagster is resident, against a Flink cluster brought up for the purpose |
-| Provider parity | podman-compose only | containerd via EKS | docker compose behaviour | None; [section 13 item 11](completion-bar.md) records it |
+| Provider parity | podman-compose only | containerd via EKS | docker compose behaviour | none; [section 13 item 11](completion-bar.md) records it |
 | Cost | $0 | The EKS control plane at $0.10 per cluster-hour is the one unbudgeable line | Any AWS bill | The priced cost model, which is arithmetic rather than an observed invoice |
 
 Two rows are **not** differences and are recorded so they are not mistaken for gaps: neither environment has an autoscaler (ADR-0027 rejects Cluster Autoscaler and Karpenter), and neither uses Spot.

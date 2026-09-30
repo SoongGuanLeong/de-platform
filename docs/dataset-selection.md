@@ -83,7 +83,7 @@ Each source is the best available referent for a distinct named requirement, and
 | **Relationships** | `REGION` 1:N `NATION` 1:N `CUSTOMER` and `SUPPLIER`; `CUSTOMER` 1:N `ORDERS` 1:N `LINEITEM`; `PART` M:N `SUPPLIER` through `PARTSUPP`; `LINEITEM` references `PARTSUPP` on the composite key |
 | **Timestamp characteristics** | `o_orderdate` plus the `l_shipdate`, `l_commitdate` and `l_receiptdate` chain. No timezone and no late arrivals |
 | **CDC or event simulation** | **None.** Insert-only, with no updates and no deletes |
-| **Data-quality problems** | None genuine: no NULLs, no updates, no deletes. **Any defect demonstrated on TPC-H is one we manufactured** |
+| **Data-quality problems** | none genuine: no NULLs, no updates, no deletes. **Any defect demonstrated on TPC-H is one we manufactured** |
 | **Streaming suitability** | none |
 | **Batch suitability** | Excellent. This is the batch centre |
 | **Lakehouse suitability** | Excellent analytical fixture, with answers that act as an assertion oracle |

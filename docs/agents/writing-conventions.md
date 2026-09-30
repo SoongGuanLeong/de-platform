@@ -76,6 +76,8 @@ A table cell that has nothing in it carries one of two words, both lower case:
 
 `N/A` and `None` were each in use as well, for the same two meanings, in 72 cells, and are replaced. Choosing between `n/a` and `none` is not mechanical: ask whether the column applies to the row at all.
 
+Lower case wherever the word appears, including at the start of a longer cell: `none published`, `none needed. ClickHouse Cloud ...`, `none; [section 13 item 11](completion-bar.md) records it`.
+
 Do not use `-`. It was doing both jobs, in 29 cells across six tables, so a reader cannot tell which of the two it means.
 
 A cell left blank is not a way to say nothing either. Two tables have blank cells, and both are structural rather than a placeholder: the `**Total**` row in `docs/system-architecture.md` has no members to list, and the 10x and 100x rows in `docs/cloud-architecture.md` section 6.1 leave the per-class split unasserted on purpose.

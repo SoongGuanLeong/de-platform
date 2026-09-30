@@ -149,7 +149,7 @@ container
 | Dagster to PostgreSQL | SCRAM-SHA-256 | Dagster's metadata store | Wrong password refused |
 | Polaris to SeaweedFS | AssumeRole with an inline session policy | `stsEndpoint` pointed at SeaweedFS STS; the vended credential is prefix-scoped | A read outside the vended prefix refused with `AccessDenied`, which is M10's test as measured in research 08 rather than in this document |
 | Spark and Flink to SeaweedFS | The vended, prefix-scoped credential | S3FileIO using the Polaris-vended credential | A read outside the prefix refused with `AccessDenied` |
-| Debezium to Apicurio | None, deliberately | See section 5 | n/a |
+| Debezium to Apicurio | none, deliberately | See section 5 | n/a |
 
 ### 3.2 The path that does not exist, stated rather than invented
 
@@ -237,7 +237,7 @@ Two surfaces are deliberately absent from this register, and the reason matters:
 | A read of a lakehouse table's bytes | **No** | none | n/a | The vended credential is a prefix-scoped storage credential, so the read does not pass through the catalog. This is the auditability consequence of ADR-0004 |
 | A job's inputs and outputs | Partly | Marquez lineage, from OpenLineage | The Marquez metadata database | The OpenLineage spec has no user or author field, so lineage records what ran and never who ran it |
 | A Dagster run and asset materialisation | Yes, at run level | The Dagster metadata database | Indefinite by default; Dagster's retention configuration covers schedules and sensors rather than runs | Run-level rather than necessarily human-level |
-| A Spark job's execution | No, by default | None unless `spark.eventLog.enabled=true`, which defaults to false | n/a | No actor identity by default |
+| A Spark job's execution | No, by default | none unless `spark.eventLog.enabled=true`, which defaults to false | n/a | No actor identity by default |
 | A Flink or Debezium job's behaviour | No | Container logs | The container log | Operational logs rather than an audit trail |
 | A Grafana configuration change | No | none | n/a | Grafana's audit log is an Enterprise and Cloud feature and is not in the OSS edition |
 | Alert firing history | n/a | The Prometheus `ALERTS` series | Prometheus retention, 15 days by default | Serves Grafana's alert history without adding Loki |
@@ -268,7 +268,7 @@ That sentence replaces the earlier "audited in both engines", which was not true
 |---|---|---|---|
 | ClickHouse query log | `system.query_log` | A declared window, set by a TTL | A TTL on the table. The default is unbounded, which is the defect this policy exists to fix |
 | Polaris catalog events | PostgreSQL, the operational database | The operational window | The scheduled delete and vacuum the operational database already uses |
-| Polaris access log, Kafka authorizer log, and the Flink, Debezium and Spark logs | The container log | The container or pod lifetime | None locally. Bounded by the container, and by CloudWatch Logs retention in the cloud |
+| Polaris access log, Kafka authorizer log, and the Flink, Debezium and Spark logs | The container log | The container or pod lifetime | none locally. Bounded by the container, and by CloudWatch Logs retention in the cloud |
 | Dagster runs and materialisations | The Dagster metadata database | The operational window | Dagster's own retention for schedules and sensors; runs trimmed by the Dagster retention asset |
 | Lineage | The Marquez metadata database | The operational window | The same scheduled job |
 | Prometheus metrics | The Prometheus TSDB | 15 days by default | Prometheus retention flags |
@@ -342,7 +342,7 @@ That sentence replaces the earlier "audited in both engines", which was not true
 
 | Concern | Local | Cloud | What the difference means |
 |---|---|---|---|
-| Workload identity | None. Each container runs as a local process | IRSA, one IAM role per component, and a node role with no S3 or Secrets Manager permission | The local run evidences the shape of the credential flow, not IAM policy semantics |
+| Workload identity | none. Each container runs as a local process | IRSA, one IAM role per component, and a node role with no S3 or Secrets Manager permission | The local run evidences the shape of the credential flow, not IAM policy semantics |
 | Secret storage | Files under a gitignored `runtime/` | AWS Secrets Manager projected by the Secrets Store CSI driver into tmpfs | The local file mode and the cloud `filePermission` are different mechanisms serving the same rule |
 | Network boundary | One rootless podman network, with loopback for the UIs | A VPC with public and private subnets, security groups, and no NAT in the minimal arm | Local isolation is real but weaker, and it is the only thing standing behind the unauthenticated surfaces |
 | Transport | Five listeners with TLS and a negative test each | TLS terminated at the ALB for the browser surfaces, and TCP pass-through with in-pod TLS for the data plane | ALB termination is client-to-ALB only, and is labelled as such |
