@@ -19,3 +19,7 @@ The five canonical roles with default label strings: `needs-triage`, `needs-info
 ### Domain docs
 
 Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Writing conventions
+
+Which word to use for a thing, where more than one was in use. See `docs/agents/writing-conventions.md`.
