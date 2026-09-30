@@ -145,7 +145,7 @@ Choosing arms after seeing results is the same failure as writing a budget after
 
 Each variant re-materialises the ClickHouse copy, because a changed Iceberg layout changes what ClickHouse reads, and the p50 and p95 figures are only comparable when both sides moved together.
 
-**B1 is two bring-ups, because Spark and a serving-sized ClickHouse cannot co-reside under the profile's 7168 MiB rule.** The **write bring-up** runs Spark resident to lay down the variant's Iceberg layout and its compaction, and produces the file-count, file-size and compaction-duration figures. The **serving bring-up** runs ClickHouse sized up to materialise the copy and answer the query set, and produces the latency figures. The worked example in [local development section 4](local-development.md) is the serving bring-up.
+**B1 is two bring-ups, because Spark and a serving-sized ClickHouse cannot co-reside under the profile's 7168 MiB rule.** The **write bring-up** declares the batch path's materialisation set: Spark at 2048 MiB, ClickHouse at its batch ceiling of 1792 MiB as the staging target, SeaweedFS at 256 MiB, and Polaris at 768 MiB to resolve the Iceberg table for Spark, 4864 MiB and 8 vCPU in all. Spark writes the variant's Iceberg layout, compacts it, and rebuilds the ClickHouse copy with a partition swap ([serving layer section 6](serving-layer.md)), so this bring-up produces the write-throughput, file-count, file-size and compaction-duration figures. The **serving bring-up** is the worked example in [local development section 4](local-development.md): Spark and Polaris are gone and ClickHouse is sized up, and it produces the latency figures.
 
 **B2, the two-arm comparison:** read-through against materialised, on C1 to C3 and N1 to N3, with P3 excluded. Fixed by [serving-layer section 8](serving-layer.md).
 
@@ -171,7 +171,7 @@ Batch peaks at 6976 MiB and streaming at 7168 MiB against an enforceable 7168 Mi
 
 **Then the batch benchmarks, in this order:**
 
-1. **B1**, the layout sweep, as two bring-ups: a write and compaction run with Spark resident, then a serving run with ClickHouse sized up (section 4). First, because B2's materialised arm must carry B1's winning layout: if it does not, the two-arm delta confounds layout with architecture and measures neither.
+1. **B1**, the layout sweep, as two bring-ups: a write and compaction run over the batch materialisation set, then a serving run with ClickHouse sized up (section 4). First, because B2's materialised arm must carry B1's winning layout: if it does not, the two-arm delta confounds layout with architecture and measures neither.
 2. **B2**, the two-arm comparison, at `c=1` and `c=4`.
 3. **B6**, the M17 per-operation cost counters.
 4. **B7**, the batch wall-clock and resource use.
