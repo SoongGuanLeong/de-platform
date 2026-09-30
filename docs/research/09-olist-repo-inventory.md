@@ -12,7 +12,7 @@
 
 ---
 
-# Technical Inventory: `SoongGuanLeong/data_pipelines_batch_stream_vector`
+# Technical inventory: `SoongGuanLeong/data_pipelines_batch_stream_vector`
 
 **Clone status: SUCCESS.** Shallow clone (`--depth 50`) into `/tmp/opencode/olist-inventory` succeeded. `gh auth status` confirms authenticated as `SoongGuanLeong` with `repo` scope; the repo is **public** (`"license": null`, 0 stars, 0 forks). No credentials were guessed and nothing outside `/tmp/opencode` was written.
 
