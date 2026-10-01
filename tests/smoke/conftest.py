@@ -446,13 +446,24 @@ def pytest_generate_tests(metafunc):
 @pytest.fixture
 def running(unit_spec):
     """Brings the case up, yields it, and always tears it down, so one failure
-    cannot poison the next case."""
-    result = compose("up", "-d", *unit_spec.services, timeout=900)
-    if result.returncode != 0:
-        raise AssertionError(
-            "podman-compose up failed for " + unit_spec.name + ":\n" + result.stdout + result.stderr
-        )
+    cannot poison the next case.
+
+    Bring-up is inside the try as well as teardown. A podman-compose up that
+    fails part way has already started the services it reached, and an up that
+    times out leaves whatever it started running, so a teardown that only ran
+    after a successful up would leave that unit's containers behind for the next
+    case to trip over.
+    """
     try:
+        result = compose("up", "-d", *unit_spec.services, timeout=900)
+        if result.returncode != 0:
+            raise AssertionError(
+                "podman-compose up failed for "
+                + unit_spec.name
+                + ":\n"
+                + result.stdout
+                + result.stderr
+            )
         yield Running(unit_spec)
     finally:
         compose("down", "--volumes", timeout=600)

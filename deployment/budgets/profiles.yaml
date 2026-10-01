@@ -318,11 +318,13 @@ limitations:
       the moment a Dockerfile exists.
   - id: jdk-17-is-a-target-not-a-universal-image-property
     statement: >-
-      Three of the six JVM images the platform pins ship JDK 21, not JDK 17.
+      Three of the five JVM images the platform pins ship JDK 21, not JDK 17.
       apache/kafka 4.3.1 and apache/polaris 1.7.0 carry Temurin 21.0.11 and
       their registries publish no JDK-17 tag for those versions, and
       quay.io/debezium/connect 3.6.1 is built on Red Hat OpenJDK 21.0.9. The
-      other three, flink 2.1.3-java17 and spark 4.1.3-java17, are JDK 17.
+      other two, flink 2.1.3-java17 and spark 4.1.3-java17, are JDK 17. The
+      unit is the image: seven services run these five images, because
+      flink-jobmanager, flink-taskmanager and flink-client are the same one.
       docs/research/03-longevity-audit.md recommends pinning every JVM image to
       JDK 17; that recommendation holds for the bytecode the platform's own
       artifacts target and for the engines' supported range, and it does not
