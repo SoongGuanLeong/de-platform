@@ -92,8 +92,8 @@ jobs:
       - name: Check governance
         run: bash deployment/scripts/check-governance.sh
 
-  # The compose-subset lint, the limit resolution and the profile-peak recompute,
-  # which land with issue #31.
+  # The compose-subset lint, the limit resolution, the profile-peak recompute and
+  # the image pins (docs/completion-bar.md sections 11 and 12, issue #31).
   compose:
     name: compose
     runs-on: ubuntu-latest
@@ -101,12 +101,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned uv
+        run: bash deployment/scripts/install-uv.sh
       - name: Check the compose subset
-        run: |
-          set -euo pipefail
-          bash deployment/scripts/check-stub.sh compose 31 \
-            deployment -path deployment/security-harness -prune -o \
-            -name 'compose*.y*ml' -print -quit
+        run: bash deployment/scripts/check-compose.sh
+      # Proves the lint is load-bearing: nine mutations must each fail it.
+      - name: Prove the compose lint catches a mutation
+        run: bash deployment/scripts/test-check-compose.sh
 
   lint:
     name: lint

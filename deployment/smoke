@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+#
+# The documented smoke command: one command from a clean checkout to a result,
+# with no manual step in between (issue #31 acceptance criterion 2).
+#
+# Five phases, in this order, because each is a precondition of the next:
+#
+#   0. Teardown. A run that was interrupted leaves its containers and named
+#      volumes behind, and the preflight would then refuse on a port its own
+#      stack holds, unable to tell that port from another process's. Smoke's
+#      contract is a bring-up from a clean slate, so the profile's own stack is
+#      removed first, volumes included: a check that passed against a previous
+#      run's data would be evidence of the wrong thing.
+#   1. Provision. Secrets are generated if absent and never overwritten, and the
+#      ownership remap is applied, so a re-run is idempotent and cannot
+#      invalidate a value an earlier run cited. Both are prerequisites of the
+#      preflight's own secret check rather than steps a reader has to remember.
+#   2. Preflight. It refuses below the declared host floor and names the
+#      shortfall, and it offers the reduced variant rather than applying it.
+#   3. Capture. Every profile's resolved configuration and the digests actually
+#      present are written to runtime/runs/smoke/<utc-timestamp>/, which is
+#      gitignored because it is raw (docs/local-development.md section 9).
+#      Capturing the resolved config matters: it is the file the provider read,
+#      not the file on disk. All five profiles are resolved here rather than this
+#      one, because "every profile resolves under podman-compose config" is the
+#      acceptance criterion and this command is the only committed entry point
+#      that runs the provider.
+#   4. The suite. tests/smoke brings each service up on its own, runs its
+#      container check, surfaces an OOM kill as a profile-budget failure and
+#      tears the unit down again.
+#
+# Usage: deployment/smoke [pytest arguments]
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+run_dir="runtime/runs/smoke/$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir -p "${run_dir}"
+
+podman-compose -f deployment/compose/smoke.yml down --volumes --remove-orphans \
+  > "${run_dir}/teardown.txt" 2>&1 || true
+
+deployment/scripts/generate-secrets.sh | tee "${run_dir}/provision.txt"
+deployment/scripts/fix-secret-ownership.sh | tee -a "${run_dir}/provision.txt"
+
+deployment/scripts/preflight.sh smoke | tee "${run_dir}/preflight.txt"
+
+# A profile that does not resolve is a failure here rather than an empty file:
+# the resolved config is evidence, and evidence of nothing is worse than none.
+resolve_failed=0
+for profile in smoke batch streaming observability benchmark; do
+  if ! podman-compose -f "deployment/compose/${profile}.yml" config \
+       > "${run_dir}/resolved-config-${profile}.yml" \
+       2> "${run_dir}/resolved-config-${profile}.err"; then
+    printf 'deployment/smoke: %s does not resolve under podman-compose config; see %s\n' \
+      "${profile}" "${run_dir}/resolved-config-${profile}.err" >&2
+    resolve_failed=1
+  fi
+done
+[ "${resolve_failed}" -eq 0 ] || exit 1
+{
+  printf 'the pinned reference from deployment/tools.lock, then the digest podman resolved it to.\n'
+  printf 'For a multi-arch image the two differ: the pin is the index digest and the local\n'
+  printf 'image records the platform manifest digest.\n'
+  set -a
+  . deployment/tools.lock
+  set +a
+  # The image set is read from the pin registry rather than restated here, so a
+  # new pin is captured by this loop the moment it is added.
+  for variable in $(grep -o '^IMAGE_[A-Za-z0-9_]*' deployment/tools.lock); do
+    reference="${!variable}"
+    printf '%s\n' "${variable}=${reference}"
+    podman image inspect --format '  resolved {{index .RepoDigests 0}}' "${reference}" 2>/dev/null || printf '  not pulled yet\n'
+  done
+} > "${run_dir}/pinned-images.txt"
+
+printf 'captured %s\n' "${run_dir}"
+uv run --frozen pytest tests/smoke -q "$@" 2>&1 | tee "${run_dir}/suite.txt"
+exit "${PIPESTATUS[0]}"

@@ -73,7 +73,7 @@ Declared with every record, because a figure without them is a figure the review
 
 - Hardware as configured: 12 vCPU, and the profile's declared entitlement in MiB, with `MemAvailable` recorded at start.
 - Data volume per source, at the declared volume in section 5.
-- Engine versions: the pinned set, Iceberg 1.11.0, Flink 2.1.3, Spark 4.1.3, ClickHouse 26.8 LTS, Polaris 1.7.0, and the JDK 17 and Python 3.12 image pins.
+- Engine versions: the pinned set, Iceberg 1.11.0, Flink 2.1.3, Spark 4.1.3, ClickHouse 26.8 LTS, Polaris 1.7.0, and the JDK and Python image pins declared in `deployment/tools.lock`. **Correction, 2026-10-01 (issue #31):** this read "the JDK 17 and Python 3.12 image pins". Three of the pinned JVM images ship JDK 21 and publish no JDK-17 variant, so the pin is a per-image declaration rather than one version.
 - The exact command, which is the literal invocation of the benchmark's entry point (section 8).
 - Concurrency, and the query set where one applies.
 - The pinned Iceberg snapshot id, or a tag, since tags never expire while `expire_snapshots` would remove the snapshot.

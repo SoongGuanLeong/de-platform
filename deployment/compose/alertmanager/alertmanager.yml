@@ -1,0 +1,13 @@
+# The minimal routing configuration the smoke profile needs: Alertmanager has
+# to start, load a configuration and answer /-/healthy. The real receivers and
+# routes land with issue #67, which owns them. The default receiver is a
+# deliberate no-op rather than a silence.
+route:
+  receiver: default
+  group_by: [alertname]
+  group_wait: 1s
+  group_interval: 1s
+  repeat_interval: 1h
+
+receivers:
+  - name: default

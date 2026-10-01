@@ -1,0 +1,14 @@
+<!-- ClickHouse server memory ceiling for the batch profile. -->
+<!--
+  deployment/budgets/profiles.yaml, and deployment/scripts/check-compose.sh
+  fails when the two disagree.
+
+  max_server_memory_usage_to_ram_ratio is raised to 1.0 as well. ClickHouse
+  takes the smaller of the two, and the ratio is applied to the container's
+  cgroup limit, so leaving it at the image default of 0.9 clamped the declared
+  ceiling to 90% of it. Measured 2026-10-01 by issue #31.
+-->
+<clickhouse>
+  <max_server_memory_usage>1879048192</max_server_memory_usage>
+  <max_server_memory_usage_to_ram_ratio>1.0</max_server_memory_usage_to_ram_ratio>
+</clickhouse>

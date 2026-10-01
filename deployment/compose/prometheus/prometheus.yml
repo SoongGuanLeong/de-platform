@@ -1,0 +1,11 @@
+# The minimal scrape configuration the smoke profile needs: Prometheus has to
+# start, load a configuration and answer /-/healthy and /-/ready. The real
+# targets, the rules and the dashboards land with issue #67, which owns them.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["127.0.0.1:9090"]

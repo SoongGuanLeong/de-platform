@@ -11,3 +11,103 @@ UV_VERSION="0.12.7"
 
 GITLEAKS_VERSION="8.30.1"
 GITLEAKS_LINUX_X64_SHA256="551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+
+# ---------------------------------------------------------------------------
+# The local execution model (issue #31)
+# ---------------------------------------------------------------------------
+#
+# PODMAN_MIN_VERSION is the floor deployment/scripts/preflight.sh enforces, and
+# it is the version the platform bring-up was executed against rather than the
+# newest release. docs/local-development.md section 5 declared 6.1.2 because
+# that was current stable when it was written. 6.1.2 is not obtainable on this
+# host: Ubuntu 26.04 packages podman 5.7.0 (the newest in the archive),
+# conda-forge stops at 5.8.3, and the upstream v6.1.3 release publishes only
+# podman-remote-static, a remote client rather than a runtime. The floor is
+# therefore the version that runs here, and the deviation is recorded as a
+# documented limitation rather than hidden. Every breaking change podman 6.0.0
+# lists is already satisfied by this host configuration: cgroups v2, the
+# netavark network backend, the pasta rootless network stack, the sqlite
+# database backend and nftables. The one 6.x feature this platform would want is
+# podman info reporting free memory, which the preflight reads from
+# /proc/meminfo instead.
+#
+# Reconsider when a podman 6.x package is available for this distribution, or
+# when a platform capability is found that 5.7.0 does not implement.
+PODMAN_MIN_VERSION="5.7.0"
+
+# podman-compose 1.6.0 (2026-06-03) is current, installable from PyPI, and the
+# version the bring-up was executed against. Its translation of
+# deploy.resources.limits to --cpus and --memory is what the bring-up relies on,
+# and that translation is identical in v1.4.0, v1.5.0 and v1.6.0
+# (docs/research/26-compose-resource-limits-and-portability.md).
+PODMAN_COMPOSE_MIN_VERSION="1.6.0"
+
+# The container set: one entry per image the local profiles run, pinned by the
+# digest of its multi-arch index. The index digest is pinned rather than a
+# platform-specific digest so one reference resolves both on the x86_64 local
+# host and on a Graviton node. The compose files use exactly this reference, and
+# deployment/scripts/check-compose.sh fails when a compose file and this file
+# disagree.
+#
+# The digests were resolved from each registry own manifest API. flink_jobmanager,
+# flink_taskmanager and flink_client are the same image. dagster_* and
+# ripe_collector are platform-authored and are not pinned here yet, for the
+# reason recorded under UNPINNED_BUILT_SERVICES below.
+IMAGE_postgres="docker.io/library/postgres:18.6@sha256:5a5a84b19854a9ffaa54082c166ff4ec27473a361e496e5ea167f298f2da9722"
+IMAGE_seaweedfs="docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882"
+IMAGE_polaris="docker.io/apache/polaris:1.7.0@sha256:3495f67f38cca33892a045f7dd3f46eb52387f0fd52d4145538a772fd8aedad7"
+IMAGE_clickhouse="docker.io/clickhouse/clickhouse-server:26.8.13.2@sha256:d3cdda9b2137852b20b96b1262b043dbedbe78c2b2c7063a3da60781a29e3463"
+IMAGE_kafka="docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837"
+IMAGE_debezium_connect="quay.io/debezium/connect:3.6.1@sha256:5a7d3ff04a3d3f2098330b3fb34a6bb6dd3d07de4e09c76b29da13bf6276332a"
+IMAGE_flink="docker.io/apache/flink:2.1.3-java17@sha256:303377fd46400715e3d4f6feba4443b27e784c5203951dd50c181d36e3893b34"
+IMAGE_spark="docker.io/apache/spark:4.1.3-java17@sha256:9b0a6c2c860f5e7d18dd5270286fef32a09c7f5a7e2b0dbe5642de8a3a02ab3e"
+IMAGE_prometheus="docker.io/prom/prometheus:v3.14.0@sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0"
+IMAGE_grafana="docker.io/grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0"
+IMAGE_alertmanager="docker.io/prom/alertmanager:v0.34.1@sha256:e9733bafb1bdef9b00e25a21f8f99dc26a22224bf16641ad754d1649f4c3357a"
+
+# The compose services that run a JVM image, and the JDK each one's image carries.
+#
+# Research 03 recommended pinning every JVM image to JDK 17. Three of the images
+# here ship JDK 21 and publish no JDK-17 variant: apache/kafka 4.3.1 and
+# apache/polaris 1.7.0 carry Temurin 21 and their registries list no 17 tag, and
+# quay.io/debezium/connect 3.6.x is built on Red Hat OpenJDK 21. Holding the
+# recommendation literally would mean downgrading three pinned components, and
+# Polaris has required Java 21 since its first release. What the platform asserts
+# instead is the declared runtime per image, and that every declared value is one
+# the research accepts: 17 or 21, never 25 or 26. Measured 2026-10-01 with
+# `java -version` inside the running container. tests/smoke asserts each
+# container reports the value declared here, and deployment/scripts/check-compose.sh
+# fails on a service with no declaration, a value outside {17, 21}, or two
+# services sharing an image that disagree.
+JVM_SERVICES="polaris kafka debezium-connect flink-jobmanager flink-taskmanager flink-client spark"
+JVM_JDK_polaris="21"
+JVM_JDK_kafka="21"
+JVM_JDK_debezium_connect="21"
+JVM_JDK_flink_jobmanager="17"
+JVM_JDK_flink_taskmanager="17"
+JVM_JDK_flink_client="17"
+JVM_JDK_spark="17"
+
+# The compose services that run a Python image. Empty at Phase 0: all four
+# Python services, the dagster-* three and ripe-collector, are platform-authored images whose code
+# lands with issues #39 and #48. When either Dockerfile lands its base must be
+# python:3.12-slim pinned by digest in this file, and the service moves into this
+# list so the same assertion covers it. check-compose.sh fails if a Dockerfile
+# appears under deployment/images/ with a Python base that is not 3.12, so the
+# rule is enforced from the moment it can be.
+PYTHON_SERVICES=""
+
+# The compose services whose image is neither a JVM nor a Python runtime: the
+# database, the object store, the column store and the three observability
+# services. Listed so every service in the compose set is classified exactly
+# once. check-compose.sh fails on a service in no list or in two, so adding a
+# service to a profile means classifying it rather than inheriting no runtime
+# assertion at all.
+NATIVE_SERVICES="postgres seaweedfs clickhouse prometheus grafana alertmanager"
+
+# Images that are platform-authored and therefore built rather than pulled. They
+# have no published digest to pin. ADR-0034 makes Marquez the only image pushed
+# to GHCR; the four below are built locally for the profiles. Listed so the
+# container set is stated in one place and the reason each is unpinned is visible
+# rather than inferred from an absence.
+UNPINNED_BUILT_SERVICES="dagster-webserver dagster-daemon dagster-user-code ripe-collector"

@@ -1,0 +1,80 @@
+# The benchmark profile, serving bring-up.
+#
+# The worked example in deployment/budgets/profiles.yaml: the serving
+# bring-up of the ClickHouse layout benchmark that M5 and completion bar
+# section 6.5 need, ClickHouse 6144 MiB plus SeaweedFS 256 MiB, peak
+# 6400 MiB / 9 vCPU. Every other benchmark declares its own ceiling in its
+# protocol and adds its own file beside this one.
+#
+# The compose subset is the portable runtime subset of docs/completion-bar.md
+# section 11: OCI images, ports, environment, volumes, healthcheck with
+# start_period, restart, depends_on without condition, command, and
+# deploy.resources.limits.{cpus,memory,pids} with nothing else under deploy. The
+# platform uses cpus and memory; pids is permitted and unused.
+# deployment/scripts/check-compose.sh enforces it, resolves every limit
+# against deployment/budgets/profiles.yaml and fails when a peak does not
+# match its parts.
+#
+# Every image is pinned by the digest of its multi-arch index. The reference
+# is repeated verbatim in deployment/tools.lock, and check-compose.sh fails
+# when the two disagree.
+#
+# Secrets are read-only files under runtime/ (gitignored), mounted at
+# /run/secrets/<name>, per ADR-0028. They are bind mounts rather than the
+# compose secrets mechanism because a compose secret's uid, gid and mode are
+# ignored by podman-compose, which is the cost recorded in
+# docs/security-model.md section 2.4.
+name: de-platform-benchmark
+
+services:
+  clickhouse:
+    image: docker.io/clickhouse/clickhouse-server:26.8.13.2@sha256:d3cdda9b2137852b20b96b1262b043dbedbe78c2b2c7063a3da60781a29e3463
+    restart: "no"
+    environment:
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/limits-6144m.xml:/etc/clickhouse-server/config.d/limits.xml:ro
+    ports:
+      - "127.0.0.1:58123:8123"
+      - "127.0.0.1:59000:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8123/ping >/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "8.00"
+          memory: 6144M
+
+  seaweedfs:
+    image: docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+    restart: "no"
+    volumes:
+      - seaweedfs-data:/data
+      - ../../runtime/secrets/seaweedfs_s3_secret_key:/run/secrets/seaweedfs_s3_secret_key:ro
+      - ./seaweedfs/entrypoint.sh:/harness/entrypoint.sh:ro
+      - ./seaweedfs/s3-config.json.tmpl:/harness/s3-config.json.tmpl:ro
+    entrypoint: ["/bin/sh", "/harness/entrypoint.sh"]
+    ports:
+      - "127.0.0.1:59333:9333"
+      - "127.0.0.1:58888:8888"
+      - "127.0.0.1:58333:8333"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:9333/cluster/status >/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 256M
+
+volumes:
+  clickhouse-data: {}
+  seaweedfs-data: {}
