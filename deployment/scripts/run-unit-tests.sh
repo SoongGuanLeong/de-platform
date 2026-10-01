@@ -15,4 +15,4 @@ if [ ! -d "${distribution}/tests" ]; then
   exit 1
 fi
 
-uv run --frozen --package "${distribution}" pytest "${distribution}/tests" -q
+uv run --frozen --package "${distribution}" --group dev pytest "${distribution}/tests" -q
