@@ -94,7 +94,7 @@ Eleven jobs plus the aggregator. They are grouped by toolchain so each job pays 
 | 7 | `java` | ubuntu-latest | Spotless with google-java-format; Gradle compile and tests of `streaming/` | path |
 | 8 | `deployment` | ubuntu-latest | `tofu fmt -check`; `tofu init -lockfile=readonly` then `tofu validate`; `tflint`; the policy scan; `helm lint`; `helm template`; `kubeconform`; the rendered-manifest drift check | path |
 | 9 | `observability` | ubuntu-latest | `promtool check rules`; the dashboard JSON schema | path |
-| 10 | `images` | ubuntu-24.04-arm | the arm64 Marquez build; pushes only on a `demo-*` tag or `workflow_dispatch` | path |
+| 10 | `images` | ubuntu-24.04-arm | the arm64 Marquez build; the condition under which it pushes is stated in section 8 | path |
 | 11 | `required` | ubuntu-latest | aggregates; the only required status check | always |
 
 **The `secrets` job is to absorb `.github/workflows/security.yml`.** The gitleaks job moves into `ci.yml` and the old file is deleted in the same change, so one required check covers everything. Keeping it separate would have made it a second required check, which is safe (it always runs, so it cannot be left Pending) but leaves two places to read.
@@ -189,6 +189,8 @@ ECR Public's one-pull-per-second anonymous cap is the decisive detail, because a
 - The Helm chart therefore takes `image.registry`, `image.repository` and `image.digest` as values, defaulting to GHCR, so the ECR path is a values change rather than a chart edit.
 
 **When the build runs.** On a pull request that touches the image context, the job **builds without pushing**, which is the only way to prove the Dockerfile compiles at review time. On a `demo-*` tag or `workflow_dispatch`, it builds and pushes. This is the one job in the graph that is not a cheap structural check, and it earns its place because it is the only artefact the platform authors rather than pins.
+
+**Correction, 2026-10-01 (ticket #81).** The condition above is the design, not the job. The job is a stub: it asserts that no Dockerfile exists and fails the moment one appears, so nothing here has built or pushed an image. Three things are therefore left to [the Helm charts and the built image](https://github.com/SoongGuanLeong/de-platform/issues/75), issue #75, and together they are the condition. The workflow triggers on a push to `main` only, so a `demo-*` tag starts no run at all, and `on.push` has to name the tag pattern. The job carries no `github.ref` or `github.event_name` guard, so it would push on any run its path filter selects. And the path filter cannot select it on a tag or a dispatch, because `deployment/scripts/paths.sh` compares the head against the commit before the push or the pull request's base, and neither event has one; the job has to be selected unconditionally on those two events.
 
 **The arm64 runner is native.** `ubuntu-24.04-arm` is a standard GitHub-hosted runner, free on public repositories, so no QEMU emulation is needed for the arm64 half. Two honest limits: a **community action in the build path may not be arm64-compatible** (GitHub's own actions are), and the build produces an arm64 image that **has never been executed**, because this host is x86_64. The build being produced is not the same claim as the image running, and [the cloud architecture](cloud-architecture.md) already carries the second as a documented limitation.
 
