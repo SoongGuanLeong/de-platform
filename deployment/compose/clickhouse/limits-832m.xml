@@ -1,0 +1,20 @@
+<!-- ClickHouse server memory ceiling for the streaming and smoke profile. -->
+<!--
+  The image's documented default is max_server_memory_usage=0 with
+  max_server_memory_usage_to_ram_ratio=0.9, a ceiling of 90% of available
+  memory. On this host that is 6.3 to 7.2 GiB, which would consume the whole
+  profile budget on its own, so the ceiling is declared explicitly here. The
+  value is the clickhouse ceiling the register declares for this profile in
+  deployment/budgets/profiles.yaml, and deployment/scripts/check-compose.sh
+  fails when the two disagree.
+
+  max_server_memory_usage_to_ram_ratio is raised to 1.0 as well. ClickHouse
+  takes the smaller of the two, and the ratio is applied to the container's
+  cgroup limit, so leaving it at the image default of 0.9 clamped the declared
+  872415232 to 785173708 - the ceiling the register declares was not the
+  ceiling the server enforced. Measured 2026-10-01 by issue #31.
+-->
+<clickhouse>
+  <max_server_memory_usage>872415232</max_server_memory_usage>
+  <max_server_memory_usage_to_ram_ratio>1.0</max_server_memory_usage_to_ram_ratio>
+</clickhouse>

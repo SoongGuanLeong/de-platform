@@ -14,7 +14,9 @@
 #
 # A ceiling is a hard limit, not a target. A service that reaches it is
 # OOM-killed rather than slowed down, and an OOM kill of a profile service is a
-# profile-budget failure, surfaced as one by the run's assertion phase.
+# profile-budget failure, surfaced as one by the run's assertion phase. The
+# ceiling binds the memory-plus-swap total rather than memory alone; see the
+# ceilings-are-hard-limits and ceilings-are-memory-plus-swap limitations below.
 #
 # The compose-subset lint recomputes every profile peak from the ceilings and
 # overrides below and fails on a mismatch, and checks that each compose file's
@@ -268,11 +270,70 @@ limitations:
       busy host can be starved with no guarantee.
   - id: ceilings-are-hard-limits
     statement: >-
-      An exceedance is an OOM kill rather than a slowdown. The run's assertion
-      phase must surface an OOM-killed profile service as a profile-budget
-      failure rather than as an application bug.
+      An exceedance is an OOM kill rather than a slowdown. Correction,
+      2026-10-01 (issue #31): this holds for the memory-plus-swap total and not
+      for memory alone, per the ceilings-are-memory-plus-swap limitation below,
+      so an OOM kill is the outcome once the host's swap is exhausted. The run's
+      assertion phase must surface an OOM-killed profile service as a
+      profile-budget failure rather than as an application bug.
   - id: local-capacity-is-not-cloud-capacity
     statement: >-
       At 7168 MiB the local path peak is about 44% of the minimal arm's 16 GiB
       and about 29% of 24 GiB at three nodes. The local run evidences the shape
       of the entitlement and never the cloud capacity.
+  - id: ceilings-are-memory-plus-swap
+    statement: >-
+      A ceiling is enforced against memory plus swap, not against memory.
+      podman run --memory=X leaves the container's memory.swap.max at X as well,
+      so a service that exceeds its ceiling can swap rather than being
+      OOM-killed, and memswap_limit is exactly the compose key that does not
+      port (completion bar section 11). An OOM kill is therefore only guaranteed
+      once the host's swap is exhausted, which is not what the
+      ceilings-are-hard-limits limitation above claims. Measured on 2026-10-01 by
+      issue #31: podman inspect reports Memory=67108864 MemorySwap=134217728 for
+      a --memory=64m container, and /sys/fs/cgroup/memory.swap.max reads
+      67108864. Trigger: the first profile run whose observed peak approaches a
+      ceiling, or a host without swap, either of which makes the difference
+      visible.
+  - id: podman-floor-is-the-executed-version
+    statement: >-
+      The preflight's podman floor is 5.7.0, the version this host carries and
+      the bring-up was executed against, not the 6.1.2 docs/local-development.md
+      section 5 declared. 6.1.2 is not obtainable here: Ubuntu 26.04 packages
+      5.7.0, conda-forge stops at 5.8.3, and upstream v6.1.3 publishes only
+      podman-remote-static. Every breaking change podman 6.0.0 lists is already
+      satisfied on this host, so nothing the platform uses regresses. Trigger: a
+      podman 6.x package for this distribution, or a platform capability found
+      that 5.7.0 does not implement.
+  - id: platform-authored-images-not-yet-built
+    statement: >-
+      Four of the seventeen services - dagster-webserver, dagster-daemon,
+      dagster-user-code and ripe-collector - run platform-authored images whose
+      code lands with issues #39 and #48. Their compose entries exist so every
+      profile resolves under podman-compose config, but nothing brings them up,
+      so the smoke profile's container checks cover thirteen of the seventeen
+      ceilings. No image is pinned for them because there is nothing to pin.
+      When either Dockerfile lands, its base must be python:3.12-slim pinned by
+      digest in deployment/tools.lock, and check-compose.sh enforces that from
+      the moment a Dockerfile exists.
+  - id: jdk-17-is-a-target-not-a-universal-image-property
+    statement: >-
+      Three of the five JVM images the platform pins ship JDK 21, not JDK 17.
+      apache/kafka 4.3.1 and apache/polaris 1.7.0 carry Temurin 21.0.11 and
+      their registries publish no JDK-17 tag for those versions, and
+      quay.io/debezium/connect 3.6.1 is built on Red Hat OpenJDK 21.0.9. The
+      other two, flink 2.1.3-java17 and spark 4.1.3-java17, are JDK 17. The
+      unit is the image: seven services run these five images, because
+      flink-jobmanager, flink-taskmanager and flink-client are the same one.
+      docs/research/03-longevity-audit.md recommends pinning every JVM image to
+      JDK 17; that recommendation holds for the bytecode the platform's own
+      artifacts target and for the engines' supported range, and it does not
+      hold as a property of the upstream images, because satisfying it
+      literally would mean downgrading three pinned components, and Polaris has
+      required Java 21 since its first release. deployment/tools.lock therefore
+      declares the JDK each image carries, check-compose.sh fails on a
+      declaration outside {17, 21} or on two services sharing an image that
+      disagree, and tests/smoke asserts each container reports its declared
+      value. Measured 2026-10-01 with java -version inside the running
+      containers. Trigger: any of the three publishes a JDK-17 variant, or the
+      platform's own JVM artifacts move off Java 17 bytecode.
