@@ -17,12 +17,12 @@ cp "${target}" "${backup}"
 trap 'cp "${backup}" "${target}"; rm -f "${backup}"' EXIT
 
 echo "== the clean tree passes =="
-uv run --frozen lint-imports --config .importlinter >/dev/null
+uv run --frozen --all-packages lint-imports --config .importlinter >/dev/null
 echo "clean tree: import-linter passed"
 
 echo "== a deliberate cross-path import fails =="
 printf '\nimport de_ingestion.commerce  # deliberate rule-2 violation for this test\n' >> "${target}"
-if uv run --frozen lint-imports --config .importlinter >/dev/null 2>&1; then
+if uv run --frozen --all-packages lint-imports --config .importlinter >/dev/null 2>&1; then
   echo "::error::import-linter passed with a cross-path import in ${target}" >&2
   exit 1
 fi

@@ -18,7 +18,7 @@ echo "== yamllint: compose files and contracts =="
 mapfile -d '' files < <(find deployment contracts -type f \
   \( -name 'compose*.y*ml' -o -name 'docker-compose*.y*ml' -o -name '*.yml' -o -name '*.yaml' \) \
   -not -path 'deployment/budgets/*' -not -path 'deployment/security-harness/profiles/*' -print0 2>/dev/null)
-if [ "${files[@]:-}" != "" ] && [ "${#files[@]}" -gt 0 ]; then
+if [ "${#files[@]}" -gt 0 ]; then
   uv run --frozen yamllint --strict "${files[@]}"
 else
   echo "::notice::no compose or contract YAML yet; yamllint had nothing to read"
