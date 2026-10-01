@@ -28,23 +28,30 @@ git -C "${tmp}" commit -q --allow-empty -m base
 failures=0
 cases=0
 
-# check <case> <path> <expected>
-# Commits <path> as the only change in a new commit and compares the map's
-# output for that single-file diff to <expected>.
-check() {
-  local name="$1" path="$2" expected="$3"
-  mkdir -p "${tmp}/$(dirname "${path}")"
-  : > "${tmp}/${path}"
-  git -C "${tmp}" add -A
-  git -C "${tmp}" commit -q -m "${name}"
+# expect_ref <case> <ref> <expected>
+# Compares the map's output for <ref>..HEAD to <expected>.
+expect_ref() {
+  local name="$1" ref="$2" expected="$3"
   local actual
-  actual="$(cd "${tmp}" && bash "${paths_script}" HEAD~1)"
+  actual="$(cd "${tmp}" && bash "${paths_script}" "${ref}")"
   cases=$((cases + 1))
   if [ "${actual}" != "${expected}" ]; then
     failures=$((failures + 1))
     printf '::error::path filters: %s\n' "${name}" >&2
     diff <(printf '%s\n' "${expected}") <(printf '%s\n' "${actual}") >&2 || true
   fi
+}
+
+# check <case> <path> <expected>
+# Commits <path> as the only change in a new commit and asserts the map's output
+# for that single-file diff.
+check() {
+  local name="$1" path="$2" expected="$3"
+  mkdir -p "${tmp}/$(dirname "${path}")"
+  : > "${tmp}/${path}"
+  git -C "${tmp}" add -A
+  git -C "${tmp}" commit -q -m "${name}"
+  expect_ref "${name}" HEAD~1 "${expected}"
 }
 
 check "platform/ fans out to all five unit entries" "platform/core.py" \
@@ -203,13 +210,35 @@ deployment=false
 observability=false
 images=false'
 
-# The default ref is HEAD~1 when none is given, so an invocation with no argument
-# must agree with the explicit one.
+# A push of several commits is judged against the commit before the push, so
+# every path in the push is selected: two commits, then the base before both.
+: > "${tmp}/ingestion/pushed.py"
+git -C "${tmp}" add -A
+git -C "${tmp}" commit -q -m "ingestion change"
+: > "${tmp}/batch/pushed.py"
+git -C "${tmp}" add -A
+git -C "${tmp}" commit -q -m "batch change"
+expect_ref "a multi-commit push selects every path it touched" HEAD~2 \
+'unit_platform=false
+unit_ingestion=true
+unit_batch=true
+unit_governance=false
+unit_orchestration=false
+unit_any=true
+unit_matrix=["ingestion","batch"]
+java=false
+deployment=false
+observability=false
+images=false'
+
+# The default ref is HEAD~1 when none is given, and the all-zero SHA a new
+# branch reports must fall back to it rather than fail the diff.
 explicit="$(cd "${tmp}" && bash "${paths_script}" HEAD~1)"
 default="$(cd "${tmp}" && bash "${paths_script}")"
-if [ "${explicit}" != "${default}" ]; then
+zero="$(cd "${tmp}" && bash "${paths_script}" 0000000000000000000000000000000000000000)"
+if [ "${explicit}" != "${default}" ] || [ "${zero}" != "${default}" ]; then
   failures=$((failures + 1))
-  printf '::error::path filters: the default ref (HEAD~1) disagrees with the explicit one\n' >&2
+  printf '::error::path filters: an absent or all-zero ref must fall back to HEAD~1\n' >&2
 fi
 
 if [ "${failures}" -ne 0 ]; then

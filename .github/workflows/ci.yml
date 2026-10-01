@@ -42,7 +42,9 @@ jobs:
       - name: Compute path filters
         id: filter
         env:
-          BASE_SHA: ${{github.event.pull_request.base.sha}}
+          # On a push the base is the commit before the push, so every commit in
+          # the push is judged; on a pull request it is the PR base SHA.
+          BASE_SHA: ${{github.event_name == 'push' && github.event.before || github.event.pull_request.base.sha}}
         run: |
           set -euo pipefail
           bash deployment/scripts/paths.sh "${BASE_SHA}" >> "${GITHUB_OUTPUT}"

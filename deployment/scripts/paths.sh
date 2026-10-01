@@ -13,13 +13,21 @@
 #   <base-ref>  the ref to compare against; the merge base of HEAD and this ref
 #               is used, so a pull request is judged on the change it introduces
 #               rather than on everything the base branch gained. In CI this is
-#               the pull request's base SHA. On a push it defaults to HEAD~1, or
-#               to the empty tree when there is no parent commit.
+#               the pull request's base SHA on a pull request, and the commit
+#               before the push on a push, so a multi-commit push selects every
+#               path it touched. An absent ref, or the all-zero SHA a new branch
+#               reports, falls back to HEAD~1, or to the empty tree when there is
+#               no parent commit.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
 ref="${1:-}"
+# A new branch reports the all-zero SHA as the commit before the push. Treat it
+# as absent so the default below applies rather than a failed diff.
+if [ "${ref}" = "0000000000000000000000000000000000000000" ]; then
+  ref=""
+fi
 if [ -z "${ref}" ]; then
   if git rev-parse --verify --quiet HEAD~1 >/dev/null 2>&1; then
     ref="HEAD~1"
