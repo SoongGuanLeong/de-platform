@@ -1,0 +1,41 @@
+[project]
+name = "de-platform"
+version = "0.0.0"
+description = "Vendor-neutral data lakehouse / data platform."
+requires-python = ">=3.12"
+readme = "README.md"
+
+# The repository root is a virtual uv project: it is a workspace root and a
+# home for the pinned developer toolchain, not a distribution.
+[tool.uv]
+package = false
+
+# One distribution per Python-bearing path (ADR-0026, docs/repository-decomposition.md).
+# The packaging graph is the declared edge set: deployment/scripts/check_packaging_graph.py
+# asserts the declared edges are the permitted ones, and .importlinter fails a
+# cross-path import, which the graph alone does not (a uv workspace shares one
+# virtual environment, so an undeclared import still resolves at runtime).
+[tool.uv.workspace]
+members = ["platform", "ingestion", "batch", "governance", "orchestration"]
+
+# One pinned version per toolchain. uv.lock pins these by hash, so CI and the
+# developer run the same tool the same way (docs/ci-cd-strategy.md section 9).
+[dependency-groups]
+dev = [
+    "actionlint-py==1.7.12.25",
+    "import-linter==2.15",
+    "pytest==9.1.1",
+    "ruff==0.16.9",
+    "yamllint==1.38.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --import-mode=importlib"

@@ -1,0 +1,227 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# contents: read everywhere; the only job that elevates is images, which needs
+# packages: write to push to GHCR (docs/ci-cd-strategy.md section 3).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
+jobs:
+  # The path filter map. It runs first, always, and its outputs drive every
+  # path-filtered job (docs/ci-cd-strategy.md sections 3 and 5).
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      unit_any: ${{steps.filter.outputs.unit_any}}
+      unit_matrix: ${{steps.filter.outputs.unit_matrix}}
+      java: ${{steps.filter.outputs.java}}
+      deployment: ${{steps.filter.outputs.deployment}}
+      observability: ${{steps.filter.outputs.observability}}
+      images: ${{steps.filter.outputs.images}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      # The filter map is proven load-bearing before it is used: the real
+      # paths.sh runs against a throwaway repository and each job's selection is
+      # asserted, so a filter that would skip a check it invalidates fails here.
+      - name: Prove the path filters select the right jobs
+        run: bash deployment/scripts/test-paths.sh
+      - name: Compute path filters
+        id: filter
+        env:
+          # On a push the base is the commit before the push, so every commit in
+          # the push is judged; on a pull request it is the PR base SHA.
+          BASE_SHA: ${{github.event_name == 'push' && github.event.before || github.event.pull_request.base.sha}}
+        run: |
+          set -euo pipefail
+          bash deployment/scripts/paths.sh "${BASE_SHA}" >> "${GITHUB_OUTPUT}"
+
+  # Absorbs .github/workflows/security.yml; that file is deleted in the same
+  # change, so one required check covers the whole graph.
+  secrets:
+    name: secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Scan for secrets
+        run: bash deployment/scripts/check-secrets.sh
+
+  # ruff, the packaging graph, import-linter rules 1 to 4, and rule 5.
+  boundaries:
+    name: boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned uv
+        run: bash deployment/scripts/install-uv.sh
+      - name: Check boundaries
+        run: bash deployment/scripts/check-boundaries.sh
+      # Proves the boundary contracts are load-bearing: a deliberate cross-path
+      # import must fail lint-imports (the ticket's fourth acceptance criterion).
+      - name: Prove a cross-path import fails
+        run: bash deployment/scripts/test-check-boundaries.sh
+
+  # The register, budget, contract and agreement validators, which land with
+  # issues #32, #36 and #43.
+  governance:
+    name: governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check governance
+        run: bash deployment/scripts/check-governance.sh
+
+  # The compose-subset lint, the limit resolution and the profile-peak recompute,
+  # which land with issue #31.
+  compose:
+    name: compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check the compose subset
+        run: |
+          set -euo pipefail
+          bash deployment/scripts/check-stub.sh compose 31 \
+            deployment -path deployment/security-harness -prune -o \
+            -name 'compose*.y*ml' -print -quit
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned uv
+        run: bash deployment/scripts/install-uv.sh
+      - name: Lint
+        run: bash deployment/scripts/check-lint.sh
+
+  # The per-distribution unit tests. The matrix is the changed distributions, so
+  # a change to one path does not pay for the other four; a change to platform/
+  # or contracts/ runs all five (docs/ci-cd-strategy.md section 5).
+  unit:
+    name: unit (${{matrix.distribution}})
+    needs: changes
+    if: needs.changes.outputs.unit_any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        distribution: ${{fromJSON(needs.changes.outputs.unit_matrix)}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned uv
+        run: bash deployment/scripts/install-uv.sh
+      - name: Run unit tests
+        run: bash deployment/scripts/run-unit-tests.sh "${{matrix.distribution}}"
+
+  # The Flink jobs. The Gradle project lands with issue #38.
+  java:
+    name: java
+    needs: changes
+    if: needs.changes.outputs.java == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check the Flink jobs
+        run: |
+          set -euo pipefail
+          bash deployment/scripts/check-stub.sh java 38 \
+            streaming \( -name '*.java' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -print -quit
+
+  # OpenTofu, Helm and the policy scan. The modules land with issue #74.
+  deployment:
+    name: deployment
+    needs: changes
+    if: needs.changes.outputs.deployment == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check the deployment artefacts
+        run: |
+          set -euo pipefail
+          bash deployment/scripts/check-stub.sh deployment 74 \
+            deployment \( -name '*.tf' -o -name '*.tfvars' -o -name 'Chart.yaml' \) -print -quit
+
+  # The Prometheus rules and the dashboards. They land with issue #67.
+  observability:
+    name: observability
+    needs: changes
+    if: needs.changes.outputs.observability == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check the observability artefacts
+        run: |
+          set -euo pipefail
+          bash deployment/scripts/check-stub.sh observability 67 \
+            observability \( -name '*.yml' -o -name '*.yaml' -o -name '*.json' \) -print -quit
+
+  # The one built image. The build lands with issue #75.
+  images:
+    name: images
+    needs: changes
+    if: needs.changes.outputs.images == 'true'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Build the image
+        run: |
+          set -euo pipefail
+          bash deployment/scripts/check-stub.sh images 75 \
+            deployment \( -name 'Dockerfile' -o -name 'Dockerfile.*' -o -name '*.Dockerfile' \) -print -quit
+
+  # The only status check the ruleset requires. It fails on any failure or
+  # cancellation and passes on success or skipped, so a legitimately
+  # path-filtered job cannot block a merge (docs/ci-cd-strategy.md section 3).
+  required:
+    name: required
+    needs: [changes, secrets, boundaries, governance, compose, lint, unit, java, deployment, observability, images]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail when a required job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "::error::a required job failed or was cancelled"
+          exit 1
+      - name: Pass
+        run: echo "every required job succeeded or was skipped"

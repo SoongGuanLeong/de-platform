@@ -1,0 +1,23 @@
+[project]
+name = "orchestration"
+version = "0.0.0"
+description = "The Dagster code location, the composition root and the only module permitted to import both spines."
+requires-python = ">=3.12"
+dependencies = ["platform", "ingestion", "batch", "governance"]
+
+[tool.uv.sources]
+platform = { workspace = true }
+ingestion = { workspace = true }
+batch = { workspace = true }
+governance = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+# The import package carries the "de_" prefix because the repository root is a
+# valid sys.path entry, and a top-level package named after the distribution
+# would be shadowed by that distribution's directory at the repository root.
+# The prefix applies uniformly to every distribution in the workspace.
+[tool.uv.build-backend]
+module-name = "de_orchestration"

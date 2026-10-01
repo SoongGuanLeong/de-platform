@@ -17,6 +17,8 @@ The lint tool list is **proposed, not measured**, which is the gap [the reposito
 
 **None of the structure this document describes exists yet.** `.github/workflows/ci.yml`, `deployment/scripts/`, `deployment/tools.lock`, `deployment/rendered/`, `contracts/`, `tests/` and the Python and Java distributions are all part of the plan, named here so the plan is reviewable. The only path named in this document that exists today is `deployment/budgets/profiles.yaml`, `docs/budgets.yaml` and the one existing workflow file.
 
+**Correction, 2026-09-30 (ticket #30).** The structure now partly exists. `.github/workflows/ci.yml`, `deployment/scripts/`, `deployment/tools.lock`, `contracts/`, `tests/` and the five Python distributions are in the repository, and `.github/workflows/security.yml` has been absorbed into the `secrets` job and deleted, so the sentence above about the one existing workflow file no longer holds. The graph's eleven jobs are present; the checks owned by other tickets (`compose`, `governance`, `java`, `deployment`, `observability`, `images`) are deferred and assert their subject is absent until the owning ticket lands. `deployment/rendered/` and the Java distribution do not exist yet.
+
 ## 1. What this document settles
 
 1. **The CI platform**, and why it is infrastructure rather than a component or an addition (section 2).
@@ -82,7 +84,7 @@ Eleven jobs plus the aggregator. They are grouped by toolchain so each job pays 
 
 | # | Job | Runner | What it checks | Trigger |
 |---|---|---|---|---|
-| 0 | `changes` | ubuntu-latest | computes the path-filter outputs; checks nothing itself | always |
+| 0 | `changes` | ubuntu-latest | computes the path-filter outputs, and proves the map selects the right jobs | always |
 | 1 | `secrets` | ubuntu-latest | `gitleaks detect` over the full history, pinned by version and SHA256 | always |
 | 2 | `boundaries` | ubuntu-latest | `ruff`; the packaging graph; `import-linter` rules 1 to 4; the notebook path check (rule 5) | always |
 | 3 | `governance` | ubuntu-latest | contract-file validation and the breaking-change check; the completion-bar register validator; the budget validator; the cross-path agreement validator; the layout-agreement check | always |
@@ -120,6 +122,8 @@ Eleven jobs plus the aggregator. They are grouped by toolchain so each job pays 
 | `images` | the image context under `deployment/` | none |
 
 **Where the Avro schema files live, decided here.** [The repository decomposition](repository-decomposition.md) never says. They belong under `contracts/`, at `contracts/<spine>/topics/<topic>.avsc`, because `contracts/` is already defined as data with no executable content, the Avro schema is data shared by the producer (Debezium) and the consumers (Flink and Spark), and putting it there satisfies the rule that cross-path communication goes through `contracts/`, `platform/` or the catalog. It also means a schema change triggers every job that consumes the topic, which is the fail-safe behaviour we want.
+
+**Correction, 2026-10-01 (ticket #30).** The filter map is proven load-bearing rather than asserted. `deployment/scripts/test-paths.sh` runs the production `deployment/scripts/paths.sh` against a throwaway git repository, one commit per case, and asserts the whole output block for that diff, including both fail-safe overrides and the `images` context. It runs as a step in the `changes` job, so the section 4 row for that job now reads that it proves the map rather than that it checks nothing.
 
 ## 6. The required checks, and what a red check does
 
