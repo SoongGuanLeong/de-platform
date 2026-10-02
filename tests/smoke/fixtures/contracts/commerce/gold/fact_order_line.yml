@@ -1,0 +1,24 @@
+# The platform core's contract fixture (issue #33).
+#
+# The real gold contracts land with the contract set in Phase 1, so this is the
+# loader's smoke input rather than a gold contract the register cites: it is the
+# worked example docs/data-contracts.md section 2 gives, and the loader is what
+# is under test. The columns the loader consumes are here; the fields the
+# governance validator owns (quality, serving, versioning) are not, because the
+# platform core does not read them.
+table: commerce.gold.fact_order_line
+spine: commerce
+layer: gold
+grain: one row per order line
+# Quoted on purpose: an unquoted 1.10 parses as the float 1.1, so a contract
+# version is a string, and the contract validator requires the quoted form.
+contract_version: "1.0"
+columns:
+  - {name: w_id, type: int, nullable: false, pii_class: none}
+  - {name: d_id, type: int, nullable: false, pii_class: none}
+  - {name: o_id, type: int, nullable: false, pii_class: none}
+  - {name: ol_number, type: int, nullable: false, pii_class: none}
+  - {name: ol_quantity, type: int, nullable: false, pii_class: none}
+  - {name: ol_amount, type: "decimal(12,2)", nullable: false, pii_class: none}
+  - {name: o_entry_d, type: timestamp, nullable: false, pii_class: none}
+business_keys: [w_id, d_id, o_id, ol_number]

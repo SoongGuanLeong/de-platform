@@ -83,6 +83,10 @@ jobs:
       # in a .py file and one in a .sh file must each fail it.
       - name: Prove the YAML single-entry-point check catches a mutation
         run: bash deployment/scripts/test-check-yaml-loading.sh
+      # Proves the catalog-API boundary check is load-bearing: a Management API
+      # path in the shared core must fail it.
+      - name: Prove the catalog-API boundary check catches a mutation
+        run: bash deployment/scripts/test-check-catalog-api.sh
 
   # The completion-bar register and budget validator, which landed with issue #32;
   # the contract validator and breaking-change check land with issues #36 and

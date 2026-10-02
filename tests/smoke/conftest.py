@@ -467,3 +467,44 @@ def running(unit_spec):
         yield Running(unit_spec)
     finally:
         compose("down", "--volumes", timeout=600)
+
+
+# ---------------------------------------------------------------------------
+# The platform core (issue #33)
+# ---------------------------------------------------------------------------
+
+# The Iceberg REST base on Polaris, from deployment/compose/smoke.yml.
+POLARIS_REST = "http://127.0.0.1:58181/api/catalog"
+
+
+@pytest.fixture
+def polaris_rest():
+    """postgres and polaris, up and answering, for the platform-core check.
+
+    The platform core resolves a namespace and a table through the Iceberg REST
+    specification against a real catalog, so this unit brings the catalog and
+    its metastore up and tears them down again. It is a smoke unit like any
+    other: one bring-up, one check, one teardown. The bootstrap credential is
+    read from the container that owns it, because the ownership remap
+    (ADR-0028) leaves the host user unable to read the file directly.
+    """
+    try:
+        result = compose("up", "-d", "postgres", "polaris", timeout=900)
+        if result.returncode != 0:
+            raise AssertionError(
+                "podman-compose up failed for the platform core:\n" + result.stdout + result.stderr
+            )
+        ready = wait_for(
+            lambda: http_status(POLARIS_REST + "/v1/config") in ("401", "200"), timeout=300
+        )
+        if not ready:
+            raise AssertionError(
+                "polaris did not answer the REST config endpoint in 300s:\n"
+                + compose("ps", timeout=120).stdout
+            )
+        secret = in_container("polaris", ["cat", "/run/secrets/polaris_bootstrap_secret"])
+        if secret.returncode != 0:
+            raise AssertionError("could not read the bootstrap credential:\n" + secret.stderr)
+        yield {"base_url": POLARIS_REST, "secret": secret.stdout.strip()}
+    finally:
+        compose("down", "--volumes", timeout=600)

@@ -20,3 +20,6 @@ bash deployment/scripts/check-notebooks.sh
 
 echo "== the YAML single entry point =="
 bash deployment/scripts/check-yaml-loading.sh
+
+echo "== the catalog API boundary =="
+bash deployment/scripts/check-catalog-api.sh
