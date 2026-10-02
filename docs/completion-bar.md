@@ -13,6 +13,8 @@ This document defines the evidence a capability must produce before it counts as
 
 No platform code exists while the map is open, so nothing here is a result. Every item below specifies evidence that will be produced during implementation. The capability register at [`docs/completion-bar.yaml`](completion-bar.yaml) ships empty and is filled in as work happens.
 
+**Correction, 2026-10-02 (ticket #32).** The register no longer ships empty. It carries the Phase 0 instance, the compose and profile layer, whose failure modes are enumerated and whose deferrals are recorded, and no capability is marked complete. `governance/src/de_governance/register.py` enforces the rules in section 12 in CI.
+
 ## 1. What this document is, and what it is not
 
 It is the definition of done, per capability class, and the mechanism that makes a claim checkable by someone who does not trust the author.
@@ -280,6 +282,8 @@ The CI never re-runs expensive evidence. It checks that the paperwork is honest:
 - compose files contain none of the keys outside the portable subset, with `deploy` permitted only at `resources.limits.{cpus,memory,pids}`; every declared limit resolves against the ceiling register in `deployment/budgets/profiles.yaml`; and every profile peak in that register is recomputed from its ceilings, so a peak that does not match its parts fails. **Correction, 2026-10-01 (issue #31):** the compose lint also asserts the pins, the runtimes and the ClickHouse ceiling XML, and the CI runs it together with a mutation test that proves each assertion fails when its subject is broken. The additions are every image reference being the digest `deployment/tools.lock` holds; every JVM service declaring the JDK its image carries, with the declaration constrained to the versions [the longevity audit](research/03-longevity-audit.md) accepts; every compose service being classified in exactly one runtime list, so a service no list names fails rather than carrying no assertion; and every profile's mounted `limits-*.xml` declaring the register's ClickHouse ceiling without clamping it with the image's own default ratio.
 
 **The class rule is scoped to classes that have instances.** The register is filled in incrementally as phases land, so a rule scoped to the whole eleven-value vocabulary would be red from the first commit and would make the required check unusable. The vocabulary in `docs/completion-bar.yaml` is closed; the obligation is not.
+
+**Correction, 2026-10-02 (ticket #32).** Two of the bullets above are read as follows, so the validator and this standard say the same thing. The class rule's obligation is discharged at the phase [the implementation roadmap](implementation-roadmap.md) section 5 assigns the class's representative to, which is why that section's Phase 0 row records no representative for `infrastructure-as-code` while Phase 0 admits the class's first instance. A populated class therefore has exactly one representative, or records the phase that will assign it, and a populated class with neither is the failure. And "no `complete` instance has an unresolved deferral" means a complete instance defers no failure mode: a core checklist item may stay `not_applicable` for good, but a failure mode may not, because completion asserts the modes were demonstrated end to end. Without that reading a complete instance could defer every mode and still pass, which is the premature-completion claim the bullet exists to catch.
 
 ## 13. What we explicitly do not test, and why
 

@@ -3,7 +3,10 @@ name = "governance"
 version = "0.0.0"
 description = "The data-quality framework, the gate, retention and the validators."
 requires-python = ">=3.12"
-dependencies = ["platform"]
+# pyyaml is declared rather than borrowed: the register and budget validator reads
+# YAML, and a distribution that imports a package should not rely on it arriving
+# transitively through the dev-only yamllint.
+dependencies = ["platform", "pyyaml"]
 
 [tool.uv.sources]
 platform = { workspace = true }
