@@ -3,32 +3,61 @@
 # The standard this register is judged against: docs/completion-bar.md
 # The thresholds it cites: docs/budgets.yaml
 # Evidence items: docs/evidence/<class>/<instance>/
+# The validator that enforces the rules below: governance/src/de_governance/register.py
 #
-# This register is forward-looking and ships empty. The map that produced it is
-# planning-only, so no platform code exists yet, and an empty register is the
-# correct state rather than an unfinished task.
+# The CI validates, without re-running any evidence: that the vocabulary is the
+# closed eleven classes; that every populated class has one representative
+# instance or a recorded phase that will assign it; that every complete instance
+# carries at least one behaviour evidence item; that every evidence link and every
+# budget reference resolves; that every not_applicable deferral carries a reason;
+# and that every instance names a module that resolves.
 #
-# The CI validates, without re-running any evidence: that every class has at least
-# one representative instance; that every complete instance carries at least one
-# behaviour evidence item; that every evidence link resolves and every item carries
-# all required fields; that every budget_ref resolves; that every not_applicable
-# entry carries a reason; and that no complete instance has an unresolved deferral.
+# 'classes' is the closed vocabulary, and each entry carries the class's
+# representative-instance slot. 'representative' names the instance whose evidence
+# carries the class's mutation note, or is null while that obligation is deferred;
+# 'assigned_in_phase' names the phase of docs/implementation-roadmap.md section 5
+# that assigns it. A class that has instances must have one or the other, so an
+# unassigned representative cannot be silent.
+#
+# This register is filled in as phases land. No capability is complete: a complete
+# instance needs a committed evidence item, and none exists yet.
 
-version: 1
+version: 2
 
-# The eleven canonical capability classes. An instance's class must be one of these.
 classes:
-  - kafka-ingestion
-  - cdc-ingestion
-  - flink-streaming
-  - spark-batch
-  - iceberg-table-management
-  - clickhouse-serving
-  - orchestration
-  - data-quality
-  - governance-and-lineage
-  - observability
-  - infrastructure-as-code
+  - id: kafka-ingestion
+    representative: null
+    assigned_in_phase: 5
+  - id: cdc-ingestion
+    representative: null
+    assigned_in_phase: 5
+  - id: flink-streaming
+    representative: null
+    assigned_in_phase: 5
+  - id: spark-batch
+    representative: null
+    assigned_in_phase: 3
+  - id: iceberg-table-management
+    representative: null
+    assigned_in_phase: 3
+  - id: clickhouse-serving
+    representative: null
+    assigned_in_phase: 3
+  - id: orchestration
+    representative: null
+    assigned_in_phase: 2
+  - id: data-quality
+    representative: null
+    assigned_in_phase: 2
+  - id: governance-and-lineage
+    representative: null
+    assigned_in_phase: 7
+  - id: observability
+    representative: null
+    assigned_in_phase: 8
+  - id: infrastructure-as-code
+    representative: null
+    assigned_in_phase: 9
 
 # One entry per capability instance. Field rules are in docs/completion-bar.md
 # sections 3, 4 and 12. An entry has the shape:
@@ -37,6 +66,7 @@ classes:
 #   - id: <stable identifier>
 #     class: <one of the classes above>
 #     instance: <the topic, job, table or dashboard name>
+#     module: <the distribution or path that implements it>
 #     representative: <true for the one instance per class whose evidence carries
 #       the class's mutation note>
 #     status: declared | in-progress | complete | deferred
@@ -45,6 +75,52 @@ classes:
 #     evidence:
 #       - <evidence item id>
 #     not_applicable:
-#       - field: <the core checklist item>
-#         reason: <why it does not apply>
-instances: []
+#       - field: <the core checklist item, or the failure mode, that is deferred>
+#         reason: <why it does not apply, or why it is not yet demonstrated>
+instances:
+  # Phase 0 (docs/implementation-roadmap.md section 5). The compose and profile
+  # layer is the class's first instance; the class's representative is assigned in
+  # Phase 9, to the OpenTofu modules or the Helm charts, so this instance carries
+  # no mutation-note obligation.
+  #
+  # The failure modes are grouped by service class rather than repeated per
+  # service: every service in the profile set is named by at least one mode below.
+  - id: compose-and-profile-layer
+    class: infrastructure-as-code
+    instance: the compose and profile layer
+    module: deployment
+    representative: false
+    status: in-progress
+    failure_modes:
+      - "an image cannot be pulled (every service; the pin is the digest deployment/tools.lock holds)"
+      - "a container is OOM-killed at its declared ceiling (every service; the ceiling is the profile entitlement in deployment/budgets/profiles.yaml)"
+      - "a healthcheck never passes inside its start_period (postgres, seaweedfs, polaris, clickhouse, kafka, flink-jobmanager, prometheus, grafana)"
+      - "a service does not recover after a dependency restarts (every service; services self-retry rather than depending on health-based start ordering)"
+      - "a host port is already bound by another process (every service that publishes one)"
+      - "a mounted secret is missing or unreadable (the services ADR-0028 gives a runtime secret: postgres, polaris, clickhouse, kafka, debezium-connect, seaweedfs, grafana)"
+      - "a profile's peak exceeds the host entitlement (every profile; the peak is recomputed by the compose lint)"
+      - "a shared service body drifts between two profiles that declare it (the services declared in more than one profile)"
+    evidence: []
+    not_applicable:
+      - field: "core item 3 (realistic data)"
+        reason: the compose and profile layer carries no dataset; its inputs are OCI images pinned by digest, and the datasets arrive with the path phases.
+      - field: "core item 5 (observability)"
+        reason: the healthchecks are the signal, but the alert rule that promotes a signal to a behaviour item is the observability class's Phase 8 obligation.
+      - field: "core item 8 (measurable acceptance criterion)"
+        reason: its resource ceilings are entitlements, not thresholds (ADR-0031); its structural criterion is the profile-peak recompute in the compose lint, which is asserted by deployment/scripts/test-check-compose.sh.
+      - field: "failure mode: an image cannot be pulled (every service; the pin is the digest deployment/tools.lock holds)"
+        reason: not yet demonstrated; no evidence item exists, and the smoke profile's output is not committed as one.
+      - field: "failure mode: a container is OOM-killed at its declared ceiling (every service; the ceiling is the profile entitlement in deployment/budgets/profiles.yaml)"
+        reason: not yet demonstrated; the ceiling is enforced by the provider, and no run has recorded an exceedance.
+      - field: "failure mode: a healthcheck never passes inside its start_period (postgres, seaweedfs, polaris, clickhouse, kafka, flink-jobmanager, prometheus, grafana)"
+        reason: not yet demonstrated; no evidence item records a start_period expiry.
+      - field: "failure mode: a service does not recover after a dependency restarts (every service; services self-retry rather than depending on health-based start ordering)"
+        reason: not yet demonstrated; the self-retry design is asserted by the compose subset lint rather than by a recorded restart.
+      - field: "failure mode: a host port is already bound by another process (every service that publishes one)"
+        reason: not yet demonstrated; no evidence item records a bind failure.
+      - field: "failure mode: a mounted secret is missing or unreadable (the services ADR-0028 gives a runtime secret: postgres, polaris, clickhouse, kafka, debezium-connect, seaweedfs, grafana)"
+        reason: not yet demonstrated; no evidence item records a missing runtime secret.
+      - field: "failure mode: a profile's peak exceeds the host entitlement (every profile; the peak is recomputed by the compose lint)"
+        reason: not yet demonstrated; the preflight resolves the peak before a run, and no evidence item records a refusal.
+      - field: "failure mode: a shared service body drifts between two profiles that declare it (the services declared in more than one profile)"
+        reason: demonstrated as a lint, not as a profile run; deployment/scripts/test-check-compose.sh mutates a shared body and the lint fails, but no evidence item exists.

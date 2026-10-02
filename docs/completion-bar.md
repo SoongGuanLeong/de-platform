@@ -13,6 +13,8 @@ This document defines the evidence a capability must produce before it counts as
 
 No platform code exists while the map is open, so nothing here is a result. Every item below specifies evidence that will be produced during implementation. The capability register at [`docs/completion-bar.yaml`](completion-bar.yaml) ships empty and is filled in as work happens.
 
+**Correction, 2026-10-02 (ticket #32).** The register no longer ships empty. It carries the Phase 0 instance, the compose and profile layer, whose failure modes are enumerated and whose deferrals are recorded, and no capability is marked complete. `governance/src/de_governance/register.py` enforces the rules in section 12 in CI.
+
 ## 1. What this document is, and what it is not
 
 It is the definition of done, per capability class, and the mechanism that makes a claim checkable by someone who does not trust the author.
