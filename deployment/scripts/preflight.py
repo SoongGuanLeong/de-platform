@@ -35,7 +35,7 @@ import stat
 import subprocess
 import sys
 
-import yaml
+from de_governance.yaml_loader import load_mapping
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 REGISTER = os.path.join(ROOT, "deployment", "budgets", "profiles.yaml")
@@ -230,7 +230,7 @@ def check_cgroups() -> None:
 
 def check_ports(compose_path: str) -> None:
     with open(compose_path, encoding="utf-8") as handle:
-        document = yaml.safe_load(handle)
+        document = load_mapping(handle)
     seen = []
     for name, service in (document.get("services") or {}).items():
         for entry in service.get("ports") or []:
@@ -259,7 +259,7 @@ def check_ports(compose_path: str) -> None:
 
 def check_secrets(compose_path: str) -> None:
     with open(compose_path, encoding="utf-8") as handle:
-        document = yaml.safe_load(handle)
+        document = load_mapping(handle)
     required = []
     for service in (document.get("services") or {}).values():
         for mount in service.get("volumes") or []:
@@ -308,7 +308,7 @@ def main() -> int:
     args = parser.parse_args()
 
     with open(REGISTER, encoding="utf-8") as handle:
-        register = yaml.safe_load(handle)
+        register = load_mapping(handle)
     lock = load_lock()
 
     status = check_host_memory(args.profile, register, args.reduced)

@@ -86,7 +86,7 @@ Eleven jobs plus the aggregator. They are grouped by toolchain so each job pays 
 |---|---|---|---|---|
 | 0 | `changes` | ubuntu-latest | computes the path-filter outputs, and proves the map selects the right jobs | always |
 | 1 | `secrets` | ubuntu-latest | `gitleaks detect` over the full history, pinned by version and SHA256 | always |
-| 2 | `boundaries` | ubuntu-latest | `ruff`; the packaging graph; `import-linter` rules 1 to 4; the notebook path check (rule 5) | always |
+| 2 | `boundaries` | ubuntu-latest | `ruff`; the packaging graph; `import-linter` rules 1 to 4; the notebook path check (rule 5); the YAML single-entry-point check | always |
 | 3 | `governance` | ubuntu-latest | contract-file validation and the breaking-change check; the completion-bar register validator; the budget validator; the cross-path agreement validator; the layout-agreement check | always |
 | 4 | `compose` | ubuntu-latest | the compose-subset lint; every declared limit resolving against `deployment/budgets/profiles.yaml`; every profile peak recomputed from its ceilings; every image pinned by the digest `deployment/tools.lock` holds; every JVM service's declared JDK and every ClickHouse memory XML agreeing with its register ceiling; and a mutation test proving the lint is load-bearing | always |
 | 5 | `lint` | ubuntu-latest | `sqlfluff`; `yamllint`; `actionlint` | always |
@@ -197,6 +197,8 @@ ECR Public's one-pull-per-second anonymous cap is the decisive detail, because a
 ## 9. The local-to-CI relationship
 
 **One script per check, invoked identically by CI and by the developer.** Each check lives in `deployment/scripts/`, and every tool version is pinned in one file, `deployment/tools.lock`. A script fetches its pinned tool by **version plus SHA256** and verifies the digest before use, which is the pattern `.github/workflows/security.yml` already uses in this repository. CI calls the same script the developer calls, so there is no second implementation to drift and no host install to document.
+
+**Correction, 2026-10-02 (after the ticket #32 retro).** The script does not drift; the environment can, and "invoked identically" is about the command rather than about the environment it runs in. Two divergences survived the identical invocation and were found by a red check rather than by review. First, CI's virtual environment is **fresh**: the repository root is a virtual project, so a `uv run` that reaches a distribution must name it with `--package <distribution>`, and a warm local environment that already holds the editable install does not show the omission. The failure is a `ModuleNotFoundError` on the runner and a green run locally. Second, the `unit` job **checks out shallow**, so a unit test that resolves a historical commit passes where the full history is present and fails on the runner; a test that needs history must be given it, and a test that does not must resolve against the checkout instead. The rule this leaves is that a green local run is not evidence: a check is verified against a clean environment (`UV_PROJECT_ENVIRONMENT=/tmp/<new-dir>`) and, where it reads git, against a shallow clone.
 
 **What CI deliberately cannot run**, restating [the testing strategy](testing-strategy.md) section 6 and [the local development architecture](local-development.md) section 9 rather than re-deciding them:
 

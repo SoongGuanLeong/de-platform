@@ -79,6 +79,10 @@ jobs:
       # import must fail lint-imports (the ticket's fourth acceptance criterion).
       - name: Prove a cross-path import fails
         run: bash deployment/scripts/test-check-boundaries.sh
+      # Proves the YAML single-entry-point check is load-bearing: a safe_load call
+      # in a .py file and one in a .sh file must each fail it.
+      - name: Prove the YAML single-entry-point check catches a mutation
+        run: bash deployment/scripts/test-check-yaml-loading.sh
 
   # The completion-bar register and budget validator, which landed with issue #32;
   # the contract validator and breaking-change check land with issues #36 and

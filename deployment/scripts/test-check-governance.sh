@@ -57,10 +57,11 @@ import os
 import sys
 
 import yaml
+from de_governance.yaml_loader import load_mapping
 
 name, register_path, budgets_path = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(register_path, encoding="utf-8") as handle:
-    document = yaml.safe_load(handle)
+    document = load_mapping(handle)
 instance = document["instances"][0]
 
 ITEM = {
@@ -110,7 +111,7 @@ elif name == "complete-instance-defers-a-mode":
     write_evidence(dict(ITEM))
 elif name == "superseded-budget-cited":
     with open(budgets_path, encoding="utf-8") as handle:
-        budgets = yaml.safe_load(handle)
+        budgets = load_mapping(handle)
     for entry in budgets["budgets"]:
         if entry["id"] == "m1-catalog-swap-hours":
             entry["supersedes"] = "m4-cross-path-tolerance"
