@@ -82,10 +82,14 @@ version = "0.0.0"
 source = { editable = "governance" }
 dependencies = [
     { name = "platform" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "platform", editable = "platform" }]
+requires-dist = [
+    { name = "platform", editable = "platform" },
+    { name = "pyyaml" },
+]
 
 [[package]]
 name = "grimp"

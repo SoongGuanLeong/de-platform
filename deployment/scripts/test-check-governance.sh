@@ -50,13 +50,13 @@ expect_fail() {
 # round-tripped through PyYAML, which drops the comments; that is fine for a copy
 # that is deleted at the end of the run.
 mutate() {
-  uv run --frozen python - "$1" "${work}/docs/completion-bar.yaml" <<'PY'
+  uv run --frozen python - "$1" "${work}/docs/completion-bar.yaml" "${work}/docs/budgets.yaml" <<'PY'
 import os
 import sys
 
 import yaml
 
-name, register_path = sys.argv[1], sys.argv[2]
+name, register_path, budgets_path = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(register_path, encoding="utf-8") as handle:
     document = yaml.safe_load(handle)
 instance = document["instances"][0]
@@ -101,6 +101,20 @@ elif name == "no-failure-modes":
     instance["failure_modes"] = []
 elif name == "module-does-not-resolve":
     instance["module"] = "no_such_module"
+elif name == "module-outside-the-repository":
+    instance["module"] = "yaml"
+elif name == "complete-instance-defers-a-mode":
+    instance["status"] = "complete"
+    write_evidence(dict(ITEM))
+elif name == "superseded-budget-cited":
+    with open(budgets_path, encoding="utf-8") as handle:
+        budgets = yaml.safe_load(handle)
+    for entry in budgets["budgets"]:
+        if entry["id"] == "m1-catalog-swap-hours":
+            entry["supersedes"] = "m4-cross-path-tolerance"
+    with open(budgets_path, "w", encoding="utf-8") as handle:
+        yaml.safe_dump(budgets, handle, sort_keys=False)
+    write_evidence(dict(ITEM, budget_ref="m4-cross-path-tolerance"))
 elif name == "representative-without-mutation-note":
     instance["representative"] = True
     document["classes"][-1]["representative"] = instance["id"]
@@ -131,9 +145,12 @@ for mutation in \
   unresolved-deferral \
   no-failure-modes \
   module-does-not-resolve \
+  module-outside-the-repository \
+  complete-instance-defers-a-mode \
   representative-without-mutation-note \
   unknown-budget-cited \
-  pending-budget-cited
+  pending-budget-cited \
+  superseded-budget-cited
 do
   reset
   mutate "${mutation}"

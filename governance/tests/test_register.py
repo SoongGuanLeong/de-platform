@@ -86,6 +86,19 @@ def test_a_populated_class_needs_a_representative_or_a_recorded_phase(tree: Path
         "has instances but no representative instance" in message
         for message in register.validate(str(tree))
     )
+    # Zero is a phase rather than an absence: the test is the key's presence.
+    document["classes"][-1]["assigned_in_phase"] = 0
+    save(tree, document)
+    assert register.validate(str(tree)) == []
+
+
+def test_a_class_with_no_instances_needs_neither(tree: Path) -> None:
+    document = load(tree)
+    document["instances"] = []
+    for entry in document["classes"]:
+        entry.pop("assigned_in_phase")
+    save(tree, document)
+    assert register.validate(str(tree)) == []
 
 
 def test_a_complete_instance_needs_a_behaviour_item(tree: Path) -> None:
@@ -130,6 +143,43 @@ def test_an_unresolved_deferral_fails(tree: Path) -> None:
     assert any(
         "unresolved not_applicable deferral" in message for message in register.validate(str(tree))
     )
+
+
+def test_a_complete_instance_defers_no_failure_mode(tree: Path) -> None:
+    document = load(tree)
+    document["instances"][0]["status"] = "complete"
+    save(tree, document)
+    assert any(
+        "still defers the failure mode" in message for message in register.validate(str(tree))
+    )
+
+    # A behaviour item satisfies the behaviour rule but not this one: completion
+    # asserts the modes were demonstrated, so the deferral has to be gone.
+    cite(tree, EVIDENCE_ITEM)
+    failures = register.validate(str(tree))
+    assert not any("has no behaviour evidence item" in message for message in failures)
+    assert any("still defers the failure mode" in message for message in failures)
+
+
+def test_a_module_must_live_in_the_repository(tree: Path) -> None:
+    document = load(tree)
+    document["instances"][0]["module"] = "yaml"
+    save(tree, document)
+    assert any(
+        "does not resolve to a module in this repository" in message
+        for message in register.validate(str(tree))
+    )
+
+
+def test_a_superseded_budget_may_not_be_cited(tree: Path) -> None:
+    budgets_path = tree / "docs" / "budgets.yaml"
+    budgets = yaml.safe_load(budgets_path.read_text(encoding="utf-8"))
+    for entry in budgets["budgets"]:
+        if entry["id"] == "m1-catalog-swap-hours":
+            entry["supersedes"] = "m4-cross-path-tolerance"
+    budgets_path.write_text(yaml.safe_dump(budgets, sort_keys=False), encoding="utf-8")
+    cite(tree, dict(EVIDENCE_ITEM, budget_ref="m4-cross-path-tolerance"))
+    assert any("supersedes" in message for message in register.validate(str(tree)))
 
 
 def test_a_budget_reference_must_resolve_to_a_committed_budget(tree: Path) -> None:

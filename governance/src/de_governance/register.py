@@ -23,10 +23,16 @@ recorded, never run: the required set contains no evidence re-run
 The class rule is scoped to classes that have instances (docs/completion-bar.md
 section 12). The representative obligation is discharged phase by phase, so a
 class whose instances have landed before its representative has been assigned
-records the phase that will assign it; a class with instances and neither a
-representative nor a recorded phase is the failure this validator exists to
-catch. That reading keeps docs/implementation-roadmap.md section 5, which assigns
-each class's representative to a named phase, as the authority.
+records the phase that will assign it (assigned_in_phase); a class with instances
+and neither a representative nor a recorded phase is the failure this validator
+exists to catch. That reading keeps docs/implementation-roadmap.md section 5,
+which assigns each class's representative to a named phase, as the authority, and
+the scoping is stated in the completion bar's own section 12.
+
+It validates the threshold register against the contract in its own header
+(docs/ci-cd-strategy.md section 4 calls this half the budget validator): unique
+ids, the required fields, the fixed-versus-derived commitment rule, and that a
+superseded entry is named by an entry that exists and is never cited.
 
 Run: deployment/scripts/check-governance.sh
 """
@@ -117,9 +123,27 @@ def load_yaml(path: str, failures: list[str], label: str):
             return None
 
 
+def valid_id(value, noun: str, seen: set[str], failures: list[str]) -> bool:
+    """An identifier is a non-empty string, unique within its collection."""
+    if not isinstance(value, str) or not value:
+        failures.append(noun + " has no id")
+        return False
+    if value in seen:
+        failures.append(noun + " " + repr(value) + " is declared twice")
+        return False
+    seen.add(value)
+    return True
+
+
+def as_list(value) -> list:
+    """A register field that should be a list, or an empty one when it is not."""
+    return value if isinstance(value, list) else []
+
+
 def load_evidence(evidence_dir: str, failures: list[str]) -> dict[str, dict]:
     """Every evidence item under docs/evidence/, keyed by its id."""
     items: dict[str, dict] = {}
+    seen: set[str] = set()
     if not os.path.isdir(evidence_dir):
         return items
     for directory, _subdirs, names in os.walk(evidence_dir):
@@ -143,11 +167,7 @@ def load_evidence(evidence_dir: str, failures: list[str]) -> dict[str, dict]:
                 failures.append(relative + ": front matter is not a mapping")
                 continue
             item_id = item.get("id")
-            if not isinstance(item_id, str) or not item_id:
-                failures.append(relative + ": evidence item has no id")
-                continue
-            if item_id in items:
-                failures.append(relative + ": duplicate evidence id " + repr(item_id))
+            if not valid_id(item_id, relative + ": evidence item", seen, failures):
                 continue
             items[item_id] = {"item": item, "path": relative}
     return items
@@ -163,11 +183,7 @@ def check_classes(classes, failures: list[str]) -> dict[str, dict]:
             failures.append("register: a class entry is not a mapping")
             continue
         class_id = entry.get("id")
-        if not isinstance(class_id, str) or not class_id:
-            failures.append("register: a class entry has no id")
-            continue
-        if class_id in declared:
-            failures.append("register: class " + repr(class_id) + " is declared twice")
+        if not valid_id(class_id, "register: a class entry", set(declared), failures):
             continue
         declared[class_id] = entry
         representative = entry.get("representative")
@@ -175,9 +191,14 @@ def check_classes(classes, failures: list[str]) -> dict[str, dict]:
             failures.append(
                 "register: class " + class_id + " representative slot is neither an id nor null"
             )
+        # Optional: a class whose representative is already assigned does not need
+        # it, and a class with no instances needs neither. It is required only of a
+        # populated class with no representative, which check_representatives reads.
         phase = entry.get("assigned_in_phase")
-        if not isinstance(phase, int) or isinstance(phase, bool) or phase < 0:
-            failures.append("register: class " + class_id + " has no assigned_in_phase")
+        if phase is not None and (
+            not isinstance(phase, int) or isinstance(phase, bool) or phase < 0
+        ):
+            failures.append("register: class " + class_id + " assigned_in_phase is " + repr(phase))
     missing = [name for name in CANONICAL_CLASSES if name not in declared]
     extra = [name for name in declared if name not in CANONICAL_CLASSES]
     if missing:
@@ -199,11 +220,7 @@ def check_instances(instances, declared: dict[str, dict], failures: list[str]) -
             failures.append("register: an instance entry is not a mapping")
             continue
         instance_id = entry.get("id")
-        if not isinstance(instance_id, str) or not instance_id:
-            failures.append("register: an instance entry has no id")
-            continue
-        if instance_id in by_id:
-            failures.append("register: instance " + repr(instance_id) + " is declared twice")
+        if not valid_id(instance_id, "register: an instance entry", set(by_id), failures):
             continue
         by_id[instance_id] = entry
 
@@ -296,7 +313,7 @@ def check_representatives(
                     "register: class " + class_id + " has a representative instance but no "
                     "representative slot"
                 )
-            elif not declared[class_id].get("assigned_in_phase"):
+            elif declared[class_id].get("assigned_in_phase") is None:
                 failures.append(
                     "register: class " + class_id + " has instances but no representative "
                     "instance and no assigned_in_phase"
@@ -331,7 +348,7 @@ def check_evidence_links(
 ) -> None:
     """Every evidence link resolves, in both directions."""
     for instance_id, entry in instances.items():
-        for item_id in entry.get("evidence", []):
+        for item_id in as_list(entry.get("evidence")):
             if item_id not in evidence:
                 failures.append(
                     "register: instance "
@@ -362,14 +379,26 @@ def check_evidence_links(
                 + ", which is not a register instance"
             )
             continue
-        if item_id not in instances[capability].get("evidence", []):
+        if item_id not in as_list(instances[capability].get("evidence")):
             failures.append(
                 "evidence: " + record["path"] + " is not cited by its capability " + capability
             )
 
 
+def superseded_budgets(budgets: dict[str, dict]) -> set[str]:
+    """The entries a later entry replaces. Evidence citing one is invalid.
+
+    docs/completion-bar.md section 9: changing a budget creates a new entry, and
+    evidence citing a superseded budget is invalid.
+    """
+    return {
+        entry["supersedes"]
+        for entry in budgets.values()
+        if isinstance(entry.get("supersedes"), str) and entry["supersedes"]
+    }
+
+
 def check_evidence_fields(
-    instances: dict[str, dict],
     evidence: dict[str, dict],
     budgets: dict[str, dict],
     failures: list[str],
@@ -403,7 +432,10 @@ def check_evidence_fields(
             failures.append("evidence: " + path + " observed_once is not a boolean")
         budget_ref = item.get("budget_ref")
         if budget_ref is not None:
-            if budget_ref not in budgets:
+            superseded = superseded_budgets(budgets)
+            if not isinstance(budget_ref, str) or not budget_ref:
+                failures.append("evidence: " + path + " budget_ref is not a budget id")
+            elif budget_ref not in budgets:
                 failures.append(
                     "evidence: "
                     + path
@@ -419,34 +451,68 @@ def check_evidence_fields(
                     + budget_ref
                     + ", whose threshold is pending rather than committed"
                 )
+            elif budget_ref in superseded:
+                failures.append(
+                    "evidence: "
+                    + path
+                    + " cites budget "
+                    + budget_ref
+                    + ", which a later entry supersedes"
+                )
 
 
 def check_complete_instances(
-    declared: dict[str, dict],
     instances: dict[str, dict],
     evidence: dict[str, dict],
     failures: list[str],
 ) -> None:
-    """A complete instance carries a behaviour item; its class carries the note."""
+    """A complete instance carries a behaviour item and defers no failure mode.
+
+    docs/completion-bar.md section 12: every complete instance has at least one
+    behaviour evidence item, and no complete instance has an unresolved deferral.
+    A core checklist item may stay not-applicable for good, but a failure mode may
+    not: completion asserts the modes were demonstrated end to end, and the CI can
+    check only that the deferral is gone. Without that, a complete instance could
+    defer every mode and pass, which is the premature-completion claim the rule
+    exists to catch.
+    """
     for instance_id, entry in instances.items():
         if entry.get("status") != "complete":
             continue
         items = [
             evidence[item_id]["item"]
-            for item_id in entry.get("evidence", [])
+            for item_id in as_list(entry.get("evidence"))
             if item_id in evidence
         ]
         if not any(item.get("proves") == "behaviour" for item in items):
             failures.append(
                 "register: complete instance " + instance_id + " has no behaviour evidence item"
             )
+        modes = {"failure mode: " + mode for mode in as_list(entry.get("failure_modes"))}
+        for deferral in as_list(entry.get("not_applicable")):
+            if isinstance(deferral, dict) and deferral.get("field") in modes:
+                failures.append(
+                    "register: complete instance "
+                    + instance_id
+                    + " still defers the failure mode "
+                    + repr(deferral["field"])
+                )
+
+
+def check_representative_notes(
+    declared: dict[str, dict],
+    instances: dict[str, dict],
+    evidence: dict[str, dict],
+    failures: list[str],
+) -> None:
+    """The representative instance of each assigned class carries the mutation note."""
     for class_id, class_entry in declared.items():
         slot = class_entry.get("representative")
         if not slot or slot not in instances:
             continue
         items = [
             evidence[item_id]["item"]
-            for item_id in instances[slot].get("evidence", [])
+            for item_id in as_list(instances[slot].get("evidence"))
             if item_id in evidence
         ]
         if not any(
@@ -474,11 +540,7 @@ def check_budgets(budgets_document, failures: list[str]) -> dict[str, dict]:
             failures.append("budgets: an entry is not a mapping")
             continue
         budget_id = entry.get("id")
-        if not isinstance(budget_id, str) or not budget_id:
-            failures.append("budgets: an entry has no id")
-            continue
-        if budget_id in by_id:
-            failures.append("budgets: " + budget_id + " is declared twice")
+        if not valid_id(budget_id, "budgets: an entry", set(by_id), failures):
             continue
         by_id[budget_id] = entry
         for field in BUDGET_REQUIRED:
@@ -513,8 +575,17 @@ def check_budgets(budgets_document, failures: list[str]) -> dict[str, dict]:
 
 
 def check_modules(instances: dict[str, dict], repo_root: str, failures: list[str]) -> None:
+    """The module an instance names resolves, imports, and lives in this repository.
+
+    docs/repository-decomposition.md: each entry carries a module field naming the
+    distribution that implements it, and CI asserts it resolves and is importable.
+    The repository half of that is what makes the assertion mean the implementing
+    module rather than any importable name: a stdlib or third-party module resolves
+    and imports and implements nothing here.
+    """
     if repo_root not in sys.path:
         sys.path.insert(0, repo_root)
+    root = os.path.realpath(repo_root)
     for instance_id, entry in instances.items():
         module = entry.get("module")
         if not isinstance(module, str) or not module:
@@ -523,13 +594,29 @@ def check_modules(instances: dict[str, dict], repo_root: str, failures: list[str
             spec = importlib.util.find_spec(module)
         except (ImportError, ValueError):
             spec = None
-        if spec is None:
+        locations = list(getattr(spec, "submodule_search_locations", None) or [])
+        if spec is not None and spec.origin:
+            locations.append(spec.origin)
+        # The repository's own virtual environment lives under .venv, so a
+        # location whose first segment under the root is a dot-directory is an
+        # installed dependency rather than the module that implements the
+        # instance. That is the difference between naming deployment/ and naming
+        # yaml.
+        inside = [
+            os.path.relpath(os.path.realpath(location), root).split(os.sep)[0]
+            for location in locations
+        ]
+        if (
+            spec is None
+            or not locations
+            or not all(segment != os.pardir and not segment.startswith(".") for segment in inside)
+        ):
             failures.append(
                 "register: instance "
                 + instance_id
                 + " names module "
                 + repr(module)
-                + ", which does not resolve and import"
+                + ", which does not resolve to a module in this repository"
             )
 
 
@@ -578,8 +665,9 @@ def validate(root: str, repo_root: str | None = None) -> list[str]:
     evidence = load_evidence(os.path.join(root, "docs", "evidence"), failures)
     check_representatives(declared, instances, failures)
     check_evidence_links(instances, evidence, failures)
-    check_evidence_fields(instances, evidence, budgets, failures)
-    check_complete_instances(declared, instances, evidence, failures)
+    check_evidence_fields(evidence, budgets, failures)
+    check_complete_instances(instances, evidence, failures)
+    check_representative_notes(declared, instances, evidence, failures)
     check_modules(instances, repo_root, failures)
     # Only a cited budget is resolved to its commit: docs/budgets.yaml is
     # committed with a placeholder in declared_commit and the sha written in the

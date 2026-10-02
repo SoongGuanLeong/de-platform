@@ -283,6 +283,8 @@ The CI never re-runs expensive evidence. It checks that the paperwork is honest:
 
 **The class rule is scoped to classes that have instances.** The register is filled in incrementally as phases land, so a rule scoped to the whole eleven-value vocabulary would be red from the first commit and would make the required check unusable. The vocabulary in `docs/completion-bar.yaml` is closed; the obligation is not.
 
+**Correction, 2026-10-02 (ticket #32).** Two of the bullets above are read as follows, so the validator and this standard say the same thing. The class rule's obligation is discharged at the phase [the implementation roadmap](implementation-roadmap.md) section 5 assigns the class's representative to, which is why that section's Phase 0 row records no representative for `infrastructure-as-code` while Phase 0 admits the class's first instance. A populated class therefore has exactly one representative, or records the phase that will assign it, and a populated class with neither is the failure. And "no `complete` instance has an unresolved deferral" means a complete instance defers no failure mode: a core checklist item may stay `not_applicable` for good, but a failure mode may not, because completion asserts the modes were demonstrated end to end. Without that reading a complete instance could defer every mode and still pass, which is the premature-completion claim the bullet exists to catch.
+
 ## 13. What we explicitly do not test, and why
 
 Each entry names the gap, the reason, and what stands in its place. Naming these is part of the deliverable.

@@ -261,7 +261,7 @@ The machine-readable list of capability instances and their evidence, at `docs/c
 _Avoid_: checklist, inventory, manifest
 
 **Representative instance**:
-The one instance in a capability class whose evidence carries the class's **mutation note**, a one line record of what was removed and that the test failed. Exactly one per populated class, and the register's `representative` flag is what makes the obligation findable. The CI checks that the note exists; whether the mutation actually fails the test is a reviewer's judgement.
+The one instance in a capability class whose evidence carries the class's **mutation note**, a one line record of what was removed and that the test failed. Exactly one per populated class, and the register's `representative` flag is what makes the obligation findable. The CI checks that the note exists; whether the mutation actually fails the test is a reviewer's judgement. **Correction, 2026-10-02 (ticket #32).** The obligation is discharged at the phase the implementation roadmap section 5 assigns the class's representative to, so a populated class whose representative has not been assigned yet records that phase in the register instead.
 _Avoid_: exemplar instance, sample instance, lead instance
 
 **Budget**:
