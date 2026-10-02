@@ -25,7 +25,8 @@ trap cleanup EXIT
 cp -r deployment "${work}/deployment"
 
 run() {
-  uv run --frozen python "${work}/deployment/scripts/check_compose.py" --root "${work}" >/dev/null 2>&1
+  uv run --frozen --package governance python "${work}/deployment/scripts/check_compose.py" \
+    --root "${work}" >/dev/null 2>&1
 }
 
 expect_pass() {

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # The boundaries job (docs/ci-cd-strategy.md section 4): ruff, the packaging
-# graph, import-linter rules 1 to 4, and rule 5 (the notebook path check).
+# graph, import-linter rules 1 to 4, rule 5 (the notebook path check), and the
+# YAML single-entry-point check.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
@@ -16,3 +17,6 @@ echo "== import-linter rules 1 to 4 =="
 uv run --frozen --all-packages lint-imports --config .importlinter
 echo "== rule 5: no notebooks under a code path =="
 bash deployment/scripts/check-notebooks.sh
+
+echo "== the YAML single entry point =="
+bash deployment/scripts/check-yaml-loading.sh

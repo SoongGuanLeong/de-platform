@@ -35,7 +35,7 @@ import os
 import re
 import sys
 
-import yaml
+from de_governance.yaml_loader import load_mapping
 
 # --root points the lint at a throwaway copy of deployment/, which is how
 # deployment/scripts/test-check-compose.sh proves the checks are load-bearing:
@@ -360,7 +360,7 @@ def check_shared_service_bodies(files: list) -> None:
     for path in files:
         relative = os.path.relpath(path, ROOT)
         with open(path, encoding="utf-8") as handle:
-            document = yaml.safe_load(handle)
+            document = load_mapping(handle)
         for name, service in (document.get("services") or {}).items():
             body = {key: value for key, value in service.items() if key != "deploy"}
             body["volumes"] = [
@@ -399,7 +399,7 @@ def check_service_classification(files: list, lock: dict) -> None:
     seen: set = set()
     for path in files:
         with open(path, encoding="utf-8") as handle:
-            document = yaml.safe_load(handle)
+            document = load_mapping(handle)
         seen.update((document.get("services") or {}).keys())
     for name in sorted(seen):
         members = [key for key, values in lists.items() if name in values]
@@ -583,7 +583,7 @@ def check_peaks(register: dict) -> None:
 
 def main() -> int:
     with open(REGISTER, encoding="utf-8") as handle:
-        register = yaml.safe_load(handle)
+        register = load_mapping(handle)
     lock = load_tools_lock()
 
     files = sorted(glob.glob(os.path.join(COMPOSE_DIR, "*.yml")))
@@ -594,7 +594,7 @@ def main() -> int:
     for path in files:
         relative = os.path.relpath(path, ROOT)
         with open(path, encoding="utf-8") as handle:
-            document = yaml.safe_load(handle)
+            document = load_mapping(handle)
         if not isinstance(document, dict) or "services" not in document:
             fail(relative + ": not a compose document")
             continue

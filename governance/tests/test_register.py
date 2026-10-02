@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 import yaml
 from de_governance import register
+from de_governance.yaml_loader import load_mapping
 
 REPO_ROOT = Path(register.repository_root())
 REGISTER = Path("docs") / "completion-bar.yaml"
@@ -37,7 +38,7 @@ def tree(tmp_path: Path) -> Path:
 
 
 def load(tree: Path) -> dict:
-    return yaml.safe_load((tree / REGISTER).read_text(encoding="utf-8"))
+    return load_mapping((tree / REGISTER).read_text(encoding="utf-8"))
 
 
 def save(tree: Path, document: dict) -> None:
@@ -173,7 +174,7 @@ def test_a_module_must_live_in_the_repository(tree: Path) -> None:
 
 def test_a_superseded_budget_may_not_be_cited(tree: Path) -> None:
     budgets_path = tree / "docs" / "budgets.yaml"
-    budgets = yaml.safe_load(budgets_path.read_text(encoding="utf-8"))
+    budgets = load_mapping(budgets_path.read_text(encoding="utf-8"))
     for entry in budgets["budgets"]:
         if entry["id"] == "m1-catalog-swap-hours":
             entry["supersedes"] = "m4-cross-path-tolerance"
@@ -203,7 +204,7 @@ def test_a_budget_reference_must_resolve_to_a_committed_budget(tree: Path) -> No
         check=True,
     ).stdout.strip()
     budgets_path = tree / "docs" / "budgets.yaml"
-    budgets = yaml.safe_load(budgets_path.read_text(encoding="utf-8"))
+    budgets = load_mapping(budgets_path.read_text(encoding="utf-8"))
     for entry in budgets["budgets"]:
         if entry["id"] == "m4-cross-path-tolerance":
             entry["declared_commit"] = head

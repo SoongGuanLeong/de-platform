@@ -110,7 +110,7 @@ Unit tests are **co-located inside each distribution**, which is what makes "run
 
 CI runs the cheap structural checks on every pull request, and never re-runs evidence, because the load-bearing evidence needs the streaming or benchmark profile and cannot run at 7 to 8 GB.
 
-**Runs:** the boundary rules 1 to 5; the contract validator and breaking-change check; the completion-bar register and budget validation; the layout-agreement check; the compose-subset lint; `tofu validate`; `helm lint` and `helm template`; `promtool check rules`; `sqlfluff`; `yamllint`; `actionlint`; and the per-distribution unit tests.
+**Runs:** the boundary rules 1 to 5; the contract validator and breaking-change check; the completion-bar register and budget validation; the layout-agreement check; the compose-subset lint; `tofu validate`; `helm lint` and `helm template`; `promtool check rules`; `sqlfluff`; `yamllint`; `actionlint`; the YAML single-entry-point check; and the per-distribution unit tests.
 
 **Does not run:** any part of the stack, any benchmark, any streaming job, any evidence re-run. Those stay human-judged from the committed raw artifacts, per ADR-0007.
 
