@@ -23,7 +23,8 @@ cleanup() { remove_tree "${work}"; }
 trap cleanup EXIT
 
 run() {
-  uv run --frozen python -m de_governance.register --root "${work}" >/dev/null 2>&1
+  uv run --frozen --package governance python -m de_governance.register \
+    --root "${work}" >/dev/null 2>&1
 }
 
 reset() {
@@ -50,7 +51,8 @@ expect_fail() {
 # round-tripped through PyYAML, which drops the comments; that is fine for a copy
 # that is deleted at the end of the run.
 mutate() {
-  uv run --frozen python - "$1" "${work}/docs/completion-bar.yaml" "${work}/docs/budgets.yaml" <<'PY'
+  uv run --frozen --package governance python - "$1" \
+    "${work}/docs/completion-bar.yaml" "${work}/docs/budgets.yaml" <<'PY'
 import os
 import sys
 

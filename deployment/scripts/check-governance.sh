@@ -7,10 +7,11 @@
 #
 # The validator reads committed artefacts and re-derives from them, and it re-runs
 # no evidence: docs/ci-cd-strategy.md section 6 keeps the required set structural.
-# It needs PyYAML, which yamllint already pins into the workspace environment, so
-# this runs through uv rather than adding a second dependency set.
+# PyYAML is a dependency of the governance distribution, so the run names the
+# package: the repository root is a virtual project, and `uv run` without
+# --package installs no distribution at all.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-exec uv run --frozen python -m de_governance.register "$@"
+exec uv run --frozen --package governance python -m de_governance.register "$@"
