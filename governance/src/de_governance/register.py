@@ -109,13 +109,47 @@ def repository_root() -> str:
     )
 
 
+class _UniqueKeyLoader(yaml.SafeLoader):
+    """A SafeLoader that rejects a duplicate mapping key instead of shadowing it."""
+
+
+def _construct_unique_mapping(loader, node, deep=False):
+    mapping: dict = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                "found a duplicate key " + repr(key),
+                key_node.start_mark,
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+_UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _construct_unique_mapping
+)
+
+
+def load_mapping(stream):
+    """Parse YAML, rejecting a duplicate mapping key.
+
+    SafeLoader keeps the last of a repeated key, so a duplicated field would
+    silently shadow the one the author wrote and the validator would judge a
+    document other than the one on disk.
+    """
+    return yaml.load(stream, Loader=_UniqueKeyLoader)
+
+
 def load_yaml(path: str, failures: list[str], label: str):
     if not os.path.isfile(path):
         failures.append(label + ": " + os.path.basename(path) + " does not exist")
         return None
     with open(path, encoding="utf-8") as handle:
         try:
-            return yaml.safe_load(handle)
+            return load_mapping(handle)
         except yaml.YAMLError as error:
             failures.append(
                 label + ": " + os.path.basename(path) + " is not valid YAML: " + str(error)
@@ -159,7 +193,7 @@ def load_evidence(evidence_dir: str, failures: list[str]) -> dict[str, dict]:
                 failures.append(relative + ": no YAML front matter")
                 continue
             try:
-                item = yaml.safe_load(match.group(1))
+                item = load_mapping(match.group(1))
             except yaml.YAMLError as error:
                 failures.append(relative + ": front matter is not valid YAML: " + str(error))
                 continue
@@ -630,7 +664,10 @@ def check_commit(sha, repo_root: str, failures: list[str], where: str) -> None:
             capture_output=True,
             check=False,
         )
-    except OSError:
+    except OSError as error:
+        failures.append(
+            where + " declares commit " + sha + ", which could not be resolved: " + str(error)
+        )
         return
     if result.returncode != 0:
         failures.append(where + " declares commit " + sha + ", which is not in this repository")

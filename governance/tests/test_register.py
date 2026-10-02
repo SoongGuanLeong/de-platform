@@ -214,6 +214,42 @@ def test_a_budget_reference_must_resolve_to_a_committed_budget(tree: Path) -> No
     assert register.validate(str(tree)) == []
 
 
+def test_a_duplicate_mapping_key_is_rejected(tree: Path) -> None:
+    # SafeLoader keeps the last of a repeated key, so a duplicate would shadow the
+    # field the author wrote and the register would disagree with the file.
+    register_path = tree / REGISTER
+    text = register_path.read_text(encoding="utf-8")
+    register_path.write_text("version: 2\n" + text, encoding="utf-8")
+    assert any("duplicate key" in message for message in register.validate(str(tree)))
+
+
+def test_a_duplicate_key_in_evidence_front_matter_is_rejected(tree: Path) -> None:
+    directory = tree / "docs" / "evidence" / "infrastructure-as-code" / "compose-and-profile-layer"
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "item.md").write_text(
+        "---\n"
+        "id: duplicate-key-item\n"
+        "capability: compose-and-profile-layer\n"
+        "capability: compose-and-profile-layer\n"
+        "---\n\nprose\n",
+        encoding="utf-8",
+    )
+    assert any("duplicate key" in message for message in register.validate(str(tree)))
+
+
+def test_a_git_launch_failure_is_a_validation_failure(
+    tree: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A commit the validator could not check is not a commit it may pass.
+    cite(tree, dict(EVIDENCE_ITEM, budget_ref="m4-cross-path-tolerance"))
+
+    def explode(*_args, **_kwargs):
+        raise OSError("git is not installed")
+
+    monkeypatch.setattr(register.subprocess, "run", explode)
+    assert any("could not be resolved" in message for message in register.validate(str(tree)))
+
+
 def test_an_instance_module_must_resolve(tree: Path) -> None:
     document = load(tree)
     document["instances"][0]["module"] = "no_such_module"
