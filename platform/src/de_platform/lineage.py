@@ -75,6 +75,15 @@ def build_run_event(
     event declares requires one: it is passed in rather than read from the clock
     so an event is reproducible, and it has no default that could emit a null.
     """
+    if run_id is not None:
+        # The OpenLineage schema types runId as a UUID, so a caller-supplied id is
+        # checked rather than trusted into an event the spec would reject.
+        try:
+            uuid.UUID(run_id)
+        except (AttributeError, TypeError, ValueError):
+            raise LineageError(
+                "run_id " + repr(run_id) + " is not a UUID, which the OpenLineage schema requires"
+            ) from None
     event: dict = {
         "eventType": event_type,
         "eventTime": event_time,

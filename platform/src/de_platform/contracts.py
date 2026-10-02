@@ -111,6 +111,18 @@ def contract_from_mapping(mapping: Mapping[str, Any]) -> Contract:
         raise ContractError(
             "contract table " + repr(table) + " disagrees with spine/layer " + repr((spine, layer))
         )
+    # This is the gold-contract loader. Bronze is governed by the Avro subject and
+    # silver by the schema check, and neither carries a contract file
+    # (docs/data-contracts.md section 4), so a non-gold layer is refused even
+    # when it agrees with the table.
+    if layer != "gold":
+        raise ContractError(
+            "a contract is for a gold table, and "
+            + repr(table)
+            + " is "
+            + repr(layer)
+            + "; bronze and silver carry no contract files (docs/data-contracts.md section 4)"
+        )
 
     raw_columns = mapping.get("columns")
     if not isinstance(raw_columns, list) or not raw_columns:

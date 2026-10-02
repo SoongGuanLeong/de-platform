@@ -44,6 +44,14 @@ def test_the_table_must_agree_with_its_spine_and_layer():
         contracts.contract_from_mapping({**CONTRACT, "layer": "silver"})
 
 
+def test_a_non_gold_contract_is_refused_even_when_it_agrees_with_its_table():
+    # Bronze is governed by the Avro subject and silver by the schema check;
+    # neither carries a contract file (docs/data-contracts.md section 4).
+    silver = {**CONTRACT, "table": "commerce.silver.fact_order_line", "layer": "silver"}
+    with pytest.raises(contracts.ContractError):
+        contracts.contract_from_mapping(silver)
+
+
 def test_every_column_carries_a_pii_class():
     bad = {
         **CONTRACT,

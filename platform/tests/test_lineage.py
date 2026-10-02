@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 
+import pytest
 from de_platform import lineage
 
 CONFIG = lineage.LineageConfig(
@@ -59,15 +60,27 @@ def test_a_run_id_is_generated_when_none_is_given():
     assert event["run"]["runId"]
 
 
+def test_a_run_id_that_is_not_a_uuid_is_refused():
+    # The OpenLineage schema types runId as a UUID, so a caller-supplied id is
+    # checked rather than trusted into an event the spec would reject.
+    with pytest.raises(lineage.LineageError):
+        lineage.build_run_event(
+            CONFIG, job_name="j", run_id="abc", event_time="2026-10-02T00:00:00Z"
+        )
+
+
 def test_emit_posts_the_event_to_the_configured_endpoint():
     event = lineage.build_run_event(
-        CONFIG, job_name="j", run_id="abc", event_time="2026-10-02T00:00:00Z"
+        CONFIG,
+        job_name="j",
+        run_id="5c9d1f2e-0000-4000-8000-000000000000",
+        event_time="2026-10-02T00:00:00Z",
     )
     recorder = Recorder([(201, {}, "")])
     emitter = lineage.OpenLineageEmitter(CONFIG, transport=recorder)
     run_id = emitter.emit(event)
     method, url, headers, body = recorder.calls[0]
-    assert run_id == "abc"
+    assert run_id == "5c9d1f2e-0000-4000-8000-000000000000"
     assert (method, url) == ("POST", "http://marquez:5000/api/v1/lineage")
     assert headers["Content-Type"] == "application/json"
     assert json.loads(body)["job"]["name"] == "j"

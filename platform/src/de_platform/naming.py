@@ -61,6 +61,8 @@ def iceberg_namespace(spine: str, layer: str | None = None) -> str:
 
 def iceberg_table(spine: str, layer: str, table: str) -> str:
     """The fully-qualified Iceberg table name, `<spine>.<layer>.<table>`."""
+    if not isinstance(table, str) or not table or "." in table:
+        raise NamingError("a table name is one non-empty component with no dot; got " + repr(table))
     return iceberg_namespace(spine, layer) + "." + table
 
 

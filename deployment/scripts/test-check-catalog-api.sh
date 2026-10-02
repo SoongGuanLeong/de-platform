@@ -3,8 +3,9 @@
 # Proves the catalog-API boundary check is load-bearing rather than decorative.
 #
 # It builds a throwaway copy of platform/src under /tmp, asserts the clean copy
-# passes, then adds a Polaris Management API call and asserts the check fails. A
-# check that survives a mutation is a check that asserts nothing.
+# passes, then adds a Polaris Management API path in three forms - a single
+# literal, a literal concatenation, and adjacent string literals - and asserts
+# each fails. A check that survives a mutation is a check that asserts nothing.
 #
 # The copy is removed with rm and rmdir rather than a recursive delete.
 set -euo pipefail
@@ -31,6 +32,10 @@ reset() {
   cp -r platform/src "${work}/platform/src"
 }
 
+# The banned path is assembled from two pieces for the same reason the check
+# assembles it: keeping the literal out of the source tree is cheap insurance.
+banned="api/"'management'
+
 reset
 if ! run; then
   echo "::error::the clean copy failed the catalog-API boundary check" >&2
@@ -38,17 +43,31 @@ if ! run; then
 fi
 printf 'clean copy passes\n'
 
-# The banned path is assembled from two pieces for the same reason the check
-# assembles it: this harness is not inside the scanned tree, but keeping the
-# literal out of the source tree is cheap insurance.
-banned="api/"'management'
 reset
-printf '\n\ndef call(token):\n    url = "http://polaris:8181/%s/v1/catalogs"\n    return url\n' \
+printf '\n\ndef call(token):\n    return "http://polaris:8181/%s/v1/catalogs"\n' \
   "${banned}" >> "${work}/platform/src/de_platform/catalog.py"
 if run; then
-  echo "::error::a Management API path in the shared core did not fail the check" >&2
+  echo "::error::a literal Management API path did not fail the check" >&2
   exit 1
 fi
-printf 'mutation caught: a Management API path in the shared core\n'
+printf 'mutation caught: a literal Management API path\n'
+
+reset
+printf '\n\ndef call(token):\n    return "/api/" + "management"\n' \
+  >> "${work}/platform/src/de_platform/catalog.py"
+if run; then
+  echo "::error::a concatenated Management API path did not fail the check" >&2
+  exit 1
+fi
+printf 'mutation caught: a concatenated Management API path\n'
+
+reset
+printf '\n\ndef call(token):\n    return "api/" "management"\n' \
+  >> "${work}/platform/src/de_platform/catalog.py"
+if run; then
+  echo "::error::an adjacent-literal Management API path did not fail the check" >&2
+  exit 1
+fi
+printf 'mutation caught: an adjacent-literal Management API path\n'
 
 printf 'the catalog-API boundary check is load-bearing\n'

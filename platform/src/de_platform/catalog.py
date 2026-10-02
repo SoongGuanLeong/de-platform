@@ -8,8 +8,9 @@ is only true while every catalog call is a REST call.
 
 Two mechanisms enforce it here:
 
-- The constructor refuses a base URL that is not an Iceberg REST base, so a
-  management endpoint cannot be passed in by accident.
+- The constructor refuses a base URL that names the Polaris Management API, so a
+  management endpoint cannot be passed in by accident. The REST base path itself
+  is configurable, because a catalog swap (ADR-0010) changes the URI.
 - Every request path is built from the REST base plus `/v1/...`, and the
   endpoints the client offers are the REST ones the config advertises. There is
   no method that builds a management path.
@@ -30,13 +31,17 @@ from collections.abc import Iterable
 
 from de_platform._http import Transport, urllib_transport
 
-# The Iceberg REST specification's base path on Polaris. The management API is a
-# different path, and naming it here is what lets the constructor refuse it.
-REST_PATH = "/api/catalog"
-# Assembled from two pieces so the literal does not appear in the source tree:
-# deployment/scripts/check-catalog-api.py fails on the Management path anywhere
-# under platform/src, and the guard is the one place that must name it.
-MANAGEMENT_PATH = "/api/" + "management"
+# The base path is configurable: Polaris serves the Iceberg REST API at
+# /api/catalog, and a Lakekeeper swap is a URI change (ADR-0010), so the guard
+# does not pin it. It refuses the one path that is definitely not the REST API,
+# Polaris's proprietary Management API.
+#
+# The prefix is held in a name rather than written as one literal, because
+# deployment/scripts/check-catalog-api.py fails on a management path assembled
+# from literals anywhere under platform/src, and this guard is the one place
+# that must name the path it refuses.
+_API_PREFIX = "/api"
+MANAGEMENT_API_PATH = _API_PREFIX + "/management"
 
 NAMESPACE_SEPARATOR = "%1F"
 
@@ -49,7 +54,7 @@ class CatalogError(RuntimeError):
 
 
 class ProprietaryApiError(ValueError):
-    """A base URL that is not the Iceberg REST specification's."""
+    """A base URL that names the Polaris Management API."""
 
 
 class NoSuchTableError(CatalogError):
@@ -57,20 +62,14 @@ class NoSuchTableError(CatalogError):
 
 
 def _rest_base(base_url: str) -> str:
-    """The Iceberg REST base, or a refusal naming why it is not one."""
+    """The catalog base URL, or a refusal if it names the Management API."""
     parts = urllib.parse.urlsplit(base_url)
-    if MANAGEMENT_PATH in parts.path:
+    if MANAGEMENT_API_PATH in parts.path:
         raise ProprietaryApiError(
-            "refusing a Polaris-proprietary management URL "
+            "refusing "
             + repr(base_url)
             + "; the platform reaches the catalog only through the Iceberg REST "
-            "specification (ADR-0010), whose base path is " + repr(REST_PATH)
-        )
-    # Anchored on the path's end rather than a substring: /api/catalog-admin and
-    # /api/catalogue both contain REST_PATH and are not the REST base.
-    if not parts.path.rstrip("/").endswith(REST_PATH):
-        raise ProprietaryApiError(
-            "refusing " + repr(base_url) + "; an Iceberg REST base URL ends with " + repr(REST_PATH)
+            "specification, never the Polaris Management API (ADR-0010)"
         )
     return base_url.rstrip("/")
 
@@ -141,19 +140,30 @@ class IcebergRestCatalog:
         return self.token
 
     def config(self) -> dict:
-        """The catalog's REST config, which names the prefix for later calls."""
+        """The catalog's REST config, which may name the prefix for later calls."""
         payload = self._request(
             "GET", "/v1/config?" + urllib.parse.urlencode({"warehouse": self.catalog})
         )
+        defaults = payload.get("defaults") if isinstance(payload, dict) else None
         overrides = payload.get("overrides") if isinstance(payload, dict) else None
+        prefix = None
+        if isinstance(defaults, dict) and isinstance(defaults.get("prefix"), str):
+            prefix = defaults["prefix"]
         if isinstance(overrides, dict) and isinstance(overrides.get("prefix"), str):
-            self._prefix = overrides["prefix"]
+            prefix = overrides["prefix"]
+        self._prefix = prefix
         return payload
 
     def _prefix_value(self) -> str:
+        """The resolved prefix, or an empty string when the catalog names none.
+
+        The Iceberg REST specification makes the prefix optional and does not
+        substitute the catalog name for a missing one: a catalog with no prefix
+        serves its namespaces at /v1/namespaces.
+        """
         if self._prefix is None:
             self.config()
-        return self._prefix or self.catalog
+        return self._prefix or ""
 
     def _namespace(self, namespace: Iterable[str]) -> str:
         parts = list(namespace)
@@ -162,7 +172,9 @@ class IcebergRestCatalog:
         return NAMESPACE_SEPARATOR.join(urllib.parse.quote(part, safe="") for part in parts)
 
     def _namespaces_path(self) -> str:
-        return "/v1/" + urllib.parse.quote(self._prefix_value(), safe="") + "/namespaces"
+        prefix = self._prefix_value()
+        segment = "/" + urllib.parse.quote(prefix, safe="") if prefix else ""
+        return "/v1" + segment + "/namespaces"
 
     def load_namespace(self, namespace: Iterable[str]) -> dict:
         return self._request("GET", self._namespaces_path() + "/" + self._namespace(namespace))

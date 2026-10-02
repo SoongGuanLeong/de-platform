@@ -40,9 +40,11 @@ def test_a_rest_base_url_is_accepted():
     assert client.base_url == REST
 
 
-def test_a_path_that_merely_contains_the_rest_path_is_refused():
-    with pytest.raises(catalog.ProprietaryApiError):
-        catalog.IcebergRestCatalog("http://polaris:8181/api/catalog-admin", catalog="de_platform")
+def test_a_custom_rest_base_path_is_accepted():
+    # A catalog swap (ADR-0010) changes the URI, so the REST base path is not
+    # pinned to Polaris's /api/catalog; only the Management API is refused.
+    client = catalog.IcebergRestCatalog("http://lakekeeper:8181/catalog", catalog="de_platform")
+    assert client.base_url == "http://lakekeeper:8181/catalog"
 
 
 def test_authenticate_posts_the_client_credentials_grant():
@@ -62,6 +64,42 @@ def test_config_asks_for_the_warehouse():
     client = catalog.IcebergRestCatalog(REST, catalog="de_platform", transport=recorder)
     assert client.config()["overrides"]["prefix"] == "de_platform"
     assert recorder.calls[0][1] == REST + "/v1/config?warehouse=de_platform"
+
+
+def test_the_defaults_prefix_is_used_when_overrides_names_none():
+    recorder = Recorder(
+        [
+            (200, {}, '{"defaults": {"prefix": "de_platform"}}'),
+            (200, {}, '{"namespace": ["commerce", "gold"], "properties": {}}'),
+        ]
+    )
+    client = catalog.IcebergRestCatalog(REST, catalog="de_platform", transport=recorder)
+    client.load_namespace(("commerce", "gold"))
+    assert recorder.calls[1][1] == REST + "/v1/de_platform/namespaces/commerce%1Fgold"
+
+
+def test_the_overrides_prefix_wins_over_defaults():
+    recorder = Recorder(
+        [
+            (200, {}, '{"defaults": {"prefix": "a"}, "overrides": {"prefix": "b"}}'),
+            (200, {}, '{"namespace": ["commerce", "gold"], "properties": {}}'),
+        ]
+    )
+    client = catalog.IcebergRestCatalog(REST, catalog="de_platform", transport=recorder)
+    client.load_namespace(("commerce", "gold"))
+    assert recorder.calls[1][1] == REST + "/v1/b/namespaces/commerce%1Fgold"
+
+
+def test_a_catalog_with_no_prefix_serves_namespaces_at_the_root():
+    recorder = Recorder(
+        [
+            (200, {}, "{}"),
+            (200, {}, '{"namespace": ["commerce", "gold"], "properties": {}}'),
+        ]
+    )
+    client = catalog.IcebergRestCatalog(REST, catalog="de_platform", transport=recorder)
+    client.load_namespace(("commerce", "gold"))
+    assert recorder.calls[1][1] == REST + "/v1/namespaces/commerce%1Fgold"
 
 
 def test_load_namespace_uses_the_unit_separator():

@@ -27,6 +27,13 @@ def test_iceberg_table_is_spine_layer_table():
     )
 
 
+def test_iceberg_table_refuses_a_dotted_or_empty_component():
+    with pytest.raises(naming.NamingError):
+        naming.iceberg_table("commerce", "gold", "fact.order_line")
+    with pytest.raises(naming.NamingError):
+        naming.iceberg_table("commerce", "gold", "")
+
+
 def test_parse_table_round_trips():
     assert naming.parse_table("commerce.gold.fact_lineitem") == (
         "commerce",
