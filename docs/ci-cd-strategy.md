@@ -86,7 +86,7 @@ Eleven jobs plus the aggregator. They are grouped by toolchain so each job pays 
 |---|---|---|---|---|
 | 0 | `changes` | ubuntu-latest | computes the path-filter outputs, and proves the map selects the right jobs | always |
 | 1 | `secrets` | ubuntu-latest | `gitleaks detect` over the full history, pinned by version and SHA256 | always |
-| 2 | `boundaries` | ubuntu-latest | `ruff`; the packaging graph; `import-linter` rules 1 to 4; the notebook path check (rule 5); the YAML single-entry-point check | always |
+| 2 | `boundaries` | ubuntu-latest | `ruff`; the packaging graph; `import-linter` rules 1 to 4; the notebook path check (rule 5); the YAML single-entry-point check; the catalog-API boundary check | always |
 | 3 | `governance` | ubuntu-latest | contract-file validation and the breaking-change check; the completion-bar register validator; the budget validator; the cross-path agreement validator; the layout-agreement check | always |
 | 4 | `compose` | ubuntu-latest | the compose-subset lint; every declared limit resolving against `deployment/budgets/profiles.yaml`; every profile peak recomputed from its ceilings; every image pinned by the digest `deployment/tools.lock` holds; every JVM service's declared JDK and every ClickHouse memory XML agreeing with its register ceiling; and a mutation test proving the lint is load-bearing | always |
 | 5 | `lint` | ubuntu-latest | `sqlfluff`; `yamllint`; `actionlint` | always |
