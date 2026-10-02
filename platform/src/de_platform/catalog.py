@@ -25,10 +25,10 @@ and so a caller can supply its own retry or instrumentation.
 from __future__ import annotations
 
 import json
-import urllib.error
 import urllib.parse
-import urllib.request
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
+
+from de_platform._http import Transport, urllib_transport
 
 # The Iceberg REST specification's base path on Polaris. The management API is a
 # different path, and naming it here is what lets the constructor refuse it.
@@ -43,8 +43,6 @@ NAMESPACE_SEPARATOR = "%1F"
 # The scope a catalog client asks for when it authenticates as a principal.
 DEFAULT_SCOPE = "PRINCIPAL_ROLE:ALL"
 
-Transport = Callable[[str, str, dict, str | None], tuple[int, dict, str]]
-
 
 class CatalogError(RuntimeError):
     """A catalog call that did not succeed."""
@@ -58,16 +56,6 @@ class NoSuchTableError(CatalogError):
     """The REST specification's NoSuchTableException."""
 
 
-def _urllib_transport(method: str, url: str, headers: dict, body: str | None):
-    data = body.encode("utf-8") if body is not None else None
-    request = urllib.request.Request(url, data=data, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return response.status, dict(response.headers), response.read().decode("utf-8")
-    except urllib.error.HTTPError as error:
-        return error.code, dict(error.headers), error.read().decode("utf-8")
-
-
 def _rest_base(base_url: str) -> str:
     """The Iceberg REST base, or a refusal naming why it is not one."""
     parts = urllib.parse.urlsplit(base_url)
@@ -78,9 +66,11 @@ def _rest_base(base_url: str) -> str:
             + "; the platform reaches the catalog only through the Iceberg REST "
             "specification (ADR-0010), whose base path is " + repr(REST_PATH)
         )
-    if REST_PATH not in parts.path:
+    # Anchored on the path's end rather than a substring: /api/catalog-admin and
+    # /api/catalogue both contain REST_PATH and are not the REST base.
+    if not parts.path.rstrip("/").endswith(REST_PATH):
         raise ProprietaryApiError(
-            "refusing " + repr(base_url) + "; an Iceberg REST base URL contains " + repr(REST_PATH)
+            "refusing " + repr(base_url) + "; an Iceberg REST base URL ends with " + repr(REST_PATH)
         )
     return base_url.rstrip("/")
 
@@ -102,7 +92,7 @@ class IcebergRestCatalog:
         self.base_url = _rest_base(base_url)
         self.catalog = catalog
         self.token = token
-        self._transport = transport or _urllib_transport
+        self._transport = transport or urllib_transport
         self._prefix: str | None = None
 
     # -- transport -----------------------------------------------------------
@@ -177,8 +167,8 @@ class IcebergRestCatalog:
     def load_namespace(self, namespace: Iterable[str]) -> dict:
         return self._request("GET", self._namespaces_path() + "/" + self._namespace(namespace))
 
-    def create_namespace(self, namespace: Iterable[str], properties: dict | None = None) -> dict:
-        body = json.dumps({"namespace": list(namespace), "properties": properties or {}})
+    def create_namespace(self, namespace: Iterable[str]) -> dict:
+        body = json.dumps({"namespace": list(namespace), "properties": {}})
         return self._request("POST", self._namespaces_path(), body)
 
     def load_table(self, namespace: Iterable[str], table: str) -> dict:
@@ -190,16 +180,3 @@ class IcebergRestCatalog:
             + urllib.parse.quote(table, safe="")
         )
         return self._request("GET", path)
-
-    def create_table(
-        self,
-        namespace: Iterable[str],
-        name: str,
-        schema: dict,
-        location: str | None = None,
-    ) -> dict:
-        body: dict = {"name": name, "schema": schema}
-        if location is not None:
-            body["location"] = location
-        path = self._namespaces_path() + "/" + self._namespace(namespace) + "/tables"
-        return self._request("POST", path, json.dumps(body))

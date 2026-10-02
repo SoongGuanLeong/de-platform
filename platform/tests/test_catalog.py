@@ -40,6 +40,11 @@ def test_a_rest_base_url_is_accepted():
     assert client.base_url == REST
 
 
+def test_a_path_that_merely_contains_the_rest_path_is_refused():
+    with pytest.raises(catalog.ProprietaryApiError):
+        catalog.IcebergRestCatalog("http://polaris:8181/api/catalog-admin", catalog="de_platform")
+
+
 def test_authenticate_posts_the_client_credentials_grant():
     recorder = Recorder([(200, {}, '{"access_token": "t0ken", "token_type": "bearer"}')])
     client = catalog.IcebergRestCatalog(REST, catalog="de_platform", transport=recorder)

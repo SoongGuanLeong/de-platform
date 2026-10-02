@@ -21,11 +21,11 @@ Marquez read-back is a registered limitation rather than an unstated one.
 from __future__ import annotations
 
 import json
-import urllib.error
-import urllib.request
 import uuid
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 from dataclasses import dataclass
+
+from de_platform._http import Transport, urllib_transport
 
 # The repository that produces the event, per the OpenLineage spec's producer
 # field: a URI naming the producer, not the consumer.
@@ -41,21 +41,9 @@ DEFAULT_NAMESPACE = "de-platform"
 # once it lands in Phase 7; a run overrides it.
 DEFAULT_ENDPOINT = "http://marquez:5000/api/v1/lineage"
 
-Transport = Callable[[str, str, dict, str | None], tuple[int, dict, str]]
-
 
 class LineageError(RuntimeError):
     """An emission that the endpoint did not accept."""
-
-
-def _urllib_transport(method: str, url: str, headers: dict, body: str | None):
-    data = body.encode("utf-8") if body is not None else None
-    request = urllib.request.Request(url, data=data, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return response.status, dict(response.headers), response.read().decode("utf-8")
-    except urllib.error.HTTPError as error:
-        return error.code, dict(error.headers), error.read().decode("utf-8")
 
 
 @dataclass(frozen=True)
@@ -75,16 +63,17 @@ def dataset(config: LineageConfig, name: str) -> dict:
 def build_run_event(
     config: LineageConfig,
     job_name: str,
+    event_time: str,
     run_id: str | None = None,
-    event_time: str | None = None,
     inputs: Iterable[str] = (),
     outputs: Iterable[str] = (),
     event_type: str = "COMPLETE",
 ) -> dict:
     """Build one OpenLineage run event.
 
-    `event_time` is an ISO-8601 UTC instant; it is passed in rather than read
-    from the clock so an event is reproducible.
+    `event_time` is a required ISO-8601 UTC instant, because the schema the
+    event declares requires one: it is passed in rather than read from the clock
+    so an event is reproducible, and it has no default that could emit a null.
     """
     event: dict = {
         "eventType": event_type,
@@ -104,7 +93,7 @@ class OpenLineageEmitter:
 
     def __init__(self, config: LineageConfig, transport: Transport | None = None) -> None:
         self.config = config
-        self._transport = transport or _urllib_transport
+        self._transport = transport or urllib_transport
 
     def emit(self, event: dict) -> str:
         """Emit an event and return its run id."""

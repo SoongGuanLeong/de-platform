@@ -89,10 +89,3 @@ def cdc_topic(server: str, schema: str, table: str) -> str:
 def cdc_subject(topic: str) -> str:
     """The Confluent subject for a CDC topic's value schema."""
     return topic + "-value"
-
-
-def serving_view(name: str, version: int) -> str:
-    """A versioned consumer-facing serving view name."""
-    if version < 1:
-        raise NamingError("a view version starts at 1; got " + repr(version))
-    return name + "_v" + str(version)

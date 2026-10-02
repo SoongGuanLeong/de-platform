@@ -46,20 +46,20 @@ class Column:
 
 @dataclass(frozen=True)
 class Contract:
-    """A gold contract, as the platform core reads it."""
+    """A gold contract, as the platform core reads it.
+
+    `schema` is the column list in declaration order. The contract file names
+    the field `columns`; the loader is what maps the file's field to the schema
+    the rest of the platform reads.
+    """
 
     table: str
     spine: str
     layer: str
     grain: str
     contract_version: str
-    columns: tuple[Column, ...]
+    schema: tuple[Column, ...]
     business_keys: tuple[str, ...]
-
-    @property
-    def schema(self) -> tuple[Column, ...]:
-        """The contract's schema: its columns, in declaration order."""
-        return self.columns
 
 
 def _require_string(mapping: Mapping[str, Any], field: str) -> str:
@@ -129,7 +129,7 @@ def contract_from_mapping(mapping: Mapping[str, Any]) -> Contract:
         layer=layer,
         grain=grain,
         contract_version=contract_version,
-        columns=columns,
+        schema=columns,
         business_keys=tuple(raw_keys),
     )
 

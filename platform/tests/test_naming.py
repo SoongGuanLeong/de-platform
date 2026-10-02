@@ -57,7 +57,3 @@ def test_cdc_topic_and_subject():
     topic = naming.cdc_topic("tpc-c", "public", "order_line")
     assert topic == "tpc-c.public.order_line"
     assert naming.cdc_subject(topic) == "tpc-c.public.order_line-value"
-
-
-def test_serving_view_is_versioned():
-    assert naming.serving_view("fact_order_line", 1) == "fact_order_line_v1"
