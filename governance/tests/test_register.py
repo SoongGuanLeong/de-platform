@@ -192,6 +192,23 @@ def test_a_budget_reference_must_resolve_to_a_committed_budget(tree: Path) -> No
         "pending rather than committed" in message for message in register.validate(str(tree))
     )
 
+    # The valid case cites a commit that resolves in this checkout. The shipped
+    # budget names a historical commit, which a shallow clone does not carry, so
+    # the copy is re-pointed at HEAD: the contract is that a resolvable commit
+    # passes, not that one particular sha is present.
+    head = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    budgets_path = tree / "docs" / "budgets.yaml"
+    budgets = yaml.safe_load(budgets_path.read_text(encoding="utf-8"))
+    for entry in budgets["budgets"]:
+        if entry["id"] == "m4-cross-path-tolerance":
+            entry["declared_commit"] = head
+    budgets_path.write_text(yaml.safe_dump(budgets, sort_keys=False), encoding="utf-8")
+
     shutil.rmtree(tree / "docs" / "evidence")
     cite(tree, dict(EVIDENCE_ITEM, budget_ref="m4-cross-path-tolerance"))
     assert register.validate(str(tree)) == []
