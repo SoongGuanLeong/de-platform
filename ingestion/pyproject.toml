@@ -9,7 +9,7 @@ requires-python = ">=3.12"
 # needs). The [binary] extra pulls a wheel so no compiler is needed. uv.lock
 # pins the resolved version; the reconsideration trigger is a PostgreSQL major
 # that psycopg 3 does not support.
-dependencies = ["platform", "governance", "psycopg[binary]"]
+dependencies = ["platform", "governance", "psycopg[binary]==3.3.6"]
 
 [tool.uv.sources]
 platform = { workspace = true }

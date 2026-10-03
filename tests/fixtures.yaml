@@ -16,12 +16,13 @@ fixtures:
     generator: ingestion/src/de_ingestion/commerce/tpcc/population.py
     seed: 20261003
     checksum:
-      algorithm: sha256
-      value: null
+      algorithm: n/a
+      value: none
       note: >-
-        no fixture bytes are committed, so there is no file to checksum; the
-        generator is pinned by the seed above and its determinism is asserted by
-        ingestion/tests/test_tpcc_population.py
+        the fixture is a live PostgreSQL database populated by the driver, not a
+        committed or generated file, so there is no byte artifact to checksum.
+        The generator is pinned by the seed above and its determinism is asserted
+        by ingestion/tests/test_tpcc_population.py
     declared_volume: >-
       W=100. The closed-form population model yields ORDER_LINE at about 30
       million rows (the dataset selection's own figure) and about 50 million

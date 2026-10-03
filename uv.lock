@@ -200,7 +200,7 @@ dependencies = [
 requires-dist = [
     { name = "governance", editable = "governance" },
     { name = "platform", editable = "platform" },
-    { name = "psycopg", extras = ["binary"] },
+    { name = "psycopg", extras = ["binary"], specifier = "==3.3.6" },
 ]
 
 [[package]]
