@@ -3,7 +3,13 @@ name = "ingestion"
 version = "0.0.0"
 description = "Ingestion for both spines: the Debezium connector, the OLTP DDL and load, the RIPE Atlas collector and the ONSPD loader."
 requires-python = ">=3.12"
-dependencies = ["platform", "governance"]
+# psycopg 3 is the PostgreSQL client the TPC-C driver writes through. It is
+# chosen over asyncpg (an async driver, while the driver is synchronous) and
+# pg8000 (pure Python, but without the COPY protocol support the bulk load
+# needs). The [binary] extra pulls a wheel so no compiler is needed. uv.lock
+# pins the resolved version; the reconsideration trigger is a PostgreSQL major
+# that psycopg 3 does not support.
+dependencies = ["platform", "governance", "psycopg[binary]"]
 
 [tool.uv.sources]
 platform = { workspace = true }
