@@ -23,13 +23,13 @@ of OpenTofu over Terraform.
 
 ## Layout
 
-- `modules/` - `network`, `storage`, `iam`, `security`, `rds` and `secrets`, each
+- `modules/` - `network`, `storage`, `iam`, `security`, `rds` and `secretsmanager`, each
   called once from the root.
 - `policies/` - the IAM role topology as data, so the boundary is reviewable as
   a diff: `iam.json` holds the node role, one policy per component and the
   vending role; `secrets.json` is the secret inventory with its rotation class;
   the two trust templates are the only trust policies.
-- `secrets/secret-projection.yaml.tmpl` - the Secrets Store CSI projection,
+- `templates/secret-projection.yaml.tmpl` - the Secrets Store CSI projection,
   setting `filePermission: "0400"` explicitly because the driver's default is
   0644 ([the security model](../docs/security-model.md) section 2.6).
 - `.terraform.lock.hcl` - the committed lock file, pinned to the AWS provider
