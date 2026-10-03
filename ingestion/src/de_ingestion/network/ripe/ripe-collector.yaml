@@ -1,0 +1,36 @@
+# The RIPE Atlas collector's declared configuration (issue #48).
+#
+# The subscription set is declared here rather than discovered at runtime, so a
+# reviewer can read exactly which measurements the collector subscribes to. The
+# two measurements are public, ongoing ping measurements (verified against
+# https://atlas.ripe.net/api/v2/measurements/<id>/ on 2026-10-03).
+#
+# The connection limits are RIPE Atlas's documented per-client-IP cap: 16
+# concurrent WebSockets, with the explicit advice to multiplex subscriptions
+# onto one socket rather than open more (docs/research/01b-datasets-event-streaming.md
+# section 1). The collector therefore declares one long-lived connection and
+# caps the subscriptions it multiplexes onto it.
+#
+# RIPE Atlas publishes no REST request rate for public results, so the REST
+# interval is the collector's own politeness budget rather than a publisher
+# limit, and is labelled as one.
+topic: network.ripe.results
+
+websocket:
+  url: wss://atlas-stream.ripe.net/stream/
+  client_id: de-platform-portfolio
+  max_connections_per_ip: 16
+  connections: 1
+  max_subscriptions_per_connection: 16
+
+rest:
+  base_url: https://atlas.ripe.net/api/v2
+  min_interval_seconds: 1.0
+  chunk_seconds: 300
+  backfill_window_seconds: 900
+
+subscriptions:
+  - stream_type: result
+    msm: 1001
+  - stream_type: result
+    msm: 38813297
