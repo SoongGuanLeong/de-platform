@@ -6,10 +6,10 @@ matrix_rows:
 claim: The keyed LSN operator holds the maximum source.lsn seen per key and forwards a record only when its LSN is not strictly less than that maximum.
 proves: signal
 command: bash deployment/scripts/run-java-tests.sh
-profile: streaming
+profile: smoke
 commit: c3cc39e
 date: 2026-10-03
-mutation_note: Removed the "if (seen != null && lsn < seen) return;" staleness comparison from LsnMaxOperator.processElement; LsnMaxOperatorTest then failed 3 of its 4 tests.
+mutation_note: Removed the "if (seen != null && lsn < seen) return;" staleness comparison from LsnMaxOperator.processElement; in LsnMaxOperatorTest the tests holdsTheMaximumLsnPerKeyAndDropsStrictlyStaleRecords, holdsTheMaximumRatherThanTheLastSeenLsn and keysAreIndependent then failed (3 of 4), under the command "cd streaming && ./gradlew :commerce:test --no-daemon --console=plain --rerun-tasks".
 artifact: docs/evidence/flink-streaming/lsn-operator-unit-test/raw/mutation-removed-staleness-rule.txt
 ---
 
@@ -30,10 +30,10 @@ Four behaviours are asserted, all per key:
 
 ## The mutation
 
-The `mutation_note` records what was removed. The staleness comparison `if (seen != null && lsn < seen) return;` was deleted from `LsnMaxOperator.processElement`, the operator was rebuilt and the suite re-run with `--rerun-tasks`, and 3 of the 4 tests failed. The raw output is committed at the `artifact` path. The behaviour is therefore falsifiable in the register's sense (docs/completion-bar.md section 3, core item 2): removing it fails the test, and the test is cited by a command that resolves.
+The `mutation_note` records what was removed, which tests failed, and the exact command. The staleness comparison `if (seen != null && lsn < seen) return;` was deleted from `LsnMaxOperator.processElement`, the operator was rebuilt and the suite re-run with `--rerun-tasks`, and 3 of the 4 tests failed. The raw output is committed at the `artifact` path. The behaviour is therefore falsifiable in the register's sense (docs/completion-bar.md section 3, core item 2): removing it fails the test, and the test is cited by a command that resolves.
 
-## Level and the profile field
+## Level
 
-This is a unit test (docs/testing-strategy.md section 2): it runs against the distribution's own code with no container and no network, so it may carry a `signal` item and may not carry a `behaviour` item. The CI java job runs it on every change under `streaming/` (docs/ci-cd-strategy.md section 5), which is what makes the cited command resolve.
+This is a unit test (docs/testing-strategy.md section 2): it runs against the distribution's own code with no container and no network, so its strongest claim is `signal` and it may not carry a `behaviour` item. It belongs to the CI-checkable set, which completion-bar section 8 places under the `smoke` profile, and testing-strategy section 6 runs the per-distribution unit tests in CI. The CI java job runs it on every change under `streaming/` (docs/ci-cd-strategy.md section 5), which is what makes the cited command resolve.
 
-The item is produced by the CI java job, not by a profile run, and the register schema has no profile value for a CI-only test. The `profile` field names the streaming path the operator belongs to. This is a recorded limitation of the evidence schema rather than a claim that a `streaming`-profile run produced the artifact; the claim is `signal`, so the profile is not load-bearing for it. The test that would close the gap is a `streaming`-profile run of the CDC job at Phase 5, which is the point at which the class's representative evidence item and its profile-scoped behaviour claims land.
+This is a signal-level item. The class's representative behaviour item and its mutation note land with the streaming path in Phase 5, where the CDC ingestion job supplies a `streaming`-profile behaviour claim.
