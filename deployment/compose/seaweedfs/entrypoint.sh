@@ -27,10 +27,21 @@ chmod 600 /tmp/s3-config.json
 # WebDAV are disabled: an unauthenticated catalog inside the object store would
 # let a client resolve table metadata without going through Polaris, routing
 # around the authorisation seam the platform depends on (ADR-0004, ADR-0010).
+#
+# Two settings bound the store to its 256 MiB ceiling in the batch profile so
+# the SF1 TPC-H bronze load fits rather than being OOM-killed (ticket #34,
+# docs/local-development.md section 11). -volume.index=leveldb moves the volume
+# server's needle index off the heap onto disk; with the default in-memory index
+# the load measured 514 MiB anonymous. GOMEMLIMIT is the Go runtime's soft
+# memory limit, which makes the collector run before the cgroup ceiling rather
+# than after the heap has already overshot it. With both, the load peaks at
+# 171.9 MiB anonymous and is not OOM-killed.
+export GOMEMLIMIT=192MiB
 exec /entrypoint.sh mini \
   -dir=/data \
   -s3.config=/tmp/s3-config.json \
   -admin.port=12646 \
+  -volume.index=leveldb \
   -s3.port.iceberg=0 \
   -s3.port.lance=0 \
   -webdav=false
