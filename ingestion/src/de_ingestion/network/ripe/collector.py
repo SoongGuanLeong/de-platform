@@ -5,6 +5,17 @@ onto it (the publisher's documented advice, research 01b section 1), produces
 each result to the configured topic through the shared Producer, advances the
 persisted timepoint cursor, and backs off before reconnecting after a drop. The
 transport is injected, so the loop is exercised without the live stream.
+
+Documented limitation, with the test that would close it:
+
+- The persisted `timepoint` cursor resumes the REST backfill, not the live
+  subscription. A WebSocket subscription is per-connection and the RIPE stream
+  is at-most-once with no resume token, so `Collector.run` re-sends the declared
+  subscription set on every (re)connect. What a restart does not re-fetch is the
+  backfill window: `BackfillProducer.run` starts each measurement from the cursor
+  (ADR-0014). The test that would close this is a collector test asserting that a
+  reconnect resumes the live stream from a persisted stream position rather than
+  re-subscribing; the publisher does not currently offer such a position.
 """
 
 from __future__ import annotations
