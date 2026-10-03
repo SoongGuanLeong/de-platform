@@ -23,13 +23,15 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # shared core and depends on nothing. governance/ is the framework a path may
 # import, so ingestion and batch may depend on it (rule 4, second clause).
 # orchestration/ is the composition root and may import both spines. pyyaml is
-# governance's, for the register and budget validator, and psycopg is ingestion's,
-# for the TPC-C driver's COPY load and transaction execution; listing each here
-# rather than relaxing the comparison keeps every declared dependency a reviewed
-# addition.
+# governance's, for the register and budget validator. ingestion's three
+# third-party packages are the TPC-C driver's psycopg (the COPY load and
+# transaction execution), the RIPE Atlas collector's websockets (the live stream)
+# and kafka-python (the producer the live subscription and the REST backfill both
+# write through). Listing each here rather than relaxing the comparison keeps
+# every declared dependency a reviewed addition.
 PERMITTED: dict[str, frozenset[str]] = {
     "platform": frozenset(),
-    "ingestion": frozenset({"platform", "governance", "psycopg"}),
+    "ingestion": frozenset({"platform", "governance", "psycopg", "websockets", "kafka-python"}),
     "batch": frozenset({"platform", "governance"}),
     "governance": frozenset({"platform", "pyyaml"}),
     "orchestration": frozenset({"platform", "ingestion", "batch", "governance"}),

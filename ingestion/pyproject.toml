@@ -9,7 +9,20 @@ requires-python = ">=3.12"
 # needs). The [binary] extra pulls a wheel so no compiler is needed. uv.lock
 # pins the resolved version; the reconsideration trigger is a PostgreSQL major
 # that psycopg 3 does not support.
-dependencies = ["platform", "governance", "psycopg[binary]"]
+#
+# websockets and kafka-python are the RIPE Atlas collector's runtime
+# dependencies, pinned like every other toolchain version
+# (docs/ci-cd-strategy.md section 9). websockets is the live stream client;
+# kafka-python is the producer both the live subscription and the REST backfill
+# write through, so the backfill is a producer into the same topic rather than a
+# second writer (ADR-0014).
+dependencies = [
+    "platform",
+    "governance",
+    "psycopg[binary]",
+    "websockets==15.0.1",
+    "kafka-python==3.0.11",
+]
 
 [tool.uv.sources]
 platform = { workspace = true }

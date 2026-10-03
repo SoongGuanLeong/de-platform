@@ -65,6 +65,14 @@ IMAGE_prometheus="docker.io/prom/prometheus:v3.14.0@sha256:5ce7540c3c00ef4ab0c9d
 IMAGE_grafana="docker.io/grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0"
 IMAGE_alertmanager="docker.io/prom/alertmanager:v0.34.1@sha256:e9733bafb1bdef9b00e25a21f8f99dc26a22224bf16641ad754d1649f4c3357a"
 
+# The base image the platform-authored Python images build on (issue #48). It
+# is pinned by the digest of its multi-arch index, so one reference resolves on
+# the x86_64 host and on a Graviton node. A platform-authored service stays in
+# UNPINNED_BUILT_SERVICES rather than PYTHON_SERVICES because the compose lint
+# exempts a built service from the digest pin it cannot have and classifies a
+# service in exactly one list; the Dockerfile pins this base inline.
+IMAGE_python="docker.io/library/python:3.12-slim@sha256:6b1f85a08c199d29d5b6d71ab9c27bd5b3b393492e01216a15758ff69c4be8b8"
+
 # The compose services that run a JVM image, and the JDK each one's image carries.
 #
 # Research 03 recommended pinning every JVM image to JDK 17. Three of the images
@@ -111,3 +119,19 @@ NATIVE_SERVICES="postgres seaweedfs clickhouse prometheus grafana alertmanager"
 # container set is stated in one place and the reason each is unpinned is visible
 # rather than inferred from an absence.
 UNPINNED_BUILT_SERVICES="dagster-webserver dagster-daemon dagster-user-code ripe-collector"
+
+# ---------------------------------------------------------------------------
+# The OpenTofu static checks (issue #74)
+# ---------------------------------------------------------------------------
+# OpenTofu 1.12.0 is the pinned CLI in the technology table
+# (docs/cloud-architecture.md section 3), so the check installs that version
+# rather than the newest release. tflint is the Terraform-only provider linter
+# chosen in docs/ci-cd-strategy.md section 10, and the AWS ruleset is pinned with
+# it so a ruleset update cannot change the check without a diff. All three are
+# fetched by version plus SHA256 and verified before use.
+TOFU_VERSION="1.12.0"
+TOFU_LINUX_AMD64_SHA256="8d7650fd42b6d790f9f747604393ccd0a9035376bccc4f1688b905d7c5bb1137"
+
+TFLINT_VERSION="0.64.0"
+TFLINT_LINUX_AMD64_SHA256="cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537"
+TFLINT_AWS_RULESET_VERSION="0.49.0"

@@ -39,3 +39,22 @@ fixtures:
         path was run at W=10. The test that closes the gap is
         tests/batch/test_tpcc_driver.py with TPCC_TEST_WAREHOUSES=100 under the
         batch profile on a tier-1 host.
+
+  - name: onspd-may-2026-subset
+    source: >-
+      ONS Postcode Directory (May 2026), hosted table, ONS Geography.
+      https://open-geography-portalx-ons.hub.arcgis.com/datasets/ons::ons-postcode-directory-may-2026
+    generator: ingestion/scripts/fetch_onspd_fixture.py
+    checksum:
+      algorithm: sha256
+      value: da821e03285994a9e63e5d6c352ac9bb09a83ae2925c6a5bfc70780e6699ecc3
+    declared_volume: >-
+      the full release is 235 MB, approximately 2.7 million postcodes and 137
+      fields; the hosted table carries 54 of those fields
+    reduced: >-
+      a bounded subset of 920 rows across four documented queries: BT postcodes
+      (to exercise the licence exclusion), terminated postcodes (the SCD2
+      interval), straddling postcodes (the bridge's many-to-many) and plain live
+      postcodes
+    volume_dependent: false
+    owner: ingestion
