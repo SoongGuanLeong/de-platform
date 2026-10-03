@@ -256,7 +256,19 @@ def scan(root: Path) -> list[str]:
         "contains(role.arms, var.arm)" in (tofu / "locals.tf").read_text(),
     )
 
-    # 11. The deployment check is the real one, not the stub.
+    # 11. No LocalStack anywhere in the modules: no endpoint override and no
+    # localstack reference in any HCL file (docs/cloud-architecture.md section 7).
+    hcl_files = list(tofu.rglob("*.tf")) + list(tofu.rglob("*.tfvars")) + list(tofu.rglob("*.hcl"))
+    localstack = [str(p) for p in hcl_files if "localstack" in p.read_text().lower()]
+    failures.check(
+        "no module references LocalStack", not localstack, "found in " + ", ".join(localstack)
+    )
+    failures.check(
+        "the provider sets no endpoint override",
+        "endpoints" not in (tofu / "providers.tf").read_text(),
+    )
+
+    # 12. The deployment check is the real one, not the stub.
     workflow = (root / ".github" / "workflows" / "ci.yml").read_text()
     failures.check("CI runs check-tofu.sh", "check-tofu.sh" in workflow)
     failures.check(
