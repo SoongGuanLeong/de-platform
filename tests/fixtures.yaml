@@ -41,11 +41,13 @@ fixtures:
       committed and the generator is what a run must reproduce
     declared_volume: SF100
     reduced: >-
-      SF1 is the correctness slice; the Phase 1 bronze load is carried out at
-      SF10, the volume the run window held (docs/implementation-roadmap.md
-      section 8)
+      SF1 is the correctness slice. The Phase 1 bronze load is blocked under the
+      batch profile because its SeaweedFS ceiling (256 MiB) is OOM-killed
+      partway through; the load completes with the ceiling raised to 1024 MiB
+      (docs/local-development.md section 11). SF100 is the Phase 3 declared
+      volume
     volume_dependent: true
-    phase_1_run_volume: SF10
+    phase_1_run_volume: SF1
     tables:
       - region
       - nation
