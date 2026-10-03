@@ -1,37 +1,41 @@
 # The fixture manifest (docs/testing-strategy.md section 4).
 #
-# No fixture bytes are committed. Every entry names the generator that produced
-# the fixture, the volume it was produced at, and the checksum of the generator
-# archive, so a fixture cannot drift from its generator silently and a run can
-# declare which generator produced the data (the TPC-H licence position,
-# docs/dataset-selection.md section 10).
-#
-# The checksum is of the downloaded generator archive, not of the generated
-# data: the data is not committed, and the generator is what a run must
-# reproduce. The declared volume is the volume a volume-dependent claim is made
-# at; the reduced slice is the correctness slice the testing strategy fixes.
+# No fixture bytes are committed. Each entry names the source, the pinned
+# generator, the checksum of the generated file (or of the pinned generator
+# archive where the generated data is too large to commit), the declared volume
+# and the reduction. A fixture may be reduced only when the evidence item labels
+# the reduction and the claim is not volume-dependent.
 
-tpch:
-  source: TPC-H v3.0.1 (dbgen 2.14.0 C source)
-  generator: dbgen, built from source by de_batch.commerce.tpch.dbgen
-  generator_url: https://codeload.github.com/electrum/tpch-dbgen/tar.gz/32f1c1b92d1664dba542e927d23d86ffa57aa253
-  generator_sha256: 01d8a4fa0fff4be83a9f43dbdc5a69f560d34f5ff0b4dbff1fc3a5320baf6318
-  declared_volume: SF100
-  reduced_slice: SF1
-  # The volume the Phase 1 bronze load was actually run at. SF100 is the
-  # declared volume and is not reached until Phase 3, where the TPC-H batch
-  # assets at the declared volume are the spark-batch representative; Phase 1
-  # permits a reduced volume, so the load is verified at SF10, the volume the
-  # Phase 1 run window held (docs/implementation-roadmap.md section 8). It is
-  # recorded so a claim made from the run is labelled with the volume it was
-  # made at.
-  phase_1_run_volume: SF10
-  tables:
-    - region
-    - nation
-    - part
-    - supplier
-    - partsupp
-    - customer
-    - orders
-    - lineitem
+version: 1
+
+fixtures:
+
+  - name: tpch
+    source: TPC-H v3.0.1 (dbgen 2.14.0 C source)
+    generator: dbgen, built from source by de_batch.commerce.tpch.dbgen
+    generator_url: >-
+      https://codeload.github.com/electrum/tpch-dbgen/tar.gz/32f1c1b92d1664dba542e927d23d86ffa57aa253
+    checksum:
+      algorithm: sha256
+      value: 01d8a4fa0fff4be83a9f43dbdc5a69f560d34f5ff0b4dbff1fc3a5320baf6318
+    checksum_of: >-
+      the pinned generator source archive, because the generated data is not
+      committed and the generator is what a run must reproduce
+    declared_volume: SF100
+    reduced: >-
+      SF1 is the correctness slice, run under the declared batch profile. The
+      profile's SeaweedFS ceiling (256 MiB) carries it with the store's volume
+      index on disk and a bounded Go heap (docs/local-development.md section
+      11). SF100 is the Phase 3 declared volume
+    volume_dependent: true
+    phase_1_run_volume: SF1
+    tables:
+      - region
+      - nation
+      - part
+      - supplier
+      - partsupp
+      - customer
+      - orders
+      - lineitem
+    owner: batch

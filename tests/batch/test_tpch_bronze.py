@@ -9,6 +9,15 @@ Two acceptance criteria are checked here that the load's own assertion cannot:
 that a second run leaves every count unchanged, and that the throughput figure
 the run prints is labelled a TPC-derived result rather than a TPC Benchmark
 Result.
+
+The load fits the batch profile's declared SeaweedFS ceiling (256 MiB). The
+store's in-memory needle index is what did not: it pushed the SF1 load to a
+measured 514 MiB anonymous and 337 MiB page cache, and the store was OOM-killed
+partway through. Two bounded settings in the profile's SeaweedFS entrypoint
+carry it instead - the volume index is disk-backed (-volume.index=leveldb) and
+the Go heap carries a soft limit (GOMEMLIMIT=192MiB) - and the same load then
+completes with a 171.9 MiB anonymous peak, every row count matching the flat
+files. The measurement is in docs/local-development.md section 11.
 """
 
 from __future__ import annotations

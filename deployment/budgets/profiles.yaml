@@ -230,6 +230,25 @@ documented_default_overrides:
     documented: "spark.driver.memory=1g and spark.executor.memory=1g with a 0.10 overhead factor, 2252.8 MiB for a driver plus one executor"
     override: "spark-submit --master local[3] with spark.driver.memory=1536m"
     reason: Local mode puts driver and executor in one JVM, which fits the 2048 MiB ceiling where a separate executor would not.
+  - service: seaweedfs
+    documented: >-
+      the volume server's needle index defaults to -volume.index=memory, an
+      in-memory map, and the Go runtime has no heap limit, so it targets twice
+      the live heap before collecting
+    override: >-
+      -volume.index=leveldb moves the needle index onto disk and
+      GOMEMLIMIT=192MiB bounds the Go heap, in
+      deployment/compose/seaweedfs/entrypoint.sh
+    reason: >-
+      With the in-memory index the SF1 TPC-H bronze load reached a cgroup peak
+      of 861 MiB (514 MiB anonymous) and the store was OOM-killed under the
+      batch profile's 256 MiB ceiling. The two bounded settings carry the same
+      load with a 171.9 MiB anonymous peak, so the ceiling holds rather than
+      needing a profile-budget change (docs/local-development.md section 11,
+      ticket #34).
+    trigger: >-
+      Reconsider if the store publishes a bounded-index default, or if a later
+      workload approaches the ceiling with the index already on disk.
   - service: grafana
     documented: "published recommended minimum of 512 MB"
     override: "384 MiB"
