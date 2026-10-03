@@ -98,8 +98,12 @@ def read_source(spark, config: Config, table: spec.SourceTable):
     """The flat file as a DataFrame of strings, one column per source column.
 
     dbgen separates fields with a pipe and terminates every record with a
-    trailing pipe. Spark's split() drops trailing empty fields, so splitting the
-    raw line yields exactly the source columns and no synthetic trailing one.
+    trailing pipe. Spark's split() keeps the empty field after that final pipe
+    (its default limit of -1 preserves trailing empties), so the split yields
+    one more element than the table has columns. The code is safe because it
+    selects the first len(columns) elements by position and never reads the
+    trailing empty one; the column count comes from the table spec, not from
+    the split.
     """
     from pyspark.sql import functions as functions
 
