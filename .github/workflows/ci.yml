@@ -162,7 +162,8 @@ jobs:
       - name: Run unit tests
         run: bash deployment/scripts/run-unit-tests.sh "${{matrix.distribution}}"
 
-  # The Flink jobs. The Gradle project lands with issue #38.
+  # The Flink jobs: the streaming distributions' unit tests under Flink's test
+  # harness. The Gradle project and its committed wrapper landed with issue #38.
   java:
     name: java
     needs: changes
@@ -172,11 +173,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Check the Flink jobs
-        run: |
-          set -euo pipefail
-          bash deployment/scripts/check-stub.sh java 38 \
-            streaming \( -name '*.java' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -print -quit
+      - name: Set up JDK 17
+        uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Run the Flink job tests
+        run: bash deployment/scripts/run-java-tests.sh
 
   # OpenTofu and the structural policy scan. The modules land with issue #74;
   # the Helm charts and the rendered manifests with issue #75.

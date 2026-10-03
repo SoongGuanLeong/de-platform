@@ -59,6 +59,21 @@ def cite(tree: Path, item: dict) -> None:
     save(tree, document)
 
 
+def isolate_compose_instance(tree: Path) -> None:
+    """Reduce the register to the compose instance and its evidence.
+
+    The rules below are tested one rule at a time, and the shipped register grows
+    as phases land, so a test that assumes a single instance scopes itself to the
+    instance it mutates rather than to the register's current size.
+    """
+    shutil.rmtree(tree / "docs" / "evidence", ignore_errors=True)
+    document = load(tree)
+    document["instances"] = [
+        entry for entry in document["instances"] if entry["id"] == "compose-and-profile-layer"
+    ]
+    save(tree, document)
+
+
 def test_the_shipped_register_validates() -> None:
     assert register.validate(str(REPO_ROOT)) == []
 
@@ -94,6 +109,7 @@ def test_a_populated_class_needs_a_representative_or_a_recorded_phase(tree: Path
 
 
 def test_a_class_with_no_instances_needs_neither(tree: Path) -> None:
+    isolate_compose_instance(tree)
     document = load(tree)
     document["instances"] = []
     for entry in document["classes"]:
@@ -184,6 +200,7 @@ def test_a_superseded_budget_may_not_be_cited(tree: Path) -> None:
 
 
 def test_a_budget_reference_must_resolve_to_a_committed_budget(tree: Path) -> None:
+    isolate_compose_instance(tree)
     cite(tree, dict(EVIDENCE_ITEM, budget_ref="no-such-budget"))
     assert any("does not resolve" in message for message in register.validate(str(tree)))
 

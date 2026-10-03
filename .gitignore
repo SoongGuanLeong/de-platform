@@ -38,3 +38,6 @@ jars/
 crash.log
 override.tf
 override.tf.json
+
+# Gradle: the wrapper's build cache is not tracked.
+.gradle/

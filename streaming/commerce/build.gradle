@@ -1,0 +1,2 @@
+// The commerce streaming distribution: the TPC-C CDC ingestion job in Java.
+// Source and test roots are the Gradle defaults under this directory.

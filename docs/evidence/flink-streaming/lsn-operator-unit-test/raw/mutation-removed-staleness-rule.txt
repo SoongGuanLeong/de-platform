@@ -1,0 +1,65 @@
+# Mutation: remove the staleness comparison from LsnMaxOperator.processElement
+#
+# Removed:
+#   Long seen = maxLsn.value();
+#   if (seen != null && lsn < seen) {
+#       return; // strictly stale
+#   }
+#
+# Command: cd streaming && ./gradlew :commerce:test --no-daemon --console=plain --rerun-tasks
+# Result: BUILD FAILED; LsnMaxOperatorTest 3 of 4 tests failed.
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :commerce:compileJava
+> Task :commerce:processResources NO-SOURCE
+> Task :commerce:classes
+> Task :commerce:compileTestJava
+> Task :commerce:processTestResources NO-SOURCE
+> Task :commerce:testClasses
+
+> Task :commerce:test FAILED
+
+LsnMaxOperatorTest > keysAreIndependent() FAILED
+    org.opentest4j.AssertionFailedError: expected: <[LsnRecord[key=order-1, lsn=100, operation=c, afterImage={}], LsnRecord[key=order-2, lsn=1, operation=c, afterImage={}], LsnRecord[key=order-2, lsn=2, operation=u, afterImage={}]]> but was: <[LsnRecord[key=order-1, lsn=100, operation=c, afterImage={}], LsnRecord[key=order-2, lsn=1, operation=c, afterImage={}], LsnRecord[key=order-1, lsn=50, operation=u, afterImage={}], LsnRecord[key=order-2, lsn=2, operation=u, afterImage={}]]>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+        at app//com.deplatform.streaming.commerce.LsnMaxOperatorTest.keysAreIndependent(LsnMaxOperatorTest.java:80)
+
+LsnMaxOperatorTest > holdsTheMaximumLsnPerKeyAndDropsStrictlyStaleRecords() FAILED
+    org.opentest4j.AssertionFailedError: expected: <[LsnRecord[key=order-1, lsn=10, operation=c, afterImage={}], LsnRecord[key=order-1, lsn=20, operation=u, afterImage={}], LsnRecord[key=order-2, lsn=3, operation=c, afterImage={}]]> but was: <[LsnRecord[key=order-1, lsn=10, operation=c, afterImage={}], LsnRecord[key=order-1, lsn=5, operation=u, afterImage={}], LsnRecord[key=order-1, lsn=20, operation=u, afterImage={}], LsnRecord[key=order-2, lsn=3, operation=c, afterImage={}], LsnRecord[key=order-1, lsn=15, operation=u, afterImage={}]]>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+        at app//com.deplatform.streaming.commerce.LsnMaxOperatorTest.holdsTheMaximumLsnPerKeyAndDropsStrictlyStaleRecords(LsnMaxOperatorTest.java:46)
+
+LsnMaxOperatorTest > holdsTheMaximumRatherThanTheLastSeenLsn() FAILED
+    org.opentest4j.AssertionFailedError: expected: <[LsnRecord[key=order-1, lsn=20, operation=c, afterImage={}]]> but was: <[LsnRecord[key=order-1, lsn=20, operation=c, afterImage={}], LsnRecord[key=order-1, lsn=10, operation=u, afterImage={}], LsnRecord[key=order-1, lsn=15, operation=u, afterImage={}]]>
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+        at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+        at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+        at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+        at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+        at app//com.deplatform.streaming.commerce.LsnMaxOperatorTest.holdsTheMaximumRatherThanTheLastSeenLsn(LsnMaxOperatorTest.java:60)
+
+4 tests completed, 3 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':commerce:test'.
+> There were failing tests. See the report at: file:///tmp/de-frontier/wt-38/streaming/commerce/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 7s
+3 actionable tasks: 3 executed
