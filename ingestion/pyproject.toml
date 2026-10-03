@@ -3,7 +3,17 @@ name = "ingestion"
 version = "0.0.0"
 description = "Ingestion for both spines: the Debezium connector, the OLTP DDL and load, the RIPE Atlas collector and the ONSPD loader."
 requires-python = ">=3.12"
-dependencies = ["platform", "governance"]
+dependencies = [
+    "platform",
+    "governance",
+    # The RIPE Atlas collector's two runtime dependencies, pinned like every
+    # other toolchain version (docs/ci-cd-strategy.md section 9). websockets is
+    # the live stream client; kafka-python is the producer both the live
+    # subscription and the REST backfill write through, so the backfill is a
+    # producer into the same topic rather than a second writer (ADR-0014).
+    "websockets==15.0.1",
+    "kafka-python==3.0.11",
+]
 
 [tool.uv.sources]
 platform = { workspace = true }
