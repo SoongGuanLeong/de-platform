@@ -29,6 +29,9 @@ import json
 import urllib.parse
 from collections.abc import Iterable
 
+# The transport and its default are part of this module's public surface: a
+# caller that needs the same HTTP transport the client injects imports it from
+# de_platform.catalog rather than from the private de_platform._http module.
 from de_platform._http import Transport, urllib_transport
 
 # The base path is configurable: Polaris serves the Iceberg REST API at

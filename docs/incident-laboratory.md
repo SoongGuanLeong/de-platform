@@ -122,7 +122,7 @@ Every incident runs under one profile plus the observability overlay, one at a t
 - **Diagnosis:** collector logs show `429`, `416` on a stale timepoint, or a disconnect; correlate with the publisher's limits (600 requests per 5 minutes per key, 2 concurrent streaming connections, an IP-ban policy, `docs/research/01a-datasets-relational-cdc.md:1082`).
 - **Root cause:** the publisher's rate limits and reconnect policy.
 - **Mitigation:** exponential back-off and a single long-lived connection.
-- **Recovery:** the stream resumes from the persisted `timepoint` cursor.
+- **Recovery:** the REST backfill resumes from the persisted `timepoint` cursor; the live subscription re-subscribes, because the stream is at-most-once and carries no resume token.
 - **Data correctness verification:** assert the cursor is persisted and the gap is bounded; the source is at-most-once, so no loss is claimed beyond that.
 - **Permanent fix:** a committed back-off policy and persisted cursor with a SHA.
 - **Artefact:** the runbook, the postmortem, the collector log, the cursor record.

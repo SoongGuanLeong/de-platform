@@ -6,9 +6,9 @@ requires-python = ">=3.12"
 # psycopg 3 is the PostgreSQL client the TPC-C driver writes through. It is
 # chosen over asyncpg (an async driver, while the driver is synchronous) and
 # pg8000 (pure Python, but without the COPY protocol support the bulk load
-# needs). The [binary] extra pulls a wheel so no compiler is needed. uv.lock
-# pins the resolved version; the reconsideration trigger is a PostgreSQL major
-# that psycopg 3 does not support.
+# needs). The [binary] extra pulls a wheel so no compiler is needed. It is pinned
+# to the version uv.lock resolved, like every other runtime dependency here; the
+# reconsideration trigger is a PostgreSQL major that psycopg 3 does not support.
 #
 # websockets and kafka-python are the RIPE Atlas collector's runtime
 # dependencies, pinned like every other toolchain version
@@ -19,7 +19,7 @@ requires-python = ">=3.12"
 dependencies = [
     "platform",
     "governance",
-    "psycopg[binary]",
+    "psycopg[binary]==3.3.6",
     "websockets==15.0.1",
     "kafka-python==3.0.11",
 ]
