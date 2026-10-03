@@ -28,13 +28,17 @@ map_owner() {
 # Polaris runs as uid 10000, gid 10001.
 map_owner 10000 10001 runtime/secrets/polaris_db_password
 map_owner 10000 10001 runtime/secrets/polaris_bootstrap_secret
+# Polaris also reads the S3 identity, to reach the warehouse it catalogues
+# (deployment/compose/polaris/entrypoint.sh). SeaweedFS reads the same file as
+# root before it drops privileges, and root reads a file whatever its owner, so
+# one mapping serves both containers.
+map_owner 10000 10001 runtime/secrets/seaweedfs_s3_secret_key
 
 # Grafana runs as uid 472, gid 0.
 map_owner 472 0 runtime/secrets/grafana_admin_password
 
-# postgres_superuser_password and seaweedfs_s3_secret_key are deliberately
-# absent: the PostgreSQL image's entrypoint reads POSTGRES_PASSWORD_FILE as root
-# before it drops privileges, and the SeaweedFS entrypoint reads the S3 key as
-# root and renders /tmp/s3-config.json, which it then chowns to the seaweed user.
-# A service that can read its secret as root avoids this step entirely, which is
-# the pattern the harness also uses.
+# postgres_superuser_password is deliberately absent: the PostgreSQL image's
+# entrypoint reads POSTGRES_PASSWORD_FILE as root before it drops privileges, and
+# a service that can read its secret as root avoids this step entirely, which is
+# the pattern the harness also uses. The SeaweedFS S3 key is mapped because
+# Polaris reads it too, as uid 10000.
