@@ -144,7 +144,15 @@ def is_northern_ireland(postcode: str) -> bool:
 
 
 def parse_yyyymm(value: Any) -> int | None:
-    """Parse an ONSPD `YYYYMM` month, or `None` for a null/blank value."""
+    """Parse an ONSPD `YYYYMM` month, or `None` for a null/blank value.
+
+    The month stays a bare `int` rather than a small `Month` type. The format
+    rule lives in this one function, and the only operation the loader needs on
+    a month is integer ordering, which the half-open interval comparison already
+    gets from the validated value. A `Month` type would have to carry that
+    ordering to be useful, which is comparison machinery for no caller; the
+    format rule is enforced at the one parse boundary instead.
+    """
     if value is None:
         return None
     if isinstance(value, int):
@@ -362,7 +370,9 @@ def fetch_subset(destination: str, transport: Any | None = None) -> int:
     reduction.
     """
     if transport is None:
-        from de_platform._http import urllib_transport
+        # The platform core's transport is public through the catalog module's
+        # seam, not the private de_platform._http module.
+        from de_platform.catalog import urllib_transport
 
         transport = urllib_transport
 
@@ -392,10 +402,6 @@ def load_onspd(path: str) -> list[dict[str, Any]]:
 # The gold tables the loader fills, in the platform's naming convention.
 DIM_POSTCODE = naming.iceberg_table("network", "gold", "dim_postcode")
 POSTCODE_GEOGRAPHY = naming.iceberg_table("network", "gold", "postcode_geography")
-
-
-def _parse_table(identifier: str) -> tuple[str, str, str]:
-    return naming.parse_table(identifier)
 
 
 def ensure_namespaces(client: Any) -> list[tuple[str, ...]]:
@@ -429,7 +435,7 @@ def address_tables(client: Any) -> dict[str, Any]:
     resolved: dict[str, Any] = {}
     gated: list[tuple[str, Exception]] = []
     for identifier in (DIM_POSTCODE, POSTCODE_GEOGRAPHY):
-        spine, layer, table = _parse_table(identifier)
+        spine, layer, table = naming.parse_table(identifier)
         try:
             resolved[identifier] = client.load_table((spine, layer), table)
         except platform_catalog.NoSuchTableError as error:
