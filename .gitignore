@@ -28,3 +28,13 @@ build/
 dist/
 *.log
 jars/
+
+# OpenTofu: the provider and module cache is not tracked, the lock file is
+# (docs/cloud-architecture.md section 7).
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+override.tf
+override.tf.json
