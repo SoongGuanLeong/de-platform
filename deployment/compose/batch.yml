@@ -83,9 +83,14 @@ services:
     restart: "no"
     depends_on:
       - postgres
+    environment:
+      AWS_ACCESS_KEY_ID: deplatform
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://seaweedfs:8333
     volumes:
       - ../../runtime/secrets/polaris_db_password:/run/secrets/polaris_db_password:ro
       - ../../runtime/secrets/polaris_bootstrap_secret:/run/secrets/polaris_bootstrap_secret:ro
+      - ../../runtime/secrets/seaweedfs_s3_secret_key:/run/secrets/seaweedfs_s3_secret_key:ro
       - ./polaris/entrypoint.sh:/harness/entrypoint.sh:ro
     entrypoint: ["/bin/bash", "/harness/entrypoint.sh"]
     ports:
