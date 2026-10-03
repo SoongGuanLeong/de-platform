@@ -1,23 +1,36 @@
-"""The batch profile's TPC-H bronze check (ticket #34).
+"""The batch profile's integration checks (tickets #34 and #54).
 
-The real components run: dbgen is built from source and generates the flat
-files, then Spark writes one Iceberg table per source table through the Polaris
-Iceberg REST catalog to SeaweedFS. The row counts are asserted against the flat
-files counted independently by the unit-tested reader, and a second run must
-leave every count unchanged.
+Two live paths share this directory and its profile. The TPC-H check (ticket
+#34) runs the real components end to end: dbgen is built from source and
+generates the flat files, then Spark writes one Iceberg table per source table
+through the Polaris Iceberg REST catalog to SeaweedFS, and the row counts are
+asserted against the flat files counted independently by the unit-tested reader.
+The TPC-C check (ticket #54) runs the driver process against its real
+dependency, a real PostgreSQL.
 
-The profile is brought up the way the runbook brings it up: the secrets are
-provisioned, the preflight decides whether the host can hold the profile, and
-podman-compose starts the services. Spark is run as the profile's transient
-member, because the compose spark service's own command is a version check; it
-runs against the same network so it reaches the catalog and the object store by
-their service names.
+Each check gates itself. The TPC-H check brings up the bronze path's subset of
+the batch profile - the catalog, its metastore and the object store as
+residents, and Spark as the transient that writes - the way the runbook brings
+it up: the secrets are provisioned, the preflight decides whether the host can
+hold the profile, and podman-compose starts the services. Spark is run as the
+profile's transient member, because the compose spark service's own command is a
+version check; it runs against the same network so it reaches the catalog and
+the object store by their service names. The TPC-C check brings PostgreSQL up
+alone rather than the whole batch profile, so the profile's peak is never
+reached. Both follow the runbook order of docs/local-development.md section 6:
+provision, ordered start, readiness, and teardown, with the teardown first so an
+interrupted run cannot poison the next.
 
-One local configuration makes the catalog able to write a new table's metadata:
-Polaris is given the SeaweedFS S3 identity (deployment/compose/polaris), which
-is the local stand-in for the IRSA role the cloud uses (ADR-0027). Without it
-CREATE TABLE fails with an AWS SDK credential error, and the gap is recorded in
-docs/local-development.md section 8.
+One local configuration makes the TPC-H catalog able to write a new table's
+metadata: Polaris is given the SeaweedFS S3 identity (deployment/compose/polaris),
+which is the local stand-in for the IRSA role the cloud uses (ADR-0027). Without
+it CREATE TABLE fails with an AWS SDK credential error, and the gap is recorded
+in docs/local-development.md section 8.
+
+The TPC-C warehouse count is read from TPCC_TEST_WAREHOUSES and defaults to 1.
+W=10 is the declared correctness slice (docs/testing-strategy.md section 4.1) and
+is run by setting the variable; W=1 keeps the default suite fast while still
+exercising every live path.
 """
 
 from __future__ import annotations
@@ -39,12 +52,13 @@ COMPOSE = ROOT + "/deployment/compose/batch.yml"
 PROJECT = "de-platform-batch"
 PROFILE = "batch"
 
-# The services this check starts. It is the bronze path's subset of the batch
-# profile: the catalog, its metastore and the object store as residents, and
-# Spark as the transient that writes. ClickHouse, Dagster and the observability
-# overlay belong to other parts of the batch profile and to no part of this
-# path, so the check gates on this subset's declared peak rather than the whole
-# profile's, computed from the same ceiling register the preflight reads.
+# The services the TPC-H check starts. It is the bronze path's subset of the
+# batch profile: the catalog, its metastore and the object store as residents,
+# and Spark as the transient that writes. ClickHouse, Dagster and the
+# observability overlay belong to other parts of the batch profile and to no
+# part of this path, so the check gates on this subset's declared peak rather
+# than the whole profile's, computed from the same ceiling register the preflight
+# reads.
 SUBSET_RESIDENTS = ("postgres", "seaweedfs", "polaris")
 SUBSET_TRANSIENT = ("spark",)
 RESERVE_MIB = 512
@@ -57,6 +71,10 @@ WAREHOUSE_BUCKET = "warehouse"
 NETWORK = "de-platform-batch_default"
 SPARK_IMAGE = "docker.io/apache/spark:4.1.3-java17"
 CONTAINER_WORKSPACE = "/work"
+
+# The TPC-C check's single service and its published port.
+SERVICE = "postgres"
+PORT = 55432
 
 # The scratch directory holds the built generator, the jars and the generated
 # flat files, none of which are committed. It defaults to the repository runtime
@@ -472,3 +490,43 @@ def load_runner(batch_profile):
         return run_load(scale, host_flat_dir, batch_profile["secret"], batch_profile["s3_secret"])
 
     return _run
+
+
+def postgres_ready():
+    result = in_container(SERVICE, ["pg_isready", "-h", "127.0.0.1", "-U", "deplatform"])
+    return result.returncode == 0
+
+
+@pytest.fixture(scope="module")
+def tpcc_dsn():
+    # An existing database can be named instead of bringing the profile's
+    # PostgreSQL up, so the suite can run against an isolated instance and not
+    # contend for the shared de-platform-batch project.
+    override = os.environ.get("TPCC_TEST_DSN")
+    if override:
+        yield override
+        return
+    run(["bash", "deployment/scripts/generate-secrets.sh"])
+    compose("down", "--volumes", timeout=600)
+    try:
+        result = compose("up", "-d", SERVICE, timeout=900)
+        if result.returncode != 0:
+            raise AssertionError(
+                "podman-compose up failed for postgres:\n" + result.stdout + result.stderr
+            )
+        if not wait_for(postgres_ready, timeout=300):
+            raise AssertionError(
+                "postgres did not become ready in 300s:\n" + compose("ps", timeout=120).stdout
+            )
+        password = in_container(SERVICE, ["cat", "/run/secrets/postgres_superuser_password"])
+        if password.returncode != 0:
+            raise AssertionError("could not read the superuser password:\n" + password.stderr)
+        yield (
+            "postgresql://deplatform:"
+            + password.stdout.strip()
+            + "@127.0.0.1:"
+            + str(PORT)
+            + "/deplatform"
+        )
+    finally:
+        compose("down", "--volumes", timeout=600)
