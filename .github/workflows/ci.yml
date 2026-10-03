@@ -178,7 +178,8 @@ jobs:
           bash deployment/scripts/check-stub.sh java 38 \
             streaming \( -name '*.java' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -print -quit
 
-  # OpenTofu, Helm and the policy scan. The modules land with issue #74.
+  # OpenTofu and the structural policy scan. The modules land with issue #74;
+  # the Helm charts and the rendered manifests with issue #75.
   deployment:
     name: deployment
     needs: changes
@@ -188,11 +189,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned uv
+        run: bash deployment/scripts/install-uv.sh
+      - name: Install pinned OpenTofu and tflint
+        run: bash deployment/scripts/install-tofu.sh
+      # Proves the structural policy scan is load-bearing: fourteen mutations
+      # must each fail it (issue #74).
+      - name: Prove the tofu policy scan catches a mutation
+        run: bash deployment/scripts/test-check-tofu.sh
       - name: Check the deployment artefacts
-        run: |
-          set -euo pipefail
-          bash deployment/scripts/check-stub.sh deployment 74 \
-            deployment \( -name '*.tf' -o -name '*.tfvars' -o -name 'Chart.yaml' \) -print -quit
+        run: bash deployment/scripts/check-tofu.sh
 
   # The Prometheus rules and the dashboards. They land with issue #67.
   observability:

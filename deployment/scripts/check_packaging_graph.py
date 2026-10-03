@@ -27,7 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # relaxing the comparison keeps every declared dependency a reviewed addition.
 PERMITTED: dict[str, frozenset[str]] = {
     "platform": frozenset(),
-    "ingestion": frozenset({"platform", "governance"}),
+    "ingestion": frozenset({"platform", "governance", "websockets", "kafka-python"}),
     "batch": frozenset({"platform", "governance"}),
     "governance": frozenset({"platform", "pyyaml"}),
     "orchestration": frozenset({"platform", "ingestion", "batch", "governance"}),
