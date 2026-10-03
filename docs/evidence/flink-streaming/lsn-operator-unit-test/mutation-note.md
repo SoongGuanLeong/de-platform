@@ -7,7 +7,7 @@ claim: The keyed LSN operator holds the maximum source.lsn seen per key and forw
 proves: signal
 command: bash deployment/scripts/run-java-tests.sh
 profile: streaming
-commit: a52e485
+commit: c3cc39e
 date: 2026-10-03
 mutation_note: Removed the "if (seen != null && lsn < seen) return;" staleness comparison from LsnMaxOperator.processElement; LsnMaxOperatorTest then failed 3 of its 4 tests.
 artifact: docs/evidence/flink-streaming/lsn-operator-unit-test/raw/mutation-removed-staleness-rule.txt
