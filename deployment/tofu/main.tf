@@ -57,8 +57,8 @@ module "rds" {
 
 # Secrets handling: the Secrets Manager secrets and the CSI projection template
 # (ADR-0028, docs/security-model.md section 2.6). No secret value is tracked.
-module "secrets" {
-  source = "./modules/secrets"
+module "secretsmanager" {
+  source = "./modules/secretsmanager"
 
   name_prefix = var.name_prefix
   inventory   = local.secret_inv

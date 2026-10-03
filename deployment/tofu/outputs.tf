@@ -15,7 +15,7 @@ output "rds_endpoint" {
 
 output "secret_names" {
   description = "The Secrets Manager secrets the arm creates."
-  value       = module.secrets.secret_names
+  value       = module.secretsmanager.secret_names
 }
 
 output "component_role_arns" {

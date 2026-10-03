@@ -125,7 +125,7 @@ PY
 expect_fail "a vending role scoped to the whole bucket"
 
 # 8. The secret projection's filePermission becomes the driver default.
-python3 - "${work}/deployment/tofu/secrets/secret-projection.yaml.tmpl" <<'PY'
+python3 - "${work}/deployment/tofu/templates/secret-projection.yaml.tmpl" <<'PY'
 import sys
 path = sys.argv[1]
 text = open(path).read()
