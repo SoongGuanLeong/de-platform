@@ -170,7 +170,18 @@ open(path, "w").write(text.replace("if contains(role.arms, var.arm)", "if true")
 PY
 expect_fail "no arm filter on the component roles"
 
-# 13. CI reverts to the stub.
+# 13. The provider gains a LocalStack endpoint override.
+python3 - "${work}/deployment/tofu/providers.tf" <<'PY'
+import sys
+path = sys.argv[1]
+text = open(path).read()
+open(path, "w").write(text.replace(
+    "  region = var.region",
+    "  region = var.region\n\n  endpoints {\n    s3 = \"http://localhost:4566\"\n  }"))
+PY
+expect_fail "a LocalStack endpoint override"
+
+# 14. CI reverts to the stub.
 python3 - "${work}/.github/workflows/ci.yml" <<'PY'
 import sys
 path = sys.argv[1]
