@@ -203,7 +203,7 @@ requires-dist = [
     { name = "governance", editable = "governance" },
     { name = "kafka-python", specifier = "==3.0.11" },
     { name = "platform", editable = "platform" },
-    { name = "psycopg", extras = ["binary"] },
+    { name = "psycopg", extras = ["binary"], specifier = "==3.3.6" },
     { name = "websockets", specifier = "==15.0.1" },
 ]
 

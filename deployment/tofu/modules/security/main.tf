@@ -59,7 +59,10 @@ resource "aws_vpc_security_group_egress_rule" "rds_all" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# The reference arm's ALB, which is the only arm with one.
+# The reference arm's ALB security group, which the AWS Load Balancer Controller
+# attaches to the ALB it provisions. Only the reference arm has an ALB, and the
+# group is part of this module's security-groups area (#74); the requirement is
+# docs/cloud-architecture.md section 2.4 and section 4.2.
 resource "aws_security_group" "alb" {
   count = var.enable_alb ? 1 : 0
 
