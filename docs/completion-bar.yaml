@@ -124,3 +124,30 @@ instances:
         reason: not yet demonstrated; the preflight resolves the peak before a run, and no evidence item records a refusal.
       - field: "failure mode: a shared service body drifts between two profiles that declare it (the services declared in more than one profile)"
         reason: demonstrated as a lint, not as a profile run; deployment/scripts/test-check-compose.sh mutates a shared body and the lint fails, but no evidence item exists.
+
+  # Phase 1 (docs/implementation-roadmap.md section 5). The keyed LSN operator's
+  # unit test lands in Phase 1 under Flink's test harness, in the CI java job; the
+  # CDC ingestion job it belongs to is Phase 5. The flink-streaming class's
+  # representative stays assigned to Phase 5, so this instance carries the
+  # operator's mutation note without being the class representative.
+  - id: lsn-operator-unit-test
+    class: flink-streaming
+    instance: the keyed LSN operator's unit test
+    module: streaming
+    representative: false
+    status: in-progress
+    failure_modes:
+      - "a strictly stale record is forwarded because the staleness comparison is absent or inverted"
+      - "the last-seen LSN is held instead of the maximum, so a mid-range LSN after a higher one is forwarded"
+      - "keyed state leaks between keys, so one key's maximum drops another key's fresh record"
+      - "the keyed state grows without bound because no time-to-live is configured"
+      - "the maximum is lost across a restore because the state is not part of the checkpoint"
+    evidence:
+      - lsn-operator-unit-test-mutation-note
+    not_applicable:
+      - field: "core item 3 (realistic data)"
+        reason: a unit test runs against the distribution's own code with no fixture (docs/testing-strategy.md section 2); the operator's input is a synthetic change event.
+      - field: "failure mode: the keyed state grows without bound because no time-to-live is configured"
+        reason: not yet demonstrated; the unit test does not advance processing time, so the state time-to-live is asserted by configuration rather than observed.
+      - field: "failure mode: the maximum is lost across a restore because the state is not part of the checkpoint"
+        reason: not yet demonstrated; a checkpoint and restore needs a Flink cluster, which lands with the CDC job in Phase 5.
