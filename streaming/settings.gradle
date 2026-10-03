@@ -1,0 +1,5 @@
+// One Gradle build for the streaming distributions. The CDC ingestion job is the
+// only Java-bearing streaming path (ADR-0013), so streaming/commerce is the only
+// subproject; streaming/network is Flink SQL and carries no Java.
+rootProject.name = 'streaming'
+include 'commerce'
