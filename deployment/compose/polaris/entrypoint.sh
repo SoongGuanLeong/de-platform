@@ -33,6 +33,19 @@ EOF
 
 chmod 600 "${config_file}"
 
+# The catalog's own access to the warehouse. In the cloud Polaris assumes an
+# IRSA role (ADR-0027); locally it uses the SeaweedFS S3 identity, which is the
+# local stand-in for that role and is recorded in the local-versus-cloud diff
+# (docs/local-development.md section 8). Without it the server cannot write a
+# new table's metadata to the warehouse, and CREATE TABLE fails with an AWS SDK
+# credential error. The guard keeps a profile that does not mount the secret
+# working unchanged, and the value is read from its file rather than written
+# into this one, so the secret still lives only under runtime/ (ADR-0028).
+if [ -f /run/secrets/seaweedfs_s3_secret_key ]; then
+  export AWS_ACCESS_KEY_ID="deplatform"
+  export AWS_SECRET_ACCESS_KEY="$(cat /run/secrets/seaweedfs_s3_secret_key)"
+fi
+
 # The config location must be a JVM system property, not an argument after -jar,
 # so it is passed through JAVA_OPTS_APPEND, which run-java.sh places before
 # -cp/-jar. Passing it as a plain argument made Quarkus treat it as an
