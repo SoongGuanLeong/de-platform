@@ -86,8 +86,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   }
 }
 
-# Authored and never used: the reference arm's documented production target,
-# which no run pulls from (ADR-0034). The minimal profile does not declare it.
+# Authored and never used. ADR-0034 keeps this resource in the reference arm as
+# the documented production target; no run pulls from it, and the minimal profile
+# does not declare it. It is not one of #74's six module areas, but it stays
+# because ADR-0034 decides it: removing it would overturn that accepted decision.
 resource "aws_ecr_repository" "marquez" {
   count = var.enable_ecr ? 1 : 0
 

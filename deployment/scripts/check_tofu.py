@@ -51,25 +51,19 @@ def statements(policy: object) -> list[dict]:
     return stmt if isinstance(stmt, list) else [stmt]
 
 
-def actions(policy: object) -> list[str]:
+def collect(policy: object, key: str) -> list[str]:
+    """Every value of `key` across a policy's statements, flattened.
+
+    An IAM statement's Action or Resource is either a string or a list of
+    strings, so one collector serves both: only the key differs.
+    """
     out: list[str] = []
     for stmt in statements(policy):
-        action = stmt.get("Action", [])
-        if isinstance(action, str):
-            out.append(action)
+        value = stmt.get(key, [])
+        if isinstance(value, str):
+            out.append(value)
         else:
-            out.extend(action)
-    return out
-
-
-def resources(policy: object) -> list[str]:
-    out: list[str] = []
-    for stmt in statements(policy):
-        resource = stmt.get("Resource", [])
-        if isinstance(resource, str):
-            out.append(resource)
-        else:
-            out.extend(resource)
+            out.extend(value)
     return out
 
 
@@ -127,7 +121,7 @@ def scan(root: Path) -> list[str]:
     iam = load_json(tofu / "policies" / "iam.json")
     components = iam.get("components", {})
     node_policy = iam.get("node", {}).get("policy")
-    node_actions = actions(node_policy)
+    node_actions = collect(node_policy, "Action")
     offending = [a for a in node_actions if a.lower().startswith(FORBIDDEN_ACTION_PREFIXES)]
     failures.check(
         "the node role carries no S3 or Secrets Manager action",
@@ -149,7 +143,7 @@ def scan(root: Path) -> list[str]:
             "arms=" + repr(sorted(arms)),
         )
         failures.check("component " + name + " has a policy", bool(role.get("policy")))
-        for action in actions(role.get("policy")):
+        for action in collect(role.get("policy"), "Action"):
             failures.check(
                 "component " + name + " has no broad action",
                 action != "*" and action.lower() not in {"s3:*", "secretsmanager:*"},
@@ -166,7 +160,7 @@ def scan(root: Path) -> list[str]:
     )
     vending_policy = vending.get("policy")
     failures.check("the vending role has a policy", bool(vending_policy))
-    vending_resources = resources(vending_policy)
+    vending_resources = collect(vending_policy, "Resource")
     failures.check(
         "the vending role is scoped to the warehouse prefix",
         any(r.endswith("/warehouse/*") for r in vending_resources),
