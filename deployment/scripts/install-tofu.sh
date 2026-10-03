@@ -31,7 +31,7 @@ install_one() {
   echo "${sha256}  ${workdir}/${archive}" | sha256sum -c -
   unzip -o -q "${workdir}/${archive}" -d "${workdir}/extract"
   install -m 0755 "${workdir}/extract/${member}" "${bindir}/${name}"
-  "${bindir}/${name}" --version | head -1
+  "${bindir}/${name}" --version | sed -n '1p'
 }
 
 install_one tofu "${TOFU_VERSION}" "${TOFU_LINUX_AMD64_SHA256}" \

@@ -27,7 +27,7 @@ from pathlib import Path
 
 ROTATION_CLASSES = {"reload", "restart", "init"}
 ARMS = {"minimal", "reference"}
-MODULES = ["network", "storage", "iam", "security", "rds", "secrets"]
+MODULES = ["network", "storage", "iam", "security", "rds", "secretsmanager"]
 FORBIDDEN_ACTION_PREFIXES = ("s3:", "secretsmanager:")
 
 
@@ -220,7 +220,7 @@ def scan(root: Path) -> list[str]:
     )
 
     # 7. The secrets projection sets filePermission 0400.
-    projection = (tofu / "secrets" / "secret-projection.yaml.tmpl").read_text()
+    projection = (tofu / "templates" / "secret-projection.yaml.tmpl").read_text()
     failures.check(
         'the secret projection sets filePermission "0400"',
         re.search(r'filePermission:\s*"0400"', projection) is not None,
