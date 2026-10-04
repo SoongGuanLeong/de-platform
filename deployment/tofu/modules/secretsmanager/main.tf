@@ -33,8 +33,12 @@ resource "aws_secretsmanager_secret_policy" "this" {
 }
 
 locals {
+  # The example pod is Polaris in `platform`, and the CSI volume mounts every
+  # object in the class, so the projection carries only that component's own
+  # secrets: the pod's IRSA role is scoped to its own.
   projection_objects = join("\n", [
     for name in var.enabled :
-    "      - objectName: \"${name}\"\n        objectType: \"secretsmanager\""
+    "      - objectName: \"${var.name_prefix}/${name}\"\n        objectAlias: \"${name}\"\n        objectType: \"secretsmanager\""
+    if var.inventory[name].component == var.projection_component
   ])
 }

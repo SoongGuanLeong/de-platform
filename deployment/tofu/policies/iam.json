@@ -68,6 +68,22 @@
             ]
           },
           {
+            "Sid": "WarehouseObjectEncryption",
+            "Effect": "Allow",
+            "Action": [
+              "kms:Decrypt",
+              "kms:GenerateDataKey"
+            ],
+            "Resource": [
+              "arn:aws:kms:${REGION}:${ACCOUNT_ID}:key/*"
+            ],
+            "Condition": {
+              "ForAnyValue:StringEquals": {
+                "kms:ResourceAliases": "alias/${NAME_PREFIX}-lake"
+              }
+            }
+          },
+          {
             "Sid": "WarehouseListBucketScoped",
             "Effect": "Allow",
             "Action": [
@@ -88,11 +104,27 @@
             "Sid": "MetadataSecret",
             "Effect": "Allow",
             "Action": [
-              "secretsmanager:GetSecretValue"
+              "secretsmanager:GetSecretValue",
+              "secretsmanager:DescribeSecret"
             ],
             "Resource": [
               "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/polaris-db-*"
             ]
+          },
+          {
+            "Sid": "MetadataSecretEncryption",
+            "Effect": "Allow",
+            "Action": [
+              "kms:Decrypt"
+            ],
+            "Resource": [
+              "arn:aws:kms:${REGION}:${ACCOUNT_ID}:key/*"
+            ],
+            "Condition": {
+              "ForAnyValue:StringEquals": {
+                "kms:ResourceAliases": "alias/${NAME_PREFIX}-platform"
+              }
+            }
           },
           {
             "Sid": "AssumeVendingRole",
@@ -572,6 +604,22 @@
           "Resource": [
             "arn:aws:s3:::${NAME_PREFIX}-lake/warehouse/*"
           ]
+        },
+        {
+          "Sid": "WarehouseObjectEncryption",
+          "Effect": "Allow",
+          "Action": [
+            "kms:Decrypt",
+            "kms:GenerateDataKey"
+          ],
+          "Resource": [
+            "arn:aws:kms:${REGION}:${ACCOUNT_ID}:key/*"
+          ],
+          "Condition": {
+            "ForAnyValue:StringEquals": {
+              "kms:ResourceAliases": "alias/${NAME_PREFIX}-lake"
+            }
+          }
         },
         {
           "Sid": "WarehouseListBucketScoped",

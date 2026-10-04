@@ -191,4 +191,15 @@ open(path, "w").write(text)
 PY
 expect_fail "CI back on the deployment stub"
 
+# 15. The CI check-tofu.sh step is deleted, leaving the test script's name as the
+# only match for "check-tofu.sh". This isolates the exact-command check: the stub
+# check at the end does not fire, so only the exact match can catch it.
+python3 - "${work}/.github/workflows/ci.yml" <<'PY'
+import sys
+path = sys.argv[1]
+text = open(path).read()
+open(path, "w").write(text.replace("run: bash deployment/scripts/check-tofu.sh", "run: true"))
+PY
+expect_fail "CI with the check-tofu.sh step deleted"
+
 printf 'the OpenTofu policy scan is load-bearing\n'

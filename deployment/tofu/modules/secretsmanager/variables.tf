@@ -16,6 +16,11 @@ variable "enabled" {
   type        = list(string)
 }
 
+variable "projection_component" {
+  description = "The component the example CSI projection is rendered for: only its secrets are projected."
+  type        = string
+}
+
 variable "kms_key_arn" {
   description = "The CMK encrypting the secrets."
   type        = string

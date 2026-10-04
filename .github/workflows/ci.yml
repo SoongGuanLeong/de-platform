@@ -193,7 +193,7 @@ jobs:
         run: bash deployment/scripts/install-uv.sh
       - name: Install pinned OpenTofu and tflint
         run: bash deployment/scripts/install-tofu.sh
-      # Proves the structural policy scan is load-bearing: fourteen mutations
+      # Proves the structural policy scan is load-bearing: fifteen mutations
       # must each fail it (issue #74).
       - name: Prove the tofu policy scan catches a mutation
         run: bash deployment/scripts/test-check-tofu.sh

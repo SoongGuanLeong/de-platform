@@ -262,9 +262,15 @@ def scan(root: Path) -> list[str]:
         "endpoints" not in (tofu / "providers.tf").read_text(),
     )
 
-    # 12. The deployment check is the real one, not the stub.
+    # 12. The deployment check is the real one, not the stub. The run step is
+    # matched exactly, because the test script's name also contains
+    # "check-tofu.sh" and a substring match would pass with the real step gone.
     workflow = (root / ".github" / "workflows" / "ci.yml").read_text()
-    failures.check("CI runs check-tofu.sh", "check-tofu.sh" in workflow)
+    failures.check(
+        "CI runs check-tofu.sh",
+        re.search(r"(?m)^\s*run:\s*bash deployment/scripts/check-tofu\.sh\s*$", workflow)
+        is not None,
+    )
     failures.check(
         "CI no longer stubs the deployment check", "check-stub.sh deployment 74" not in workflow
     )

@@ -60,12 +60,13 @@ module "rds" {
 module "secretsmanager" {
   source = "./modules/secretsmanager"
 
-  name_prefix = var.name_prefix
-  inventory   = local.secret_inv
-  enabled     = var.enabled_secrets
-  kms_key_arn = module.storage.platform_kms_key_arn
-  region      = var.region
-  tags        = local.common_tags
+  name_prefix          = var.name_prefix
+  inventory            = local.secret_inv
+  enabled              = var.enabled_secrets
+  projection_component = "polaris"
+  kms_key_arn          = module.storage.platform_kms_key_arn
+  region               = var.region
+  tags                 = local.common_tags
 }
 
 # IAM: the node role with no S3 or Secrets Manager permission, one IRSA role per
