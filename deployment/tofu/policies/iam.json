@@ -1,0 +1,644 @@
+{
+  "node": {
+    "role_name": "node",
+    "policy": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "NodeBootstrapAndImagePull",
+          "Effect": "Allow",
+          "Action": [
+            "ec2:DescribeInstances",
+            "ec2:DescribeInstanceTypes",
+            "ec2:DescribeRouteTables",
+            "ec2:DescribeSecurityGroups",
+            "ec2:DescribeSubnets",
+            "ec2:DescribeVolumes",
+            "ec2:DescribeVolumesModifications",
+            "ec2:DescribeInstanceTopology",
+            "eks:DescribeCluster",
+            "ecr:GetAuthorizationToken",
+            "ecr:BatchCheckLayerAvailability",
+            "ecr:GetDownloadUrlForLayer",
+            "ecr:BatchGetImage"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Sid": "NodeEbsCsiVolumeLifecycle",
+          "Effect": "Allow",
+          "Action": [
+            "ec2:CreateVolume",
+            "ec2:DeleteVolume",
+            "ec2:AttachVolume",
+            "ec2:DetachVolume",
+            "ec2:ModifyVolume",
+            "ec2:CreateSnapshot",
+            "ec2:DeleteSnapshot",
+            "ec2:DescribeSnapshots"
+          ],
+          "Resource": "*"
+        }
+      ]
+    }
+  },
+  "components": {
+    "polaris": {
+      "namespace": "platform",
+      "service_account": "polaris",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "WarehouseObjectAccess",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:GetObjectVersion",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:GetBucketLocation"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-lake/warehouse/*"
+            ]
+          },
+          {
+            "Sid": "WarehouseObjectEncryption",
+            "Effect": "Allow",
+            "Action": [
+              "kms:Decrypt",
+              "kms:GenerateDataKey"
+            ],
+            "Resource": [
+              "arn:aws:kms:${REGION}:${ACCOUNT_ID}:key/*"
+            ],
+            "Condition": {
+              "ForAnyValue:StringEquals": {
+                "kms:ResourceAliases": "alias/${NAME_PREFIX}-lake"
+              }
+            }
+          },
+          {
+            "Sid": "WarehouseListBucketScoped",
+            "Effect": "Allow",
+            "Action": [
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-lake"
+            ],
+            "Condition": {
+              "StringLike": {
+                "s3:prefix": [
+                  "warehouse/*"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "MetadataSecret",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue",
+              "secretsmanager:DescribeSecret"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/polaris-db-*"
+            ]
+          },
+          {
+            "Sid": "MetadataSecretEncryption",
+            "Effect": "Allow",
+            "Action": [
+              "kms:Decrypt"
+            ],
+            "Resource": [
+              "arn:aws:kms:${REGION}:${ACCOUNT_ID}:key/*"
+            ],
+            "Condition": {
+              "ForAnyValue:StringEquals": {
+                "kms:ResourceAliases": "alias/${NAME_PREFIX}-platform"
+              }
+            }
+          },
+          {
+            "Sid": "AssumeVendingRole",
+            "Effect": "Allow",
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Resource": [
+              "arn:aws:iam::${ACCOUNT_ID}:role/${NAME_PREFIX}-polaris-vending"
+            ]
+          }
+        ]
+      }
+    },
+    "kafka": {
+      "namespace": "streaming",
+      "service_account": "kafka",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "TieredStorage",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
+              "s3:GetBucketLocation"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-kafka",
+              "arn:aws:s3:::${NAME_PREFIX}-kafka/*"
+            ]
+          },
+          {
+            "Sid": "TlsSecret",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/kafka-tls-*"
+            ]
+          }
+        ]
+      }
+    },
+    "flink": {
+      "namespace": "streaming",
+      "service_account": "flink-operator",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "CheckpointsAndSavepoints",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
+              "s3:GetBucketLocation"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-flink",
+              "arn:aws:s3:::${NAME_PREFIX}-flink/*"
+            ]
+          },
+          {
+            "Sid": "WarehouseReadWrite",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:GetBucketLocation"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-lake/warehouse/*"
+            ]
+          },
+          {
+            "Sid": "KeystoreSecret",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/flink-keystore-*"
+            ]
+          }
+        ]
+      }
+    },
+    "spark": {
+      "namespace": "batch",
+      "service_account": "spark",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "RawAndWarehouse",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
+              "s3:GetBucketLocation"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-lake",
+              "arn:aws:s3:::${NAME_PREFIX}-lake/raw/*",
+              "arn:aws:s3:::${NAME_PREFIX}-lake/warehouse/*"
+            ]
+          }
+        ]
+      }
+    },
+    "clickhouse": {
+      "namespace": "serving",
+      "service_account": "clickhouse",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "ServingCopy",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
+              "s3:GetBucketLocation"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-lake",
+              "arn:aws:s3:::${NAME_PREFIX}-lake/warehouse/*"
+            ]
+          },
+          {
+            "Sid": "PasswordSecret",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/clickhouse-*"
+            ]
+          }
+        ]
+      }
+    },
+    "dagster": {
+      "namespace": "orchestration",
+      "service_account": "dagster",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "LandingAndWarehouse",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
+              "s3:GetBucketLocation"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${NAME_PREFIX}-lake",
+              "arn:aws:s3:::${NAME_PREFIX}-lake/raw/*",
+              "arn:aws:s3:::${NAME_PREFIX}-lake/warehouse/*"
+            ]
+          },
+          {
+            "Sid": "MetadataSecret",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/dagster-db-*"
+            ]
+          }
+        ]
+      }
+    },
+    "debezium": {
+      "namespace": "streaming",
+      "service_account": "debezium",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "SourceCredential",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/debezium-source-*"
+            ]
+          }
+        ]
+      }
+    },
+    "ripe-collector": {
+      "namespace": "streaming",
+      "service_account": "ripe-collector",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "ApiKey",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/ripe-atlas-api-key-*"
+            ]
+          }
+        ]
+      }
+    },
+    "marquez": {
+      "namespace": "governance",
+      "service_account": "marquez",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "MetadataRead",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/marquez-db-*"
+            ]
+          }
+        ]
+      }
+    },
+    "apicurio": {
+      "namespace": "governance",
+      "service_account": "apicurio",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "RegistryDb",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/apicurio-db-*"
+            ]
+          }
+        ]
+      }
+    },
+    "vpc-cni": {
+      "namespace": "kube-system",
+      "service_account": "aws-node",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "EniManagement",
+            "Effect": "Allow",
+            "Action": [
+              "ec2:DescribeInstances",
+              "ec2:DescribeInstanceTypes",
+              "ec2:DescribeTags",
+              "ec2:DescribeNetworkInterfaces",
+              "ec2:CreateNetworkInterface",
+              "ec2:AttachNetworkInterface",
+              "ec2:DetachNetworkInterface",
+              "ec2:DeleteNetworkInterface",
+              "ec2:ModifyNetworkInterfaceAttribute",
+              "ec2:AssignPrivateIpAddresses",
+              "ec2:UnassignPrivateIpAddresses"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    },
+    "ebs-csi": {
+      "namespace": "kube-system",
+      "service_account": "ebs-csi-controller-sa",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "VolumeLifecycle",
+            "Effect": "Allow",
+            "Action": [
+              "ec2:CreateVolume",
+              "ec2:DeleteVolume",
+              "ec2:AttachVolume",
+              "ec2:DetachVolume",
+              "ec2:ModifyVolume",
+              "ec2:CreateSnapshot",
+              "ec2:DeleteSnapshot",
+              "ec2:DescribeSnapshots",
+              "ec2:DescribeVolumes",
+              "ec2:DescribeVolumesModifications",
+              "ec2:DescribeInstances"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Sid": "VolumeEncryption",
+            "Effect": "Allow",
+            "Action": [
+              "kms:CreateGrant",
+              "kms:DescribeKey",
+              "kms:ListGrants",
+              "kms:RevokeGrant"
+            ],
+            "Resource": [
+              "arn:aws:kms:${REGION}:${ACCOUNT_ID}:key/*"
+            ]
+          }
+        ]
+      }
+    },
+    "secrets-store-csi": {
+      "namespace": "kube-system",
+      "service_account": "secrets-store-csi-driver",
+      "arms": [
+        "minimal",
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "ProjectSecrets",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue",
+              "secretsmanager:DescribeSecret"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:${NAME_PREFIX}/*"
+            ]
+          }
+        ]
+      }
+    },
+    "alb-controller": {
+      "namespace": "kube-system",
+      "service_account": "aws-load-balancer-controller",
+      "arms": [
+        "reference"
+      ],
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "LoadBalancerManagement",
+            "Effect": "Allow",
+            "Action": [
+              "ec2:DescribeAccountAttributes",
+              "ec2:DescribeAddresses",
+              "ec2:DescribeAvailabilityZones",
+              "ec2:DescribeInternetGateways",
+              "ec2:DescribeVpcs",
+              "ec2:DescribeSubnets",
+              "ec2:DescribeSecurityGroups",
+              "ec2:DescribeInstances",
+              "ec2:DescribeNetworkInterfaces",
+              "ec2:DescribeTags",
+              "ec2:CreateSecurityGroup",
+              "ec2:DeleteSecurityGroup",
+              "ec2:AuthorizeSecurityGroupIngress",
+              "ec2:RevokeSecurityGroupIngress",
+              "ec2:CreateTags",
+              "ec2:DeleteTags",
+              "elasticloadbalancing:DescribeLoadBalancers",
+              "elasticloadbalancing:DescribeTargetGroups",
+              "elasticloadbalancing:DescribeListeners",
+              "elasticloadbalancing:DescribeRules",
+              "elasticloadbalancing:CreateLoadBalancer",
+              "elasticloadbalancing:DeleteLoadBalancer",
+              "elasticloadbalancing:CreateTargetGroup",
+              "elasticloadbalancing:DeleteTargetGroup",
+              "elasticloadbalancing:CreateListener",
+              "elasticloadbalancing:DeleteListener",
+              "elasticloadbalancing:CreateRule",
+              "elasticloadbalancing:DeleteRule",
+              "elasticloadbalancing:RegisterTargets",
+              "elasticloadbalancing:DeregisterTargets",
+              "elasticloadbalancing:ModifyListener",
+              "elasticloadbalancing:AddTags",
+              "elasticloadbalancing:RemoveTags",
+              "iam:CreateServiceLinkedRole",
+              "iam:GetServerCertificate",
+              "iam:ListServerCertificates",
+              "acm:ListCertificates",
+              "acm:DescribeCertificate",
+              "cognito-idp:DescribeUserPoolClient",
+              "tag:GetResources"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    }
+  },
+  "vending": {
+    "role_name": "polaris-vending",
+    "assumed_by": "polaris",
+    "policy": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "WarehouseReadWrite",
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetObject",
+            "s3:GetObjectVersion",
+            "s3:PutObject",
+            "s3:DeleteObject",
+            "s3:GetBucketLocation"
+          ],
+          "Resource": [
+            "arn:aws:s3:::${NAME_PREFIX}-lake/warehouse/*"
+          ]
+        },
+        {
+          "Sid": "WarehouseObjectEncryption",
+          "Effect": "Allow",
+          "Action": [
+            "kms:Decrypt",
+            "kms:GenerateDataKey"
+          ],
+          "Resource": [
+            "arn:aws:kms:${REGION}:${ACCOUNT_ID}:key/*"
+          ],
+          "Condition": {
+            "ForAnyValue:StringEquals": {
+              "kms:ResourceAliases": "alias/${NAME_PREFIX}-lake"
+            }
+          }
+        },
+        {
+          "Sid": "WarehouseListBucketScoped",
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket"
+          ],
+          "Resource": [
+            "arn:aws:s3:::${NAME_PREFIX}-lake"
+          ],
+          "Condition": {
+            "StringLike": {
+              "s3:prefix": [
+                "warehouse/*"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

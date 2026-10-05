@@ -111,3 +111,19 @@ NATIVE_SERVICES="postgres seaweedfs clickhouse prometheus grafana alertmanager"
 # container set is stated in one place and the reason each is unpinned is visible
 # rather than inferred from an absence.
 UNPINNED_BUILT_SERVICES="dagster-webserver dagster-daemon dagster-user-code ripe-collector"
+
+# ---------------------------------------------------------------------------
+# The OpenTofu static checks (issue #74)
+# ---------------------------------------------------------------------------
+# OpenTofu 1.12.0 is the pinned CLI in the technology table
+# (docs/cloud-architecture.md section 3), so the check installs that version
+# rather than the newest release. tflint is the Terraform-only provider linter
+# chosen in docs/ci-cd-strategy.md section 10, and the AWS ruleset is pinned with
+# it so a ruleset update cannot change the check without a diff. All three are
+# fetched by version plus SHA256 and verified before use.
+TOFU_VERSION="1.12.0"
+TOFU_LINUX_AMD64_SHA256="8d7650fd42b6d790f9f747604393ccd0a9035376bccc4f1688b905d7c5bb1137"
+
+TFLINT_VERSION="0.64.0"
+TFLINT_LINUX_AMD64_SHA256="cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537"
+TFLINT_AWS_RULESET_VERSION="0.49.0"
